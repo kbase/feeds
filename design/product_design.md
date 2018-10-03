@@ -1,4 +1,7 @@
-Feeds
+This is part of the Feeds work, but focused on the backend Feeds service. A more global design doc can be found here:
+https://docs.google.com/document/d/1dR4xAPpXdc5rDYmeiUX-HOqs8dCuyNKrE8CEW6Jv0wE/edit#
+
+
 # Feeds Design
 This document describes the high level design for the Feeds service and what it should do. The goal is to provide a way to notify our users about events, including, but not limited to, the following:
 * Jobs that have recently changed state (queued->running, running->completed).
