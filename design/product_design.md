@@ -39,13 +39,15 @@ The absolute barest minimum MVP should be a feeds interface that tells when a Na
 * Has a list of users that can see it.
 * Each user gets their own unique copy of the Notification; deleting one has no effect on the others.
 * A notification can have one or more links to other pages.
-* A notification has a "type" that defines how it should be received. These types should be:
+* A notification has a "level" that defines how it should be received. These levels should be:
   * Alert - something happened, but nothing to respond to.
     * A job changing state.
     * An app that you have favorited has been updated.
     * A Narrative has been shared with you.
     * A Narrative that you had access to is no longer shared with you.
     * A Narrative you own but have shared with others has been shared with a new user.
+    * A user has joined a group you are in.
+    * A user has left a group you are in.
   * Error - something unrecoverably bad happened.
     * An app entered an error state.
   * Warning - something significant happened you really should be aware of.
@@ -58,6 +60,12 @@ The absolute barest minimum MVP should be a feeds interface that tells when a Na
     * A request to share a Narrative.
     * A request to accept ownership of a group.
 * A notification has an icon that is set based on its type.
+* A notification can have an optional "category", linked to the source that created it.
+  * narrative or workspace for data
+  * job
+  * app -> app updates, releases, etc.
+  * social -> groups, sharing, etc.
+  * catalog -> for admin requests and responses ("Your request to release X module has been approved")
 * A notification response can be decided by the service that creates the notification. Responses include:
   * Approve/Deny a sharing request
   * Approve/Deny a group invite
