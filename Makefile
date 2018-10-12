@@ -5,5 +5,5 @@ build-docs:
 	sphinx-apidoc --separate -o docsource/internal_apis src
 
 test:
-	flake8 src
-	pytest --verbose tests --cov feeds
+	flake8 feeds
+	pytest --verbose test --cov feeds
