@@ -1,3 +1,4 @@
+
 import os
 import json
 from flask import (
@@ -8,6 +9,12 @@ app = Flask(__name__)
 
 @app.route('/notifications/', methods=['GET'])
 def get_notifications():
+    """
+    General flow should be:
+    1. validate/authenticate user
+    2. make user feed object
+    3. query user feed for most recent, based on params
+    """
     # dummy code below
     max_notes = request.args.get('n', default=10, type=int)
     rev_sort = request.args.get('rev', default=0, type=int)
@@ -21,3 +28,5 @@ def get_notifications():
         "level_filter": level_filter,
         "include_seen": include_seen
     })
+
+

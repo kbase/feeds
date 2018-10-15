@@ -3,14 +3,17 @@ _verb_register = dict()
 def register(verb):
     if not issubclass(verb, Verb):
         raise TypeError("Can only register Verb subclasses")
+
     if verb.id is None:
         raise ValueError("A verb must have an id")
     elif str(verb.id) in _verb_register:
         raise ValueError("The verb id '{}' is already taken by {}".format(verb.id, _verb_register[str(verb.id)].infinitive))
+
     if verb.infinitive is None:
         raise ValueError("A verb must have an infinitive form")
     elif verb.infinitive.lower() in _verb_register:
         raise ValueError("The verb '{}' is already registered!".format(verb.infinitive))
+
     if verb.past_tense is None:
         raise ValueError("A verb must have a past tense form")
     elif verb.past_tense.lower() in _verb_register:
@@ -26,6 +29,7 @@ def get_verb(key):
     # if they're both None, fail.
     # otherwise, look it up.
     assert key is not None
+
     key = str(key)
     if key.lower() in _verb_register:
         return _verb_register[key]()
