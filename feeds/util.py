@@ -1,4 +1,5 @@
 import requests
+import time
 
 def check_user_id(user_id):
     """
@@ -14,3 +15,5 @@ def check_user_ids(id_list):
     """
     pass
 
+def epoch_ms():
+    return int(time.time()*1000)
