@@ -11,4 +11,5 @@ test:
 	flake8 feeds
 	pytest --verbose test --cov feeds
 
-start: all
+start:
+	gunicorn --worker-class gevent --timeout 300 --workers 10 --bind :5000 feeds:app
