@@ -1,2 +1,4 @@
 import os
-os.environ['CELERY_CONFIG_MODULE'] = 'feeds.celery_config'
+from .server import create_app
+
+app = create_app()

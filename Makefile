@@ -1,3 +1,6 @@
+install:
+	pip install -r requirements.txt
+
 build-docs:
 	-rm -r docs
 	-rm -r docsource/internal_apis
@@ -7,3 +10,5 @@ build-docs:
 test:
 	flake8 feeds
 	pytest --verbose test --cov feeds
+
+start: all

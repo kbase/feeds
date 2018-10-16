@@ -7,6 +7,7 @@ from flask import (
 )
 from flask.logging import default_handler
 from .util import epoch_ms
+from .config import FeedsConfig
 import logging
 
 VERSION = "0.0.1"
@@ -16,11 +17,17 @@ def _initialize_logging():
     root.addHandler(default_handler)
     root.setLevel('INFO')
 
+def _initialize_config():
+    # TODO - include config for:
+    # * database access
+    return FeedsConfig()
+
 def _log(msg, *args):
     logging.getLogger(__name__).info(msg, *args)
 
 def create_app(test_config=None):
     _initialize_logging()
+    _initialize_config()
 
     app = Flask(__name__, instance_relative_config=True)
     if test_config is None:
@@ -91,4 +98,3 @@ def create_app(test_config=None):
         raise NotImplementedError()
 
     return app
-
