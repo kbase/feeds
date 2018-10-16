@@ -16,4 +16,4 @@ def check_user_ids(id_list):
     pass
 
 def epoch_ms():
-    return int(time.time()*1000)
+    return int(round(time.time()*1000))

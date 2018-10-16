@@ -1,7 +1,6 @@
 import pytest
 from feeds.activity.notification import Notification
 import uuid
-from .util import validate_uuid
 
 def test_basic_notification():
     assert True
