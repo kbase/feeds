@@ -47,7 +47,10 @@ class FeedsConfig(object):
             env_path = os.environ.get(env)
             if env_path:
                 if not os.path.isfile(env_path):
-                    raise ConfigError("Environment variable {} is set to {}, which is not a config file.".format(ENV_CONFIG_PATH, env_path))
+                    raise ConfigError(
+                        "Environment variable {} is set to {}, "
+                        "which is not a config file.".format(ENV_CONFIG_PATH, env_path)
+                    )
                 else:
                     return env_path
         if not os.path.isfile(DEFAULT_CONFIG_PATH):
