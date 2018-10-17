@@ -98,3 +98,5 @@ def create_app(test_config=None):
         raise NotImplementedError()
 
     return app
+
+app = create_app()

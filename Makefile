@@ -12,6 +12,6 @@ test:
 	pytest --verbose test --cov feeds
 
 start:
-	gunicorn --worker-class gevent --timeout 300 --workers 10 --bind :5000 feeds:app
+	gunicorn --worker-class gevent --timeout 300 --workers 10 --bind :5000 feeds.server:app
 
 .PHONY: test
