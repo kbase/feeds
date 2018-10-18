@@ -4,7 +4,7 @@ This module handles authentication management. This mainly means:
 * validating user ids
 """
 
-from .config import config
+from .config import get_config
 import requests
 import json
 from .exceptions import (
@@ -16,7 +16,7 @@ from cachetools import (
     Cache,
     TTLCache
 )
-AUTH_URL = config.auth_url
+AUTH_URL = get_config().auth_url
 AUTH_API_PATH = '/api/V2/'
 CACHE_EXPIRE_TIME = 300  # seconds
 
@@ -52,12 +52,25 @@ def validate_service_token(token):
     else:
         raise InvalidTokenError("Token is not a Service token!")
 
-def valid_user_token(token):
+def validate_user_token(token):
     """
     Validates a user auth token.
     If valid, does nothing. If invalid, raises an InvalidTokenError.
     """
     __fetch_token(token)
+
+def validate_user_id(user_id):
+    return validate_user_ids([user_id])
+
+def validate_user_ids(user_ids):
+    """
+    Validates whether users are real or not.
+    Returns the parsed response from the server, as a dict. Each
+    key is a user that exists, each value is their user name.
+    Raises an HTTPError if something bad happens.
+    """
+    r = __auth_request('users?list={}'.format(','.join(user_ids)))
+    return json.loads(r.content)
 
 def __fetch_token(token):
     """
