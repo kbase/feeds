@@ -4,6 +4,7 @@ import json
 from datetime import datetime
 from ..util import epoch_ms
 from .. import verbs
+from ..actor import validate_actor
 
 class Notification(BaseActivity):
     def __init__(self, actor, verb, note_object, source, target=None, context={}):
@@ -51,12 +52,5 @@ class Notification(BaseActivity):
     def _validate(self):
         """
         Validates whether the notification fields are accurate. Should be called before sending a new notification to storage.
-        """
-        self.validate_actor(self.actor)
-
-    def validate_actor(self):
-        """
-        TODO: add group validation. only users are actors for now.
-        TODO: migrate to base class for users
         """
         pass

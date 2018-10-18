@@ -16,7 +16,8 @@ from cachetools import (
     Cache,
     TTLCache
 )
-AUTH_URL = get_config().auth_url
+config = get_config()
+AUTH_URL = config.auth_url
 AUTH_API_PATH = '/api/V2/'
 CACHE_EXPIRE_TIME = 300  # seconds
 
@@ -42,6 +43,9 @@ def validate_service_token(token):
     If invalid, raises an InvalidTokenError. If any other errors occur, raises
     a TokenLookupError.
 
+    Also returns a valid response - the token's user - if that user is in the
+    configured list of admins.
+
     TODO: I know this is going to be rife with issues. The name of the token doesn't have
     to be the service. But as long as it's a Service token, then it came from in KBase, so
     everything should be ok.
@@ -50,6 +54,8 @@ def validate_service_token(token):
     token = __fetch_token(token)
     if token.get('type') == 'Service':
         return token.get('name')
+    elif token.get('user') in config.admins:
+        return token.get('user')
     else:
         raise InvalidTokenError("Token is not a Service token!")
 
@@ -112,7 +118,7 @@ def __auth_request(path, token):
     Makes a request of the auth server after cramming the token in a header.
     Only makes GET requests, since that's all we should need.
     """
-    headers = {'Authorization', token}
+    headers = {'Authorization': token}
     r = requests.get(AUTH_URL + AUTH_API_PATH + path, headers=headers)
     # the requests that fail based on the token (401, 403) get returned for the
     # calling function to turn into an informative error

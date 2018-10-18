@@ -5,9 +5,21 @@ from flask import (
     Flask,
     request
 )
+from http.client import responses
 from flask.logging import default_handler
 from .util import epoch_ms
 from .config import FeedsConfig
+from .auth import (
+    validate_service_token,
+    validate_user_token,
+    validate_user_id,
+    validate_user_ids
+)
+from .exceptions import (
+    MissingTokenError,
+    InvalidTokenError,
+    TokenLookupError
+)
 import logging
 
 VERSION = "0.0.1"
@@ -22,8 +34,11 @@ def _initialize_config():
     # * database access
     return FeedsConfig()
 
-def _log(msg, *args):
-    logging.getLogger(__name__).info(msg, *args)
+def _log(msg, *args, level=logging.INFO):
+    logging.getLogger(__name__).log(level, msg, *args)
+
+def _log_error(error):
+    _log("Exception: " + str(error), level=logging.ERROR)
 
 def create_app(test_config=None):
     _initialize_logging()
@@ -34,6 +49,16 @@ def create_app(test_config=None):
         app.config.from_pyfile('config.py', silent=True)
     else:
         app.config.from_mapping(test_config)
+
+    @app.before_request
+    def preprocess_request():
+        pass
+
+    @app.after_request
+    def postprocess_request(response):
+        _log('%s %s %s %s', request.method, request.path, response.status_code,
+             request.headers.get('User-Agent'))
+        return response
 
     @app.route('/', methods=['GET'])
     def root():
@@ -95,8 +120,44 @@ def create_app(test_config=None):
         This also requires a service token as an Authorization header. Once validated, will be used
         as the Source of the notification, and used in logic to determine which feeds get notified.
         """
-        raise NotImplementedError()
+        token = _get_auth_token(request)
+        service = validate_service_token(token)
+        return (flask.jsonify({'foo': 'bar'}), 200)
 
+    @app.errorhandler(404)
+    def not_found(err):
+        return _make_error(err, "Path {} not found.".format(request.path), 404)
+
+    @app.errorhandler(MissingTokenError)
+    def handle_missing_token(err):
+        _log_error(err)
+        return _make_error(err, "Authentication token required", 401)
+
+    @app.errorhandler(InvalidTokenError)
+    def handle_invalid_token(err):
+        _log_error(err)
+        return _make_error(err, "Invalid token", 401)
+
+    @app.errorhandler(TokenLookupError)
+    def handle_auth_service_error(err):
+        _log_error(err)
+        return _make_error(err, "Unable to fetch authentication information", 500)
+
+    def _get_auth_token(request, required=True):
+        token = request.headers.get('Authorization')
+        if not token and required:
+            raise MissingTokenError()
+        return token
+
+    def _make_error(error, msg, status_code):
+        _log("%s %s", status_code, msg)
+        err_response = {
+            "http_code": status_code,
+            "http_status": responses[status_code],
+            "message": msg,
+            "time": epoch_ms()
+        }
+        return (flask.jsonify({'error': err_response}), status_code)
     return app
 
 app = create_app()

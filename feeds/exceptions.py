@@ -38,3 +38,9 @@ class InvalidActorError(Exception):
     Raised when an actor doesn't exist in the system as either a user or Group.
     """
     pass
+
+class MissingTokenError(Exception):
+    """
+    Raised when a request header doesn't have a token, but needs one.
+    """
+    pass

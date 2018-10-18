@@ -14,6 +14,7 @@ DB_HOST_PORT = "redis-port"
 DB_USER = "redis-user"
 DB_PW = "redis-pw"
 AUTH_URL = "auth-url"
+ADMIN_LIST = "admins"
 
 class FeedsConfig(object):
     """
@@ -42,6 +43,7 @@ class FeedsConfig(object):
         self.redis_user = self._get_line(cfg, DB_USER, required=False)
         self.redis_pw = self._get_line(cfg, DB_PW, required=False)
         self.auth_url = self._get_line(cfg, AUTH_URL)
+        self.admins = self._get_line(cfg, ADMIN_LIST)
 
     def _find_config_path(self):
         """
