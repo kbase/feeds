@@ -1,5 +1,6 @@
 import pytest
 from feeds import verbs
+from feeds.exceptions import MissingVerbError
 
 def test_register_verb():
     class TestVerb(verbs.Verb):
@@ -75,7 +76,7 @@ def test_get_verb():
     assert str(v) == 'invite'
 
 def test_get_verb_fail():
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(MissingVerbError) as e:
         verbs.get_verb('fail')
     assert 'Verb "fail" not found' in str(e.value)
 

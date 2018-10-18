@@ -1,3 +1,5 @@
+from .exceptions import MissingVerbError
+
 _verb_register = dict()
 
 def register(verb):
@@ -34,7 +36,7 @@ def get_verb(key):
     if key.lower() in _verb_register:
         return _verb_register[key]()
     else:
-        raise ValueError('Verb "{}" not found.'.format(key))
+        raise MissingVerbError('Verb "{}" not found.'.format(key))
 
 class Verb(object):
     id = None

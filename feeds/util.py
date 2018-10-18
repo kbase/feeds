@@ -1,5 +1,5 @@
 import requests
-import time
+from datetime import datetime
 
 def check_user_id(user_id):
     """
@@ -16,4 +16,4 @@ def check_user_ids(id_list):
     pass
 
 def epoch_ms():
-    return int(round(time.time()*1000))
+    return int(datetime.utcnow().timestamp()*1000)
