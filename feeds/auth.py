@@ -28,12 +28,13 @@ class TokenCache(TTLCache):
     """
     def __getitem__(self, key, cache_getitem=Cache.__getitem__):
         token = super(TokenCache, self).__getitem__(key, cache_getitem=cache_getitem)
-        if token.get('expires', 0) < epoch_ms():
+        if token.get('expires', 0) <= epoch_ms():
             return self.__missing__(key)
         else:
             return token
 
 __token_cache = TokenCache(1000, CACHE_EXPIRE_TIME)
+__user_cache = TTLCache(1000, CACHE_EXPIRE_TIME)
 
 def validate_service_token(token):
     """
@@ -69,8 +70,24 @@ def validate_user_ids(user_ids):
     key is a user that exists, each value is their user name.
     Raises an HTTPError if something bad happens.
     """
-    r = __auth_request('users?list={}'.format(','.join(user_ids)))
-    return json.loads(r.content)
+    users = dict()
+    # fetch ones we know of from the cache
+    for user_id in user_ids:
+        try:
+            users[user_id] = __user_cache[user_id]
+        except:
+            pass
+    # now we have a partial list. the ones that weren't found will
+    # not be in the users dict. Use set difference to find the
+    # remaining user ids.
+    filtered_users = set(user_ids).difference(set(users))
+    if not filtered_users:
+        return users
+    r = __auth_request('users?list={}'.format(','.join(filtered_users)))
+    found_users = json.loads(r.content)
+    __user_cache.update(found_users)
+    users.update(found_users)
+    return users
 
 def __fetch_token(token):
     """
