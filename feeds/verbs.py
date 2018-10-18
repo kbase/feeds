@@ -27,6 +27,22 @@ def register(verb):
         verb.past_tense.lower(): verb
     })
 
+def translate_verb(verb):
+    """
+    Translates a given verb into a verb object.
+    4 cases -
+        - if it's a string, return get_verb (let the MissingVerbError rise)
+        - if it's a verb, but not registered, raise a MissingVerbError
+        - if it's a verb that's registered, return it
+        - if it's not a Verb or a str, raise a TypeError
+    """
+    if isinstance(verb, str):
+        return get_verb(verb)
+    elif issubclass(verb, Verb):
+        return get_verb(verb.infinitive)
+    else:
+        raise TypeError("Must be either a subclass of Verb or a string.")
+
 def get_verb(key):
     # if they're both None, fail.
     # otherwise, look it up.

@@ -6,13 +6,14 @@ import logging
 DEFAULT_CONFIG_PATH = "deploy.cfg"
 ENV_CONFIG_PATH = "FEEDS_CONFIG"
 ENV_CONFIG_BACKUP = "KB_DEPLOYMENT_CONFIG"
+ENV_AUTH_TOKEN = "AUTH_TOKEN"
+
 INI_SECTION = "feeds"
 DB_HOST = "redis-host"
 DB_HOST_PORT = "redis-port"
 DB_USER = "redis-user"
 DB_PW = "redis-pw"
 AUTH_URL = "auth-url"
-
 
 class FeedsConfig(object):
     """
@@ -29,6 +30,9 @@ class FeedsConfig(object):
 
     def __init__(self):
         # Look for the file. ENV_CONFIG_PATH > ENV_CONFIG_BACKUP > DEFAULT_CONFIG_PATH
+        self.auth_token = os.environ.get(ENV_AUTH_TOKEN)
+        if self.auth_token is None:
+            raise RuntimeError("The AUTH_TOKEN environment variable must be set!")
         config_file = self._find_config_path()
         cfg = self._load_config(config_file)
         if not cfg.has_section(INI_SECTION):
@@ -83,3 +87,11 @@ class FeedsConfig(object):
         if not val and required:
             raise ConfigError("Required option {} has no value!".format(key))
         return val
+
+__config = None
+
+def get_config():
+    global __config
+    if not __config:
+        __config = FeedsConfig()
+    return __config
