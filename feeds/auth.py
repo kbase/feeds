@@ -62,9 +62,9 @@ def validate_service_token(token):
 def validate_user_token(token):
     """
     Validates a user auth token.
-    If valid, does nothing. If invalid, raises an InvalidTokenError.
+    If valid, returns the user id. If invalid, raises an InvalidTokenError.
     """
-    __fetch_token(token)
+    return __fetch_token(token)['user']
 
 def validate_user_id(user_id):
     return validate_user_ids([user_id])

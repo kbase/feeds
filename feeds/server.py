@@ -114,8 +114,8 @@ def create_app(test_config=None):
             "servertime": epoch_ms()
         })
 
-    @app.route('/api/V1/notifications/<user_id>', methods=['GET'])
-    def get_notifications(user_id):
+    @app.route('/api/V1/notifications', methods=['GET'])
+    def get_notifications():
         # TODO: add filtering
         """
         General flow should be:
@@ -136,6 +136,8 @@ def create_app(test_config=None):
         #     "level_filter": level_filter,
         #     "include_seen": include_seen
         # })
+        user_id = validate_user_token(_get_auth_token(request))
+        _log('Getting feed for {}'.format(user_id))
         feed = NotificationFeed(user_id)
         notes = feed.get_notifications(count=max_notes)
         return_list = list()
