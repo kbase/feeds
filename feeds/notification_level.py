@@ -62,3 +62,8 @@ class Error(Level):
 class Request(Level):
     id = 4
     name = 'request'
+
+register(Alert)
+register(Warning)
+register(Error)
+register(Request)

@@ -45,7 +45,7 @@ class Notification(BaseActivity):
             * validate target is valid
             * validate context fits
         """
-        self.id = uuid.uuid4()
+        self.id = str(uuid.uuid4())
         self.actor = actor
         self.verb = verbs.translate_verb(verb)
         self.object = note_object

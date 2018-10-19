@@ -26,7 +26,7 @@ class NotificationManager(BaseManager):
         target_users = self.get_target_users(note)
         # add the notification to the database.
         activity_storage = RedisActivityStorage()
-        activity_storage.add_activity(note)
+        activity_storage.add_to_storage(note)
         for user in target_users:
             # add the notification to the appropriate users' feeds.
             feed = NotificationFeed(user)

@@ -10,8 +10,8 @@ class NotificationFeed(BaseFeed):
 
     def __init__(self, user_id):
         self.user_id = user_id
-        self.timeline_storage = timeline_storage_class()
-        self.activity_storage = activity_storage_class()
+        self.timeline_storage = self.timeline_storage_class(self.user_id)
+        self.activity_storage = self.activity_storage_class()
         self.timeline = None
         self.cache = TTLCache(1000, 600)
 
@@ -49,11 +49,14 @@ class NotificationFeed(BaseFeed):
         """
         pass
 
+    def add_notification(self, note):
+        return self.add_activity(note)
+
     def add_activity(self, note):
         """
         Adds an activity to this user's feed
         """
-        self.timeline_storage.add_activity(note)
+        self.timeline_storage.add_to_timeline(note)
 
     def add_activities(self):
         """
