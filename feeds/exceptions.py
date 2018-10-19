@@ -44,3 +44,22 @@ class MissingTokenError(Exception):
     Raised when a request header doesn't have a token, but needs one.
     """
     pass
+
+class IllegalParameterError(Exception):
+    """
+    Raised if a request receives an unexpected parameter format. E.g.,
+    a JSON list instead of a JSON object.
+    """
+    pass
+
+class MissingParameterError(Exception):
+    """
+    Raised if a request is missing required parameters, but is otherwise well-formed.
+    """
+    pass
+
+class MissingLevelError(Exception):
+    """
+    Raised if looking for a Notification Level that doesn't exist.
+    """
+    pass

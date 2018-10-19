@@ -13,8 +13,10 @@ DB_HOST = "redis-host"
 DB_HOST_PORT = "redis-port"
 DB_USER = "redis-user"
 DB_PW = "redis-pw"
+DB_DB = "redis-db"
 AUTH_URL = "auth-url"
 ADMIN_LIST = "admins"
+GLOBAL_FEED = "global-feed"
 
 class FeedsConfig(object):
     """
@@ -27,6 +29,7 @@ class FeedsConfig(object):
     redis-user
     redis-pw
     auth-url
+    global-feed - name of the feed to represent a global user, or notifications that everyone should see.
     """
 
     def __init__(self):
@@ -42,8 +45,12 @@ class FeedsConfig(object):
         self.redis_port = self._get_line(cfg, DB_HOST_PORT)
         self.redis_user = self._get_line(cfg, DB_USER, required=False)
         self.redis_pw = self._get_line(cfg, DB_PW, required=False)
+        self.redis_db = self._get_line(cfg, DB_DB, required=False)
+        if self.redis_db is None:
+            self.redis_db = 0
+        self.global_feed = self._get_line(cfg, GLOBAL_FEED)
         self.auth_url = self._get_line(cfg, AUTH_URL)
-        self.admins = self._get_line(cfg, ADMIN_LIST)
+        self.admins = self._get_line(cfg, ADMIN_LIST).split(",")
 
     def _find_config_path(self):
         """
