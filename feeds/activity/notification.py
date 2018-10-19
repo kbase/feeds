@@ -61,6 +61,20 @@ class Notification(BaseActivity):
         """
         pass
 
+    def to_json(self):
+        # returns a jsonifyable structure
+        # leave out target. don't need to see who else saw this.
+        return {
+            "id": self.id,
+            "actor": self.actor,
+            "verb": self.verb.infinitive,
+            "object": self.object,
+            "source": self.source,
+            "context": self.context,
+            "level": self.level.name,
+            "time": self.time
+        }
+
     def serialize(self):
         """
         Serializes this notification for caching / simple storage.
@@ -84,6 +98,8 @@ class Notification(BaseActivity):
         """
         Deserializes and returns a new Notification instance.
         """
+        if serial is None:
+            return None
         struct = json.loads(serial)
         deserial = cls(
             struct['a'],
@@ -91,8 +107,8 @@ class Notification(BaseActivity):
             struct['o'],
             struct['s'],
             level=str(struct['l']),
-            target=struct['t'],
-            context=struct['c']
+            target=struct.get('t'),
+            context=struct.get('c')
         )
         deserial.time = struct['m']
         deserial.id = struct['i']

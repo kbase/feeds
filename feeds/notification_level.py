@@ -37,7 +37,7 @@ def translate_level(level):
     """
     if isinstance(level, str):
         return get_level(level)
-    elif issubclass(level, level):
+    elif issubclass(level, Level):
         return get_level(level.name)
     else:
         raise TypeError("Must be either a subclass of Level or a string.")

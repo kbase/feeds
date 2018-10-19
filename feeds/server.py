@@ -25,6 +25,7 @@ from .exceptions import (
 )
 from feeds.managers.notification_manager import NotificationManager
 from feeds.activity.notification import Notification
+from feeds.feeds.notification.notification_feed import NotificationFeed
 
 VERSION = "0.0.1"
 
@@ -42,7 +43,7 @@ def _log(msg, *args, level=logging.INFO):
     logging.getLogger(__name__).log(level, msg, *args)
 
 def _log_error(error):
-    _log("Exception: " + str(error), level=logging.ERROR)
+    _log("Exception: " + str(error) + error, level=logging.ERROR)
 
 def _get_auth_token(request, required=True):
     token = request.headers.get('Authorization')
@@ -113,8 +114,9 @@ def create_app(test_config=None):
             "servertime": epoch_ms()
         })
 
-    @app.route('/api/V1/notifications', methods=['GET'])
-    def get_notifications():
+    @app.route('/api/V1/notifications/<user_id>', methods=['GET'])
+    def get_notifications(user_id):
+        # TODO: add filtering
         """
         General flow should be:
         1. validate/authenticate user
@@ -126,14 +128,20 @@ def create_app(test_config=None):
         rev_sort = request.args.get('rev', default=0, type=int)
         rev_sort = False if rev_sort==0 else True
         level_filter = request.args.get('f', default=None, type=str)
-        include_seen = request.args.get('seen', default=0, type=int)
+        include_seen = request.args.get('seen', default=1, type=int)
         include_seen = False if include_seen==0 else True
-        return json.dumps({
-            "max_notes": max_notes,
-            "rev_sort": rev_sort,
-            "level_filter": level_filter,
-            "include_seen": include_seen
-        })
+        # return json.dumps({
+        #     "max_notes": max_notes,
+        #     "rev_sort": rev_sort,
+        #     "level_filter": level_filter,
+        #     "include_seen": include_seen
+        # })
+        feed = NotificationFeed(user_id)
+        notes = feed.get_notifications(count=max_notes)
+        return_list = list()
+        for note in notes:
+            return_list.append(note.to_json())
+        return (flask.jsonify(return_list), 200)
 
     @app.route('/api/V1/notification/<note_id>', methods=['GET'])
     def get_single_notification(note_id):
@@ -182,7 +190,7 @@ def create_app(test_config=None):
         manager = NotificationManager()
         manager.add_notification(new_note)
         # on success, return the notification id and info.
-        return (flask.jsonify({'foo': 'bar'}), 200)
+        return (flask.jsonify({'id': new_note.id}), 200)
 
     @app.errorhandler(IllegalParameterError)
     @app.errorhandler(json.JSONDecodeError)
