@@ -1,15 +1,15 @@
 [feeds]
-# Redis info
-redis-host=localhost
-redis-port=6379
-redis-user=
-redis-pw=
+# DB info
+# db-engine - allowed values = redis, mongodb
+db-engine=mongodb
+db-host=localhost
+db-port=6379
+db-user=
+db-pw=
 
-# MongoDB Info
-mongo-host=
-mongo-db=
-mongo-user=
-mongo-pw=
 
 auth-url=https://ci.kbase.us/services/auth
+
+# admins are allowed to use their auth tokens to create global notifications.
+# examples would be notices about KBase downtime or events.
 admins=wjriehl,scanon,kkeller

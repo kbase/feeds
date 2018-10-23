@@ -8,14 +8,16 @@ ENV_CONFIG_BACKUP = "KB_DEPLOYMENT_CONFIG"
 ENV_AUTH_TOKEN = "AUTH_TOKEN"
 
 INI_SECTION = "feeds"
-DB_HOST = "redis-host"
-DB_HOST_PORT = "redis-port"
-DB_USER = "redis-user"
-DB_PW = "redis-pw"
-DB_DB = "redis-db"
-AUTH_URL = "auth-url"
-ADMIN_LIST = "admins"
-GLOBAL_FEED = "global-feed"
+
+KEY_DB_HOST = "db-host"
+KEY_DB_PORT = "db-port"
+KEY_DB_USER = "db-user"
+KEY_DB_PW = "db-pw"
+KEY_DB_NAME = "db-name"
+KEY_DB_ENGINE = "db-engine"
+KEY_AUTH_URL = "auth-url"
+KEY_ADMIN_LIST = "admins"
+KEY_GLOBAL_FEED = "global-feed"
 
 
 class FeedsConfig(object):
@@ -23,14 +25,6 @@ class FeedsConfig(object):
     Loads a config set from the root deploy.cfg file. This should be in ini format.
 
     Keys of note are:
-
-    redis-host
-    redis-port
-    redis-user
-    redis-pw
-    auth-url
-    global-feed - name of the feed to represent a global user, or
-        notifications that everyone should see.
     """
 
     def __init__(self):
@@ -44,16 +38,15 @@ class FeedsConfig(object):
             raise ConfigError(
                 "Error parsing config file: section {} not found!".format(INI_SECTION)
             )
-        self.redis_host = self._get_line(cfg, DB_HOST)
-        self.redis_port = self._get_line(cfg, DB_HOST_PORT)
-        self.redis_user = self._get_line(cfg, DB_USER, required=False)
-        self.redis_pw = self._get_line(cfg, DB_PW, required=False)
-        self.redis_db = self._get_line(cfg, DB_DB, required=False)
-        if self.redis_db is None:
-            self.redis_db = 0
-        self.global_feed = self._get_line(cfg, GLOBAL_FEED)
-        self.auth_url = self._get_line(cfg, AUTH_URL)
-        self.admins = self._get_line(cfg, ADMIN_LIST).split(",")
+        self.db_engine = self._get_line(cfg, KEY_DB_ENGINE)
+        self.db_host = self._get_line(cfg, KEY_DB_HOST)
+        self.db_port = self._get_line(cfg, KEY_DB_PORT)
+        self.db_user = self._get_line(cfg, KEY_DB_USER, required=False)
+        self.db_pw = self._get_line(cfg, KEY_DB_PW, required=False)
+        self.db_name = self._get_line(cfg, KEY_DB_NAME, required=False)
+        self.global_feed = self._get_line(cfg, KEY_GLOBAL_FEED)
+        self.auth_url = self._get_line(cfg, KEY_AUTH_URL)
+        self.admins = self._get_line(cfg, KEY_ADMIN_LIST).split(",")
 
     def _find_config_path(self):
         """

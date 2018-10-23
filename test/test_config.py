@@ -12,8 +12,9 @@ FAKE_AUTH_TOKEN = "I'm an auth token!"
 
 GOOD_CONFIG = [
     '[feeds]',
-    'redis-host=foo',
-    'redis-port=bar',
+    'db-engine=redis',
+    'db-host=foo',
+    'db-port=bar',
     'auth-url=baz',
     'global-feed=global',
     'admins=admin1,admin2,admin3'
@@ -44,15 +45,15 @@ def test_config_from_env_ok(dummy_config, dummy_auth_token):
     os.environ['FEEDS_CONFIG'] = cfg_path
     cfg = config.FeedsConfig()
     assert cfg.auth_url == 'baz'
-    assert cfg.redis_host == 'foo'
-    assert cfg.redis_port == 'bar'
+    assert cfg.db_host == 'foo'
+    assert cfg.db_port == 'bar'
     del os.environ['FEEDS_CONFIG']
 
     os.environ['KB_DEPLOYMENT_CONFIG'] = cfg_path
     cfg = config.FeedsConfig()
     assert cfg.auth_url == 'baz'
-    assert cfg.redis_host == 'foo'
-    assert cfg.redis_port == 'bar'
+    assert cfg.db_host == 'foo'
+    assert cfg.db_port == 'bar'
 
     del os.environ['KB_DEPLOYMENT_CONFIG']
 
@@ -60,7 +61,7 @@ def test_config_from_env_ok(dummy_config, dummy_auth_token):
 def test_config_from_env_errors(dummy_config, dummy_auth_token):
     cfg_lines = [
         '[not-feeds]',
-        'redis-host=foo'
+        'db-host=foo'
     ]
 
     cfg_path = dummy_config(cfg_lines)
@@ -81,8 +82,8 @@ def test_get_config(dummy_config, dummy_auth_token):
     os.environ['FEEDS_CONFIG'] = cfg_path
 
     cfg = config.get_config()
-    assert cfg.redis_host == 'foo'
-    assert cfg.redis_port == 'bar'
+    assert cfg.db_host == 'foo'
+    assert cfg.db_port == 'bar'
     assert cfg.auth_url == 'baz'
     assert cfg.auth_token == FAKE_AUTH_TOKEN
     del os.environ['FEEDS_CONFIG']
