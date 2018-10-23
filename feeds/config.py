@@ -1,7 +1,6 @@
 import os
 import configparser
 from .exceptions import ConfigError
-import logging
 
 DEFAULT_CONFIG_PATH = "deploy.cfg"
 ENV_CONFIG_PATH = "FEEDS_CONFIG"
@@ -13,7 +12,11 @@ DB_HOST = "redis-host"
 DB_HOST_PORT = "redis-port"
 DB_USER = "redis-user"
 DB_PW = "redis-pw"
+DB_DB = "redis-db"
 AUTH_URL = "auth-url"
+ADMIN_LIST = "admins"
+GLOBAL_FEED = "global-feed"
+
 
 class FeedsConfig(object):
     """
@@ -26,6 +29,8 @@ class FeedsConfig(object):
     redis-user
     redis-pw
     auth-url
+    global-feed - name of the feed to represent a global user, or
+        notifications that everyone should see.
     """
 
     def __init__(self):
@@ -36,16 +41,24 @@ class FeedsConfig(object):
         config_file = self._find_config_path()
         cfg = self._load_config(config_file)
         if not cfg.has_section(INI_SECTION):
-            raise ConfigError("Error parsing config file: section {} not found!".format(INI_SECTION))
+            raise ConfigError(
+                "Error parsing config file: section {} not found!".format(INI_SECTION)
+            )
         self.redis_host = self._get_line(cfg, DB_HOST)
         self.redis_port = self._get_line(cfg, DB_HOST_PORT)
         self.redis_user = self._get_line(cfg, DB_USER, required=False)
         self.redis_pw = self._get_line(cfg, DB_PW, required=False)
+        self.redis_db = self._get_line(cfg, DB_DB, required=False)
+        if self.redis_db is None:
+            self.redis_db = 0
+        self.global_feed = self._get_line(cfg, GLOBAL_FEED)
         self.auth_url = self._get_line(cfg, AUTH_URL)
+        self.admins = self._get_line(cfg, ADMIN_LIST).split(",")
 
     def _find_config_path(self):
         """
-        A little helper to test whether a given file path, or one given by an environment variable, exists.
+        A little helper to test whether a given file path, or one given by an
+        environment variable, exists.
         """
         for env in [ENV_CONFIG_PATH, ENV_CONFIG_BACKUP]:
             env_path = os.environ.get(env)
@@ -88,7 +101,9 @@ class FeedsConfig(object):
             raise ConfigError("Required option {} has no value!".format(key))
         return val
 
+
 __config = None
+
 
 def get_config():
     global __config

@@ -1,12 +1,16 @@
 from .base import BaseActivity
 import uuid
 import json
-from datetime import datetime
 from ..util import epoch_ms
 from .. import verbs
+# from ..actor import validate_actor
+from .. import notification_level
+
+SERIAL_TOKEN = "|"
+
 
 class Notification(BaseActivity):
-    def __init__(self, actor, verb, note_object, source, target=None, context={}):
+    def __init__(self, actor, verb, note_object, source, level='alert', target=None, context={}):
         """
         A notification is roughly of this form:
             actor, verb, object, (target)
@@ -31,6 +35,7 @@ class Notification(BaseActivity):
         :param source: source service for the note. String.
         :param target: target of the note. Optional. Should be a user id or group id if present.
         :param context: freeform context of the note. key-value pairs.
+        :param validate: if True, runs _validate immediately
 
         TODO:
             * decide on global ids for admin use
@@ -40,23 +45,72 @@ class Notification(BaseActivity):
             * validate target is valid
             * validate context fits
         """
+        self.id = str(uuid.uuid4())
         self.actor = actor
         self.verb = verbs.translate_verb(verb)
         self.object = note_object
         self.source = source
         self.target = target
         self.context = context
+        self.level = notification_level.translate_level(level)
         self.time = epoch_ms()  # int timestamp down to millisecond
 
-    def _validate(self):
+    def validate(self):
         """
-        Validates whether the notification fields are accurate. Should be called before sending a new notification to storage.
-        """
-        self.validate_actor(self.actor)
-
-    def validate_actor(self):
-        """
-        TODO: add group validation. only users are actors for now.
-        TODO: migrate to base class for users
+        Validates whether the notification fields are accurate. Should be called before
+        sending a new notification to storage.
         """
         pass
+
+    def to_json(self):
+        # returns a jsonifyable structure
+        # leave out target. don't need to see who else saw this.
+        return {
+            "id": self.id,
+            "actor": self.actor,
+            "verb": self.verb.infinitive,
+            "object": self.object,
+            "source": self.source,
+            "context": self.context,
+            "level": self.level.name,
+            "time": self.time
+        }
+
+    def serialize(self):
+        """
+        Serializes this notification for caching / simple storage.
+        Assumes it's been validated.
+        Just dumps it all to a json string.
+        """
+        serial = {
+            "i": self.id,
+            "a": self.actor,
+            "v": self.verb.id,
+            "o": self.object,
+            "s": self.source,
+            "t": self.target,
+            "l": self.level.id,
+            "m": self.time
+        }
+        return json.dumps(serial, separators=(',', ':'))
+
+    @classmethod
+    def deserialize(cls, serial):
+        """
+        Deserializes and returns a new Notification instance.
+        """
+        if serial is None:
+            return None
+        struct = json.loads(serial)
+        deserial = cls(
+            struct['a'],
+            str(struct['v']),
+            struct['o'],
+            struct['s'],
+            level=str(struct['l']),
+            target=struct.get('t'),
+            context=struct.get('c')
+        )
+        deserial.time = struct['m']
+        deserial.id = struct['i']
+        return deserial
