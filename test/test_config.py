@@ -85,5 +85,4 @@ def test_get_config(dummy_config, dummy_auth_token):
     assert cfg.redis_port == 'bar'
     assert cfg.auth_url == 'baz'
     assert cfg.auth_token == FAKE_AUTH_TOKEN
-    os.remove("fake_test_config_delete_me.cfg")
     del os.environ['FEEDS_CONFIG']
