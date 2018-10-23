@@ -1,10 +1,9 @@
 from ..base import TimelineStorage
 from .connection import get_redis_connection
-from feeds.config import get_config
 from .util import (
     get_user_key
 )
-import logging
+
 
 class RedisTimelineStorage(TimelineStorage):
     # TODO: CACHING!!

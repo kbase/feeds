@@ -35,4 +35,3 @@ class TimelineStorage(BaseStorage):
 
     def remove_from_timeline(self, activity_ids):
         raise NotImplementedError()
-

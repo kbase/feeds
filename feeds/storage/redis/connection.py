@@ -3,6 +3,7 @@ from feeds.config import get_config
 
 connection_pool = None
 
+
 def get_redis_connection(server_name='default'):
     '''
     Gets the specified redis connection
@@ -13,6 +14,7 @@ def get_redis_connection(server_name='default'):
         connection_pool = setup_redis()
 
     return redis.StrictRedis(connection_pool=connection_pool)
+
 
 def setup_redis():
     '''

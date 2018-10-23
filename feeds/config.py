@@ -1,7 +1,6 @@
 import os
 import configparser
 from .exceptions import ConfigError
-import logging
 
 DEFAULT_CONFIG_PATH = "deploy.cfg"
 ENV_CONFIG_PATH = "FEEDS_CONFIG"
@@ -18,6 +17,7 @@ AUTH_URL = "auth-url"
 ADMIN_LIST = "admins"
 GLOBAL_FEED = "global-feed"
 
+
 class FeedsConfig(object):
     """
     Loads a config set from the root deploy.cfg file. This should be in ini format.
@@ -29,7 +29,8 @@ class FeedsConfig(object):
     redis-user
     redis-pw
     auth-url
-    global-feed - name of the feed to represent a global user, or notifications that everyone should see.
+    global-feed - name of the feed to represent a global user, or
+        notifications that everyone should see.
     """
 
     def __init__(self):
@@ -40,7 +41,9 @@ class FeedsConfig(object):
         config_file = self._find_config_path()
         cfg = self._load_config(config_file)
         if not cfg.has_section(INI_SECTION):
-            raise ConfigError("Error parsing config file: section {} not found!".format(INI_SECTION))
+            raise ConfigError(
+                "Error parsing config file: section {} not found!".format(INI_SECTION)
+            )
         self.redis_host = self._get_line(cfg, DB_HOST)
         self.redis_port = self._get_line(cfg, DB_HOST_PORT)
         self.redis_user = self._get_line(cfg, DB_USER, required=False)
@@ -54,7 +57,8 @@ class FeedsConfig(object):
 
     def _find_config_path(self):
         """
-        A little helper to test whether a given file path, or one given by an environment variable, exists.
+        A little helper to test whether a given file path, or one given by an
+        environment variable, exists.
         """
         for env in [ENV_CONFIG_PATH, ENV_CONFIG_BACKUP]:
             env_path = os.environ.get(env)
@@ -97,7 +101,9 @@ class FeedsConfig(object):
             raise ConfigError("Required option {} has no value!".format(key))
         return val
 
+
 __config = None
+
 
 def get_config():
     global __config

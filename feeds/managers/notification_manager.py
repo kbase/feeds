@@ -7,10 +7,10 @@ See also the docs in NotificationFeed.
 """
 
 from .base import BaseManager
-from ..activity.notification import Notification
 from ..storage.redis.activity_storage import RedisActivityStorage
 from ..feeds.notification.notification_feed import NotificationFeed
 from feeds.config import get_config
+
 
 class NotificationManager(BaseManager):
     def __init__(self):

@@ -20,6 +20,7 @@ If we make a MongoDB adapter, it can work with documents.
 
 # activity_cache = TTLCache(1000, 600)
 
+
 class RedisActivityStorage(ActivityStorage):
     def serialize(self):
         raise NotImplementedError()
@@ -58,7 +59,5 @@ class RedisActivityStorage(ActivityStorage):
             ret_list.append(acts[id_])
         return ret_list
 
-
     def remove_from_storage(self, activity_ids):
         raise NotImplementedError()
-

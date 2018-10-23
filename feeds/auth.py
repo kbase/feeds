@@ -21,6 +21,7 @@ AUTH_URL = config.auth_url
 AUTH_API_PATH = '/api/V2/'
 CACHE_EXPIRE_TIME = 300  # seconds
 
+
 class TokenCache(TTLCache):
     """
     Extends the TTLCache to handle KBase auth tokens.
@@ -34,8 +35,10 @@ class TokenCache(TTLCache):
         else:
             return token
 
+
 __token_cache = TokenCache(1000, CACHE_EXPIRE_TIME)
 __user_cache = TTLCache(1000, CACHE_EXPIRE_TIME)
+
 
 def validate_service_token(token):
     """
@@ -59,6 +62,7 @@ def validate_service_token(token):
     else:
         raise InvalidTokenError("Token is not a Service token!")
 
+
 def validate_user_token(token):
     """
     Validates a user auth token.
@@ -66,8 +70,10 @@ def validate_user_token(token):
     """
     return __fetch_token(token)['user']
 
+
 def validate_user_id(user_id):
     return validate_user_ids([user_id])
+
 
 def validate_user_ids(user_ids):
     """
@@ -81,7 +87,7 @@ def validate_user_ids(user_ids):
     for user_id in user_ids:
         try:
             users[user_id] = __user_cache[user_id]
-        except:
+        except KeyError:
             pass
     # now we have a partial list. the ones that weren't found will
     # not be in the users dict. Use set difference to find the
@@ -94,6 +100,7 @@ def validate_user_ids(user_ids):
     __user_cache.update(found_users)
     users.update(found_users)
     return users
+
 
 def __fetch_token(token):
     """
@@ -113,6 +120,7 @@ def __fetch_token(token):
         except requests.HTTPError as e:
             _handle_errors(e)
 
+
 def __auth_request(path, token):
     """
     Makes a request of the auth server after cramming the token in a header.
@@ -125,6 +133,7 @@ def __auth_request(path, token):
     # others - 404, 500 - get raised
     r.raise_for_status()
     return r
+
 
 def _handle_errors(err):
     if err.response.status_code == 401:

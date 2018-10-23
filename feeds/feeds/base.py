@@ -4,3 +4,4 @@ class BaseFeed(object):
     and store them. It does NOT know how to fan those out to other feeds. It's just a really
     fancy, database-powered list of Activities.
     """
+    pass

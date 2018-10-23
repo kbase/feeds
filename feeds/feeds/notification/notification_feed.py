@@ -5,6 +5,7 @@ from feeds.storage.redis.timeline_storage import RedisTimelineStorage
 from cachetools import TTLCache
 import logging
 
+
 class NotificationFeed(BaseFeed):
     def __init__(self, user_id):
         self.user_id = user_id
@@ -66,4 +67,3 @@ class NotificationFeed(BaseFeed):
         Adds several activities to this user's feed.
         """
         pass
-

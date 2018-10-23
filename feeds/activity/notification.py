@@ -1,13 +1,13 @@
 from .base import BaseActivity
 import uuid
 import json
-from datetime import datetime
 from ..util import epoch_ms
 from .. import verbs
-from ..actor import validate_actor
+# from ..actor import validate_actor
 from .. import notification_level
 
 SERIAL_TOKEN = "|"
+
 
 class Notification(BaseActivity):
     def __init__(self, actor, verb, note_object, source, level='alert', target=None, context={}):
@@ -57,7 +57,8 @@ class Notification(BaseActivity):
 
     def validate(self):
         """
-        Validates whether the notification fields are accurate. Should be called before sending a new notification to storage.
+        Validates whether the notification fields are accurate. Should be called before
+        sending a new notification to storage.
         """
         pass
 
