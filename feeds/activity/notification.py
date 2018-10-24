@@ -114,3 +114,22 @@ class Notification(BaseActivity):
         deserial.time = struct['m']
         deserial.id = struct['i']
         return deserial
+
+    @classmethod
+    def from_dict(cls, serial):
+        """
+        Returns a new Notification from a serialized dictionary (e.g. used in Mongo)
+        """
+        assert serial
+        deserial = cls(
+            serial['actor'],
+            str(serial['verb']),
+            serial['object'],
+            serial['source'],
+            level=str(serial['level']),
+            target=serial.get('target'),
+            context=serial.get('context')
+        )
+        deserial.time = serial['created']
+        deserial.id = serial['act_id']
+        return deserial

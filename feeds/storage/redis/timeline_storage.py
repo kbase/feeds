@@ -8,10 +8,6 @@ from .util import (
 class RedisTimelineStorage(TimelineStorage):
     # TODO: CACHING!!
 
-    def __init__(self, user_id):
-        assert user_id
-        self.user_id = user_id
-
     def get_timeline(self, count=10):
         """
         Gets the user's timeline of activity ids.

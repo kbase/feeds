@@ -7,7 +7,7 @@ See also the docs in NotificationFeed.
 """
 
 from .base import BaseManager
-from ..storage.redis.activity_storage import RedisActivityStorage
+from ..storage.mongodb.activity_storage import MongoActivityStorage
 from ..feeds.notification.notification_feed import NotificationFeed
 from feeds.config import get_config
 
@@ -25,12 +25,12 @@ class NotificationManager(BaseManager):
         note.validate()  # any errors get raised to be caught by the server.
         target_users = self.get_target_users(note)
         # add the notification to the database.
-        activity_storage = RedisActivityStorage()
-        activity_storage.add_to_storage(note)
-        for user in target_users:
-            # add the notification to the appropriate users' feeds.
-            feed = NotificationFeed(user)
-            feed.add_notification(note)
+        activity_storage = MongoActivityStorage()
+        activity_storage.add_to_storage(note, target_users)
+        # for user in target_users:
+        #     # add the notification to the appropriate users' feeds.
+        #     feed = NotificationFeed(user)
+        #     feed.add_notification(note)
 
     def get_target_users(self, note):
         """

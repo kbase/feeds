@@ -69,3 +69,15 @@ class MissingLevelError(Exception):
     Raised if looking for a Notification Level that doesn't exist.
     """
     pass
+
+class ActivityStorageError(Exception):
+    """
+    Raised if an activity is failed to be stored in a database.
+    """
+    pass
+
+class ActivityRetrievalError(Exception):
+    """
+    Raised if the service fails to retrieve an activity from a database.
+    """
+    pass

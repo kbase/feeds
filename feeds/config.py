@@ -18,7 +18,7 @@ KEY_DB_ENGINE = "db-engine"
 KEY_AUTH_URL = "auth-url"
 KEY_ADMIN_LIST = "admins"
 KEY_GLOBAL_FEED = "global-feed"
-
+KEY_DEBUG = "debug"
 
 class FeedsConfig(object):
     """
@@ -41,12 +41,21 @@ class FeedsConfig(object):
         self.db_engine = self._get_line(cfg, KEY_DB_ENGINE)
         self.db_host = self._get_line(cfg, KEY_DB_HOST)
         self.db_port = self._get_line(cfg, KEY_DB_PORT)
+        try:
+            self.db_port = int(self.db_port)
+        except:
+            raise ConfigError("{} must be an int! Got {}".format(KEY_DB_PORT, self.db_port))
         self.db_user = self._get_line(cfg, KEY_DB_USER, required=False)
         self.db_pw = self._get_line(cfg, KEY_DB_PW, required=False)
         self.db_name = self._get_line(cfg, KEY_DB_NAME, required=False)
         self.global_feed = self._get_line(cfg, KEY_GLOBAL_FEED)
         self.auth_url = self._get_line(cfg, KEY_AUTH_URL)
         self.admins = self._get_line(cfg, KEY_ADMIN_LIST).split(",")
+        self.debug = self._get_line(cfg, KEY_DEBUG, required=False)
+        if not self.debug or self.debug.lower() != "true":
+            self.debug = False
+        else:
+            self.debug = True
 
     def _find_config_path(self):
         """

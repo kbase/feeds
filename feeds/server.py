@@ -8,7 +8,7 @@ import logging
 from http.client import responses
 from flask.logging import default_handler
 from .util import epoch_ms
-from .config import FeedsConfig
+from .config import get_config
 from .auth import (
     validate_service_token,
     validate_user_token
@@ -31,13 +31,6 @@ def _initialize_logging():
     root = logging.getLogger()
     root.addHandler(default_handler)
     root.setLevel('INFO')
-
-
-def _initialize_config():
-    # TODO - include config for:
-    # * database access
-    return FeedsConfig()
-
 
 def _log(msg, *args, level=logging.INFO):
     logging.getLogger(__name__).log(level, msg, *args)
@@ -96,7 +89,7 @@ def _get_notification_params(params):
 
 def create_app(test_config=None):
     _initialize_logging()
-    _initialize_config()
+    cfg = get_config()
 
     app = Flask(__name__, instance_relative_config=True)
     if test_config is None:
@@ -106,6 +99,7 @@ def create_app(test_config=None):
 
     @app.before_request
     def preprocess_request():
+        _log('%s %s', request.method, request.path)
         pass
 
     @app.after_request
@@ -187,10 +181,11 @@ def create_app(test_config=None):
         Once validated, will be used as the Source of the notification,
         and used in logic to determine which feeds get notified.
         """
-        token = _get_auth_token(request)
-        service = validate_service_token(token)  # can also be an admin user
-        if not service:
-            raise InvalidTokenError("Token must come from a service, not a user!")
+        if not cfg.debug:
+            token = _get_auth_token(request)
+            service = validate_service_token(token)  # can also be an admin user
+            if not service:
+                raise InvalidTokenError("Token must come from a service, not a user!")
         params = _get_notification_params(json.loads(request.get_data()))
         # create a Notification from params.
         new_note = Notification(
