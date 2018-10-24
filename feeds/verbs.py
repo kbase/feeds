@@ -41,7 +41,7 @@ def translate_verb(verb):
     """
     if isinstance(verb, str):
         return get_verb(verb)
-    elif issubclass(verb, Verb):
+    elif isinstance(verb, Verb):
         return get_verb(verb.infinitive)
     else:
         raise TypeError("Must be either a subclass of Verb or a string.")
