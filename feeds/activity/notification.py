@@ -3,14 +3,13 @@ import uuid
 import json
 from ..util import epoch_ms
 from .. import verbs
-# from ..actor import validate_actor
+from ..actor import validate_actor
 from .. import notification_level
-
-SERIAL_TOKEN = "|"
 
 
 class Notification(BaseActivity):
-    def __init__(self, actor, verb, note_object, source, level='alert', target=None, context={}):
+    def __init__(self, actor, verb, note_object, source, level='alert', target=None,
+                 context={}, expires=None, external_key=None):
         """
         A notification is roughly of this form:
             actor, verb, object, (target)
@@ -36,6 +35,9 @@ class Notification(BaseActivity):
         :param target: target of the note. Optional. Should be a user id or group id if present.
         :param context: freeform context of the note. key-value pairs.
         :param validate: if True, runs _validate immediately
+        :param expires: if not None, set a new expiration date - should be an int, ms since epoch
+        :param external_key: an optional special key given by the service that created the
+            notification
 
         TODO:
             * decide on global ids for admin use
@@ -53,19 +55,42 @@ class Notification(BaseActivity):
         self.target = target
         self.context = context
         self.level = notification_level.translate_level(level)
-        self.time = epoch_ms()  # int timestamp down to millisecond
+        self.created = epoch_ms()  # int timestamp down to millisecond
+        if expires is not None:
+            self.expires = self._default_expiration()
+        else:
+            self.validate_expiration(expires)
+            self.expires = expires
+        self.external_key = external_key
 
     def validate(self):
         """
         Validates whether the notification fields are accurate. Should be called before
         sending a new notification to storage.
         """
+        self.validate_expiration(self.expires, self.created)
+        validate_actor(self.actor)
+
+    def validate_expiration(self, expires, created):
+        """
+        Validates whether the expiration time is valid and after the created time.
+        If yes, returns True. If not, raises an InvalidExpirationTimeError.
+        """
         pass
 
-    def to_json(self):
-        # returns a jsonifyable structure
-        # leave out target. don't need to see who else saw this.
-        return {
+    def _default_expiration(self):
+        """
+        Returns the default expiration time of this notification.
+        """
+        pass
+
+    def to_dict(self):
+        """
+        Returns a dict form of the Notification.
+        Useful for storing in a document store.
+        Less useful, but not terrible, for returning to a user.
+        """
+        dict_form = {
             "id": self.id,
             "actor": self.actor,
             "verb": self.verb.infinitive,
@@ -73,8 +98,18 @@ class Notification(BaseActivity):
             "source": self.source,
             "context": self.context,
             "level": self.level.name,
-            "time": self.time
+            "created": self.created,
+            "expires": self.expires,
+            "external_key": self.external_key
         }
+        return dict_form
+
+    def user_view(self):
+        """
+        Returns a view of the Notification that's intended for the user.
+        That means we leave out the target and external keys.
+        """
+        pass
 
     def serialize(self):
         """
@@ -90,7 +125,7 @@ class Notification(BaseActivity):
             "s": self.source,
             "t": self.target,
             "l": self.level.id,
-            "m": self.time
+            "c": self.created
         }
         return json.dumps(serial, separators=(',', ':'))
 
@@ -111,7 +146,7 @@ class Notification(BaseActivity):
             target=struct.get('t'),
             context=struct.get('c')
         )
-        deserial.time = struct['m']
+        deserial.time = struct['c']
         deserial.id = struct['i']
         return deserial
 

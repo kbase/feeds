@@ -145,7 +145,7 @@ def create_app(test_config=None):
         notes = feed.get_notifications(count=max_notes)
         return_list = list()
         for note in notes:
-            return_list.append(note.to_json())
+            return_list.append(note.to_dict())
         return (flask.jsonify(return_list), 200)
 
     @app.route('/api/V1/notification/<note_id>', methods=['GET'])
