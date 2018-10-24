@@ -2,9 +2,10 @@ from typing import List
 from ..base import ActivityStorage
 from .connection import get_feeds_collection
 from feeds.exceptions import (
-    ActivityStorageError,
-    ActivityRetrievalError
+    ActivityStorageError
 )
+from pymongo import PyMongoError
+
 
 class MongoActivityStorage(ActivityStorage):
     def add_to_storage(self, activity, target_users: List[str]):
@@ -29,7 +30,7 @@ class MongoActivityStorage(ActivityStorage):
         }
         try:
             coll.insert_one(act_doc)
-        except e:
+        except PyMongoError as e:
             raise ActivityStorageError("Failed to store activity: " + str(e))
 
     def get_from_storage(self, activity_ids):

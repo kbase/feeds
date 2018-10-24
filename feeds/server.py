@@ -32,6 +32,7 @@ def _initialize_logging():
     root.addHandler(default_handler)
     root.setLevel('INFO')
 
+
 def _log(msg, *args, level=logging.INFO):
     logging.getLogger(__name__).log(level, msg, *args)
 

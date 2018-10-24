@@ -1,7 +1,4 @@
-from pymongo import (
-    ASCENDING,
-    DESCENDING
-)
+import pymongo
 from ..base import TimelineStorage
 from .connection import get_feeds_collection
 
@@ -29,7 +26,7 @@ class MongoTimelineStorage(TimelineStorage):
             query['level'] = level.id
         if verb is not None:
             query['verb'] = verb.id
-        timeline = coll.find(query).sort("created", DESCENDING)
+        timeline = coll.find(query).sort("created", pymongo.DESCENDING)
         serial_notes = [note for note in timeline]
         return serial_notes
 

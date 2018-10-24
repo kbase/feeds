@@ -8,7 +8,6 @@ See also the docs in NotificationFeed.
 
 from .base import BaseManager
 from ..storage.mongodb.activity_storage import MongoActivityStorage
-from ..feeds.notification.notification_feed import NotificationFeed
 from feeds.config import get_config
 
 
@@ -27,10 +26,6 @@ class NotificationManager(BaseManager):
         # add the notification to the database.
         activity_storage = MongoActivityStorage()
         activity_storage.add_to_storage(note, target_users)
-        # for user in target_users:
-        #     # add the notification to the appropriate users' feeds.
-        #     feed = NotificationFeed(user)
-        #     feed.add_notification(note)
 
     def get_target_users(self, note):
         """

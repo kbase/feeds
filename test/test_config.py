@@ -14,7 +14,7 @@ GOOD_CONFIG = [
     '[feeds]',
     'db-engine=redis',
     'db-host=foo',
-    'db-port=bar',
+    'db-port=5',
     'auth-url=baz',
     'global-feed=global',
     'admins=admin1,admin2,admin3'
@@ -46,14 +46,14 @@ def test_config_from_env_ok(dummy_config, dummy_auth_token):
     cfg = config.FeedsConfig()
     assert cfg.auth_url == 'baz'
     assert cfg.db_host == 'foo'
-    assert cfg.db_port == 'bar'
+    assert cfg.db_port == 5
     del os.environ['FEEDS_CONFIG']
 
     os.environ['KB_DEPLOYMENT_CONFIG'] = cfg_path
     cfg = config.FeedsConfig()
     assert cfg.auth_url == 'baz'
     assert cfg.db_host == 'foo'
-    assert cfg.db_port == 'bar'
+    assert cfg.db_port == 5
 
     del os.environ['KB_DEPLOYMENT_CONFIG']
 
@@ -83,7 +83,7 @@ def test_get_config(dummy_config, dummy_auth_token):
 
     cfg = config.get_config()
     assert cfg.db_host == 'foo'
-    assert cfg.db_port == 'bar'
+    assert cfg.db_port == 5
     assert cfg.auth_url == 'baz'
     assert cfg.auth_token == FAKE_AUTH_TOKEN
     del os.environ['FEEDS_CONFIG']

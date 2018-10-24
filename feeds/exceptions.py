@@ -70,11 +70,13 @@ class MissingLevelError(Exception):
     """
     pass
 
+
 class ActivityStorageError(Exception):
     """
     Raised if an activity is failed to be stored in a database.
     """
     pass
+
 
 class ActivityRetrievalError(Exception):
     """

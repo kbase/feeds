@@ -28,7 +28,9 @@ def get_mongo_connection():
 class FeedsMongoConnection(object):
     def __init__(self):
         self.cfg = get_config()
-        log.log(__name__, "opening MongoDB connection {} {}".format(self.cfg.db_host, self.cfg.db_port))
+        log.log(__name__, "opening MongoDB connection {} {}".format(
+            self.cfg.db_host, self.cfg.db_port)
+        )
         self.conn = MongoClient(host=self.cfg.db_host, port=self.cfg.db_port)
         self.db = self.conn[self.cfg.db_name]
         self._setup_indexes()

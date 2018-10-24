@@ -20,6 +20,7 @@ KEY_ADMIN_LIST = "admins"
 KEY_GLOBAL_FEED = "global-feed"
 KEY_DEBUG = "debug"
 
+
 class FeedsConfig(object):
     """
     Loads a config set from the root deploy.cfg file. This should be in ini format.
@@ -43,7 +44,7 @@ class FeedsConfig(object):
         self.db_port = self._get_line(cfg, KEY_DB_PORT)
         try:
             self.db_port = int(self.db_port)
-        except:
+        except ValueError:
             raise ConfigError("{} must be an int! Got {}".format(KEY_DB_PORT, self.db_port))
         self.db_user = self._get_line(cfg, KEY_DB_USER, required=False)
         self.db_pw = self._get_line(cfg, KEY_DB_PW, required=False)
