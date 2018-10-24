@@ -24,13 +24,14 @@ class ActivityStorage(BaseStorage):
 
 
 class TimelineStorage(BaseStorage):
-    def __init__(self):
-        pass
+    def __init__(self, user_id):
+        assert user_id
+        self.user_id = user_id
 
     def add_to_timeline(self, activity):
         raise NotImplementedError()
 
-    def get_timeline(self):
+    def get_timeline(self, count=10):
         raise NotImplementedError()
 
     def remove_from_timeline(self, activity_ids):

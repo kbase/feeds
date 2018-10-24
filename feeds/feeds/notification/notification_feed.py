@@ -1,7 +1,7 @@
 from ..base import BaseFeed
 from feeds.activity.notification import Notification
-from feeds.storage.redis.activity_storage import RedisActivityStorage
-from feeds.storage.redis.timeline_storage import RedisTimelineStorage
+from feeds.storage.mongodb.activity_storage import MongoActivityStorage
+from feeds.storage.mongodb.timeline_storage import MongoTimelineStorage
 from cachetools import TTLCache
 import logging
 
@@ -9,8 +9,8 @@ import logging
 class NotificationFeed(BaseFeed):
     def __init__(self, user_id):
         self.user_id = user_id
-        self.timeline_storage = RedisTimelineStorage(self.user_id)
-        self.activity_storage = RedisActivityStorage()
+        self.timeline_storage = MongoTimelineStorage(self.user_id)
+        self.activity_storage = MongoActivityStorage()
         self.timeline = None
         self.cache = TTLCache(1000, 600)
 
@@ -41,10 +41,8 @@ class NotificationFeed(BaseFeed):
         # 4. Return them.
         if count < 1 or not isinstance(count, int):
             raise ValueError('Count must be an integer > 0')
-        self._update_timeline()
-        note_ids = self.timeline
-        serial_notes = self.activity_storage.get_from_storage(note_ids)
-        note_list = [Notification.deserialize(note) for note in serial_notes]
+        serial_notes = self.timeline_storage.get_timeline(count=count)
+        note_list = [Notification.from_dict(note) for note in serial_notes]
         return note_list
 
     def mark_activities(self, activity_ids, seen=False):

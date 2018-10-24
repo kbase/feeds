@@ -22,10 +22,10 @@ def setup_redis():
     '''
     config = get_config()
     pool = redis.ConnectionPool(
-        host=config.redis_host,
-        port=config.redis_port,
-        password=config.redis_pw,
-        db=config.redis_db
+        host=config.db_host,
+        port=config.db_port,
+        password=config.db_pw,
+        db=config.db_name
 
         # decode_responses=config.get('decode_responses', True),
         # # connection options
