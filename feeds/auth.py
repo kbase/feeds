@@ -95,7 +95,7 @@ def validate_user_ids(user_ids):
     filtered_users = set(user_ids).difference(set(users))
     if not filtered_users:
         return users
-    r = __auth_request('users?list={}'.format(','.join(filtered_users)))
+    r = __auth_request('users?list={}'.format(','.join(filtered_users)), config.auth_token)
     found_users = json.loads(r.content)
     __user_cache.update(found_users)
     users.update(found_users)

@@ -108,7 +108,7 @@ class FeedsConfig(object):
 __config = None
 
 
-def get_config():
+def get_config(from_disk=False):
     global __config
     if not __config:
         __config = FeedsConfig()
