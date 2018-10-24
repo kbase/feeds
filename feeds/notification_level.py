@@ -15,7 +15,7 @@ def register(level):
         ))
 
     if level.name is None:
-        raise ValueError("A level must have an name form")
+        raise ValueError("A level must have a name")
     elif level.name.lower() in _level_register:
         raise ValueError("The level '{}' is already registered!".format(level.name))
 
@@ -28,7 +28,7 @@ def register(level):
 def get_level(key):
     key = str(key)
     if key.lower() in _level_register:
-        return _level_register[key]
+        return _level_register[key]()
     else:
         raise MissingLevelError('Level "{}" not found.'.format(key))
 
@@ -42,7 +42,7 @@ def translate_level(level):
     """
     if isinstance(level, str):
         return get_level(level)
-    elif issubclass(level, Level):
+    elif isinstance(level, Level):
         return get_level(level.name)
     else:
         raise TypeError("Must be either a subclass of Level or a string.")
