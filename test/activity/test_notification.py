@@ -16,6 +16,7 @@ cfg = test_config()
 # some dummy "good" inputs for testing
 actor = "test_actor"
 verb_inf = "invite"
+verb_past = "invited"
 verb_id = 1
 note_object = "foo"
 source = "groups"
@@ -181,15 +182,39 @@ def test_validate_bad(requests_mock):
 
 
 def test_default_lifespan():
-    pass
+    note = Notification(actor, verb_inf, note_object, source)
+    lifespan = int(cfg.get('feeds', 'lifespan'))
+    assert note.expires - note.created == lifespan * 24 * 60 * 60 * 1000
 
 
 def test_to_dict():
-    pass
+    note = Notification(actor, verb_inf, note_object, source, level=level_name)
+    d = note.to_dict()
+    assert d["actor"] == actor
+    assert d["verb"] == verb_id
+    assert d["object"] == note_object
+    assert d["source"] == source
+    assert isinstance(d["expires"], int) and d["expires"] == note.expires
+    assert isinstance(d["created"], int) and d["created"] == note.created
+    assert d["target"] is None
+    assert d["context"] is None
+    assert d["level"] == level_id
+    assert d["external_key"] is None
 
 
 def test_user_view():
-    pass
+    note = Notification(actor, verb_inf, note_object, source, level=level_id)
+    v = note.user_view()
+    assert v["actor"] == actor
+    assert v["verb"] == verb_past
+    assert v["object"] == note_object
+    assert v["source"] == source
+    assert isinstance(v["expires"], int) and v["expires"] == note.expires
+    assert isinstance(v["created"], int) and v["created"] == note.created
+    assert "target" not in v
+    assert v["context"] is None
+    assert v["level"] == level_name
+    assert "external_key" not in v
 
 
 def test_from_dict():

@@ -39,7 +39,9 @@ def translate_verb(verb):
         - if it's a verb that's registered, return it
         - if it's not a Verb or a str, raise a TypeError
     """
-    if isinstance(verb, str):
+    if isinstance(verb, int):
+        return get_verb(str(verb))
+    elif isinstance(verb, str):
         return get_verb(verb)
     elif isinstance(verb, Verb):
         return get_verb(verb.infinitive)

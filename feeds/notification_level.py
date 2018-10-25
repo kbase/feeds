@@ -40,7 +40,9 @@ def translate_level(level):
 
     :param level: Either a string or a Level. (stringify numerical ids before looking them up)
     """
-    if isinstance(level, str):
+    if isinstance(level, int):
+        return get_level(str(level))
+    elif isinstance(level, str):
         return get_level(level)
     elif isinstance(level, Level):
         return get_level(level.name)

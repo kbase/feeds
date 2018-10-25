@@ -19,4 +19,4 @@ def test_validate_actor_fail(requests_mock):
     requests_mock.get('{}/api/V2/users?list={}'.format(cfg.get('feeds', 'auth-url'), user_id), text=json.dumps({}))
     with pytest.raises(InvalidActorError) as e:
         validate_actor(user_id)
-    assert "Actor '{}' is not a real user".format(user_id)
+    assert "Actor '{}' is not a real user".format(user_id) in str(e.value)
