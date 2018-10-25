@@ -92,6 +92,10 @@ def test_translate_verb():
     v_trans = verbs.translate_verb(v)
     assert isinstance(v_trans, verbs.Request)
 
+    v = verbs.translate_verb(1)
+    assert isinstance(v, verbs.Invite)
+    assert v.infinitive == 'invite'
+
     v = verbs.translate_verb('1')
     assert isinstance(v, verbs.Invite)
     assert v.infinitive == 'invite'

@@ -218,8 +218,26 @@ def test_user_view():
 
 
 def test_from_dict():
-    pass
-
+    act_id = str(uuid.uuid4())
+    verb = [verb_id, str(verb_id), verb_inf, verb_past]
+    level = [level_id, level_name, str(level_id)]
+    d = {
+        "actor": actor,
+        "object": note_object,
+        "source": source,
+        "expires": 1234567890111,
+        "created": 1234567890000,
+        "target": target,
+        "context": context,
+        "external_key": external_key,
+        "id": act_id
+    }
+    for v in verb:
+        for l in level:
+            note_d = d.copy()
+            note_d.update({'level': l, 'verb': v})
+            note = Notification.from_dict(note_d)
+            assert_note_ok(note, **note_d)
 
 def test_serialize():
     pass

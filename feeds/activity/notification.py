@@ -181,9 +181,9 @@ class Notification(BaseActivity):
             context=struct.get('c'),
             external_key=struct.get('x')
         )
-        deserial.time = struct['c']
+        deserial.created = struct['c']
         deserial.id = struct['i']
-        deserial.time = struct['e']
+        deserial.expires = struct['e']
         return deserial
 
     @classmethod
@@ -202,7 +202,7 @@ class Notification(BaseActivity):
             context=serial.get('context'),
             external_key=serial.get('external_key')
         )
-        deserial.time = serial['created']
+        deserial.created = serial['created']
         deserial.expires = serial['expires']
-        deserial.id = serial['act_id']
+        deserial.id = serial['id']
         return deserial
