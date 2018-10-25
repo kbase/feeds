@@ -1,4 +1,5 @@
 import pytest
+import json
 from feeds.activity.notification import Notification
 import uuid
 from feeds.util import epoch_ms
@@ -9,9 +10,6 @@ from feeds.exceptions import (
     MissingLevelError,
     InvalidExpirationError
 )
-
-    # def __init__(self, actor, verb, note_object, source, level='alert', target=None,
-    #              context={}, expires=None, external_key=None):
 
 cfg = test_config()
 
@@ -45,6 +43,7 @@ def assert_note_ok(note, **kwargs):
         assert note.level.name == kwargs['level_name']
     if 'expires' not in kwargs:
         assert note.expires == note.created + (int(cfg.get('feeds', 'lifespan')) * 24 * 60 * 60 * 1000)
+    assert note.created < note.expires
     assert_is_uuid(note.id)
 
 def test_note_new_ok_no_kwargs():
@@ -164,16 +163,21 @@ def test_note_new_bad_expires():
         assert "Notifications should expire sometime after they are created" in str(e.value)
 
 
-def test_validate_ok():
-    pass
+def test_validate_ok(requests_mock):
+    user_id = "foo"
+    user_display = "Foo Bar"
+    requests_mock.get('{}/api/V2/users?list={}'.format(cfg.get('feeds', 'auth-url'), user_id), text=json.dumps({user_id: user_display}))
+    note = Notification(user_id, verb_inf, note_object, source)
+    # If this doesn't throw any errors, then it passes!
+    note.validate()
 
 
-def test_validate_bad():
-    pass
-
-
-def test_validate_expiration():
-    pass
+def test_validate_bad(requests_mock):
+    user_id = "foo"
+    requests_mock.get('{}/api/V2/users?list={}'.format(cfg.get('feeds', 'auth-url'), user_id), text=json.dumps({}))
+    note = Notification(user_id, verb_inf, note_object, source)
+    # If this doesn't throw any errors, then it passes!
+    note.validate()
 
 
 def test_default_lifespan():

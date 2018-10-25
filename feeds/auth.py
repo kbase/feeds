@@ -72,7 +72,11 @@ def validate_user_token(token):
 
 
 def validate_user_id(user_id):
-    return validate_user_ids([user_id])
+    """
+    Validates whether a SINGLE user is real or not.
+    Returns a boolean.
+    """
+    return user_id in validate_user_ids([user_id])
 
 
 def validate_user_ids(user_ids):
