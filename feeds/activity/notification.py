@@ -98,18 +98,18 @@ class Notification(BaseActivity):
     def to_dict(self):
         """
         Returns a dict form of the Notification.
-        Useful for storing in a document store.
+        Useful for storing in a document store, returns the id of each verb and level.
         Less useful, but not terrible, for returning to a user.
         """
         dict_form = {
             "id": self.id,
             "actor": self.actor,
-            "verb": self.verb.infinitive,
+            "verb": self.verb.id,
             "object": self.object,
             "source": self.source,
             "context": self.context,
             "target": self.target,
-            "level": self.level.name,
+            "level": self.level.id,
             "created": self.created,
             "expires": self.expires,
             "external_key": self.external_key

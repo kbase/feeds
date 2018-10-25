@@ -4,7 +4,7 @@ from .connection import get_feeds_collection
 from feeds.exceptions import (
     ActivityStorageError
 )
-from pymongo import PyMongoError
+from pymongo.errors import PyMongoError
 
 
 class MongoActivityStorage(ActivityStorage):
@@ -23,6 +23,8 @@ class MongoActivityStorage(ActivityStorage):
             "target": activity.target,
             "source": activity.source,
             "level": activity.level.id,
+            "created": activity.created,
+            "expires": activity.expires,
             "users": target_users,
             "unseen": target_users,
             "created": activity.time,
