@@ -3,6 +3,12 @@ from feeds.activity.notification import Notification
 import uuid
 from feeds.util import epoch_ms
 from ..conftest import test_config
+from ..util import assert_is_uuid
+from feeds.exceptions import (
+    MissingVerbError,
+    MissingLevelError,
+    InvalidExpirationError
+)
 
     # def __init__(self, actor, verb, note_object, source, level='alert', target=None,
     #              context={}, expires=None, external_key=None):
@@ -39,6 +45,7 @@ def assert_note_ok(note, **kwargs):
         assert note.level.name == kwargs['level_name']
     if 'expires' not in kwargs:
         assert note.expires == note.created + (int(cfg.get('feeds', 'lifespan')) * 24 * 60 * 60 * 1000)
+    assert_is_uuid(note.id)
 
 def test_note_new_ok_no_kwargs():
     note = Notification(actor, verb_inf, note_object, source)
@@ -87,37 +94,74 @@ def test_note_new_external_key():
                    object=note_object, source=source, external_key=external_key)
 
 
-
 def test_note_new_bad_actor():
-    pass
+    # TODO: Should only fail on validate - shouldn't do a lookup whenever a new note is made.
+    # also, shouldn't be None.
+    with pytest.raises(AssertionError) as e:
+        Notification(None, verb_inf, note_object, source)
+    assert "actor must not be None" in str(e.value)
 
 
 def test_note_new_bad_verb():
-    pass
+    with pytest.raises(AssertionError) as e:
+        Notification(actor, None, note_object, source)
+    assert "verb must not be None" in str(e.value)
+
+    with pytest.raises(MissingVerbError) as e:
+        Notification(actor, "foobar", note_object, source)
+    assert 'Verb "foobar" not found' in str(e.value)
 
 
 def test_note_new_bad_object():
-    pass
-
+    # TODO: Also test object validation itself later.
+    with pytest.raises(AssertionError) as e:
+        Notification(actor, verb_inf, None, source)
+    assert 'note_object must not be None' in str(e.value)
 
 def test_note_new_bad_source():
-    pass
+    # TODO: Validate sources as being real.
+    with pytest.raises(AssertionError) as e:
+        Notification(actor, verb_inf, note_object, None)
+    assert 'source must not be None' in str(e.value)
 
 
 def test_note_new_bad_level():
-    pass
+    with pytest.raises(AssertionError) as e:
+        Notification(actor, verb_inf, note_object, source, level=None)
+    assert "level must not be None" in str(e.value)
+
+    with pytest.raises(MissingLevelError) as e:
+        Notification(actor, verb_inf, note_object, source, level="foobar")
+    assert 'Level "foobar" not found' in str(e.value)
 
 
 def test_note_new_bad_target():
-    pass
+    bad_targets = [{}, "foo", 123, False]
+    for bad in bad_targets:
+        with pytest.raises(AssertionError) as e:
+            Notification(actor, verb_inf, note_object, source, target=bad)
+        assert "target must be either a list or None" in str(e.value)
 
 
 def test_note_new_bad_context():
-    pass
+    bad_context = [[], "foo", 123, False]
+    for bad in bad_context:
+        with pytest.raises(AssertionError) as e:
+            Notification(actor, verb_inf, note_object, source, context=bad)
+        assert "context must be either a dict or None" in str(e.value)
 
 
 def test_note_new_bad_expires():
-    pass
+    bad_expires = ["foo", {}, []]
+    for bad in bad_expires:
+        with pytest.raises(InvalidExpirationError) as e:
+            Notification(actor, verb_inf, note_object, source, expires=bad)
+        assert "Expiration time should be the number of milliseconds" in str(e.value)
+    bad_expires = [123, True, False]
+    for bad in bad_expires:
+        with pytest.raises(InvalidExpirationError) as e:
+            Notification(actor, verb_inf, note_object, source, expires=bad)
+        assert "Notifications should expire sometime after they are created" in str(e.value)
 
 
 def test_validate_ok():

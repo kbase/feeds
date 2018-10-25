@@ -12,7 +12,7 @@ from feeds.config import get_config
 
 class Notification(BaseActivity):
     def __init__(self, actor, verb, note_object, source, level='alert', target=None,
-                 context={}, expires=None, external_key=None):
+                 context=None, expires=None, external_key=None):
         """
         A notification is roughly of this form:
             actor, verb, object, (target)
@@ -50,6 +50,13 @@ class Notification(BaseActivity):
             * validate target is valid
             * validate context fits
         """
+        assert actor is not None, "actor must not be None"
+        assert verb is not None, "verb must not be None"
+        assert note_object is not None, "note_object must not be None"
+        assert source is not None, "source must not be None"
+        assert level is not None, "level must not be None"
+        assert target is None or isinstance(target, list), "target must be either a list or None"
+        assert context is None or isinstance(context, dict), "context must be either a dict or None"
         self.id = str(uuid.uuid4())
         self.actor = actor
         self.verb = verbs.translate_verb(verb)
@@ -84,9 +91,12 @@ class Notification(BaseActivity):
         except (TypeError, ValueError):
             raise InvalidExpirationError(
                 "Expiration time should be the number "
-                "of milliseconds since the epoch."
+                "of milliseconds since the epoch"
             )
-        pass
+        if expires <= created:
+            raise InvalidExpirationError(
+                "Notifications should expire sometime after they are created"
+            )
 
     def _default_lifespan(self):
         """
