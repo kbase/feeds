@@ -7,6 +7,7 @@ from ..actor import validate_actor
 from .. import notification_level
 from feeds.exceptions import InvalidExpirationError
 import datetime
+from feeds.config import get_config
 
 
 class Notification(BaseActivity):
@@ -59,9 +60,9 @@ class Notification(BaseActivity):
         self.level = notification_level.translate_level(level)
         self.created = epoch_ms()  # int timestamp down to millisecond
         if expires is not None:
-            self.expires = self._default_expiration()
+            self.expires = self._default_lifespan() + self.created
         else:
-            self.validate_expiration(expires)
+            self.validate_expiration(expires, self.created)
             self.expires = expires
         self.external_key = external_key
 
@@ -88,11 +89,11 @@ class Notification(BaseActivity):
             )
         pass
 
-    def _default_expiration(self):
+    def _default_lifespan(self):
         """
-        Returns the default expiration time of this notification.
+        Returns the default lifespan of this notification in ms.
         """
-        pass
+        return get_config().lifespan * 24 * 60 * 60 * 1000
 
     def to_dict(self):
         """
@@ -107,6 +108,7 @@ class Notification(BaseActivity):
             "object": self.object,
             "source": self.source,
             "context": self.context,
+            "target": self.target,
             "level": self.level.name,
             "created": self.created,
             "expires": self.expires,
@@ -119,7 +121,18 @@ class Notification(BaseActivity):
         Returns a view of the Notification that's intended for the user.
         That means we leave out the target and external keys.
         """
-        pass
+        view = {
+            "id": self.id,
+            "actor": self.actor,
+            "verb": self.verb.past_tense,
+            "object": self.object,
+            "source": self.source,
+            "context": self.context,
+            "level": self.level.name,
+            "created": self.created,
+            "expires": self.expires
+        }
+        return view
 
     def serialize(self):
         """

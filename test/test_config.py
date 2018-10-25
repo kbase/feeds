@@ -17,7 +17,8 @@ GOOD_CONFIG = [
     'db-port=5',
     'auth-url=baz',
     'global-feed=global',
-    'admins=admin1,admin2,admin3'
+    'admins=admin1,admin2,admin3',
+    'lifespan=30'
 ]
 
 @pytest.fixture(scope="function")
