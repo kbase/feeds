@@ -5,6 +5,8 @@ from ..util import epoch_ms
 from .. import verbs
 from ..actor import validate_actor
 from .. import notification_level
+from feeds.exceptions import InvalidExpirationError
+import datetime
 
 
 class Notification(BaseActivity):
@@ -74,8 +76,16 @@ class Notification(BaseActivity):
     def validate_expiration(self, expires, created):
         """
         Validates whether the expiration time is valid and after the created time.
-        If yes, returns True. If not, raises an InvalidExpirationTimeError.
+        If yes, returns True. If not, raises an InvalidExpirationError.
         """
+        # Just validate that the time looks like a real time in epoch millis.
+        try:
+            datetime.datetime.fromtimestamp(expires/1000)
+        except (TypeError, ValueError):
+            raise InvalidExpirationError(
+                "Expiration time should be the number "
+                "of milliseconds since the epoch."
+            )
         pass
 
     def _default_expiration(self):
@@ -125,7 +135,9 @@ class Notification(BaseActivity):
             "s": self.source,
             "t": self.target,
             "l": self.level.id,
-            "c": self.created
+            "c": self.created,
+            "e": self.expires,
+            "x": self.external_key
         }
         return json.dumps(serial, separators=(',', ':'))
 
@@ -144,10 +156,12 @@ class Notification(BaseActivity):
             struct['s'],
             level=str(struct['l']),
             target=struct.get('t'),
-            context=struct.get('c')
+            context=struct.get('c'),
+            external_key=struct.get('x')
         )
         deserial.time = struct['c']
         deserial.id = struct['i']
+        deserial.time = struct['e']
         return deserial
 
     @classmethod
@@ -163,8 +177,10 @@ class Notification(BaseActivity):
             serial['source'],
             level=str(serial['level']),
             target=serial.get('target'),
-            context=serial.get('context')
+            context=serial.get('context'),
+            external_key=serial.get('external_key')
         )
         deserial.time = serial['created']
+        deserial.expires = serial['expires']
         deserial.id = serial['act_id']
         return deserial
