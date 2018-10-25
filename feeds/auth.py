@@ -52,7 +52,6 @@ def validate_service_token(token):
     TODO: I know this is going to be rife with issues. The name of the token doesn't have
     to be the service. But as long as it's a Service token, then it came from in KBase, so
     everything should be ok.
-    TODO: Add 'source' to PUT notification endpoint.
     """
     token = __fetch_token(token)
     if token.get('type') == 'Service':
@@ -67,6 +66,7 @@ def validate_user_token(token):
     """
     Validates a user auth token.
     If valid, returns the user id. If invalid, raises an InvalidTokenError.
+    If debug is True, always validates and returns a nonsense user name
     """
     return __fetch_token(token)['user']
 

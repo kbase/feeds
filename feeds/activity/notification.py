@@ -59,11 +59,10 @@ class Notification(BaseActivity):
         self.context = context
         self.level = notification_level.translate_level(level)
         self.created = epoch_ms()  # int timestamp down to millisecond
-        if expires is not None:
-            self.expires = self._default_lifespan() + self.created
-        else:
-            self.validate_expiration(expires, self.created)
-            self.expires = expires
+        if expires is None:
+            expires = self._default_lifespan() + self.created
+        self.validate_expiration(expires, self.created)
+        self.expires = expires
         self.external_key = external_key
 
     def validate(self):

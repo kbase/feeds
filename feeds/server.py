@@ -4,6 +4,7 @@ from flask import (
     Flask,
     request
 )
+import traceback
 import logging
 from http.client import responses
 from flask.logging import default_handler
@@ -38,7 +39,13 @@ def _log(msg, *args, level=logging.INFO):
 
 
 def _log_error(error):
-    _log("Exception: " + str(error) + error, level=logging.ERROR)
+    formatted_error = ''.join(
+        traceback.format_exception(
+            etype=type(error),
+            value=error,
+            tb=error.__traceback__)
+        )
+    _log("Exception: " + formatted_error, level=logging.ERROR)
 
 
 def _get_auth_token(request, required=True):
