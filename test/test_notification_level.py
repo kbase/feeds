@@ -72,6 +72,10 @@ def test_translate_level():
     l_trans = level.translate_level(l)
     assert isinstance(l_trans, level.Alert)
 
+    l = level.translate_level(1)
+    assert isinstance(l, level.Alert)
+    assert l.name == 'alert'
+
     l = level.translate_level('1')
     assert isinstance(l, level.Alert)
     assert l.name == 'alert'

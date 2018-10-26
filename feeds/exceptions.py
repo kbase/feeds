@@ -83,3 +83,17 @@ class ActivityRetrievalError(Exception):
     Raised if the service fails to retrieve an activity from a database.
     """
     pass
+
+
+class InvalidExpirationError(Exception):
+    """
+    Raised when trying to give a Notification an invalid expiration time.
+    """
+    pass
+
+
+class InvalidNotificationError(Exception):
+    """
+    Raised when trying to deserialize a Notification that has been stored badly.
+    """
+    pass

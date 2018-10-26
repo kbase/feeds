@@ -4,7 +4,7 @@ from .connection import get_feeds_collection
 from feeds.exceptions import (
     ActivityStorageError
 )
-from pymongo import PyMongoError
+from pymongo.errors import PyMongoError
 
 
 class MongoActivityStorage(ActivityStorage):
@@ -15,19 +15,9 @@ class MongoActivityStorage(ActivityStorage):
         Raises an ActivityStorageError if it fails.
         """
         coll = get_feeds_collection()
-        act_doc = {
-            "act_id": activity.id,
-            "actor": activity.actor,
-            "verb": activity.verb.id,
-            "object": activity.object,
-            "target": activity.target,
-            "source": activity.source,
-            "level": activity.level.id,
-            "users": target_users,
-            "unseen": target_users,
-            "created": activity.time,
-            "context": activity.context
-        }
+        act_doc = activity.to_dict()
+        act_doc["users"] = target_users
+        act_doc["unseen"] = target_users
         try:
             coll.insert_one(act_doc)
         except PyMongoError as e:

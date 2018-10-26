@@ -19,6 +19,7 @@ KEY_AUTH_URL = "auth-url"
 KEY_ADMIN_LIST = "admins"
 KEY_GLOBAL_FEED = "global-feed"
 KEY_DEBUG = "debug"
+KEY_LIFESPAN = "lifespan"
 
 
 class FeedsConfig(object):
@@ -52,6 +53,11 @@ class FeedsConfig(object):
         self.global_feed = self._get_line(cfg, KEY_GLOBAL_FEED)
         self.auth_url = self._get_line(cfg, KEY_AUTH_URL)
         self.admins = self._get_line(cfg, KEY_ADMIN_LIST).split(",")
+        self.lifespan = self._get_line(cfg, KEY_LIFESPAN)
+        try:
+            self.lifespan = int(self._get_line(cfg, KEY_LIFESPAN))
+        except ValueError:
+            raise ConfigError("{} must be an int! Got {}".format(KEY_LIFESPAN, self.lifespan))
         self.debug = self._get_line(cfg, KEY_DEBUG, required=False)
         if not self.debug or self.debug.lower() != "true":
             self.debug = False
@@ -108,7 +114,7 @@ class FeedsConfig(object):
 __config = None
 
 
-def get_config():
+def get_config(from_disk=False):
     global __config
     if not __config:
         __config = FeedsConfig()

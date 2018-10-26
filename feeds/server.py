@@ -4,6 +4,7 @@ from flask import (
     Flask,
     request
 )
+import traceback
 import logging
 from http.client import responses
 from flask.logging import default_handler
@@ -38,7 +39,13 @@ def _log(msg, *args, level=logging.INFO):
 
 
 def _log_error(error):
-    _log("Exception: " + str(error) + error, level=logging.ERROR)
+    formatted_error = ''.join(
+        traceback.format_exception(
+            etype=type(error),
+            value=error,
+            tb=error.__traceback__)
+        )
+    _log("Exception: " + formatted_error, level=logging.ERROR)
 
 
 def _get_auth_token(request, required=True):
@@ -145,7 +152,7 @@ def create_app(test_config=None):
         notes = feed.get_notifications(count=max_notes)
         return_list = list()
         for note in notes:
-            return_list.append(note.to_json())
+            return_list.append(note.user_view())
         return (flask.jsonify(return_list), 200)
 
     @app.route('/api/V1/notification/<note_id>', methods=['GET'])

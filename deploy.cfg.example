@@ -21,3 +21,13 @@ admins=wjriehl,scanon,kkeller,mmdrake
 # fake user name for the global feed. Should be something that's not a valid
 # user name.
 global-feed=_global_
+
+# Default lifetime for each notification in days. Notes older than this won't be
+# returned without explicitly looking them up by either their id or external key
+# (when given).
+lifespan=30
+
+# In debug mode, auth is effectively ignored.
+# Useful for testing, etc.
+# SET TO FALSE IN PRODUCTION!
+debug=False
