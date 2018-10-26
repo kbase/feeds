@@ -8,7 +8,8 @@ from ..util import assert_is_uuid
 from feeds.exceptions import (
     MissingVerbError,
     MissingLevelError,
-    InvalidExpirationError
+    InvalidExpirationError,
+    InvalidNotificationError
 )
 
 cfg = test_config()
@@ -239,9 +240,94 @@ def test_from_dict():
             note = Notification.from_dict(note_d)
             assert_note_ok(note, **note_d)
 
-def test_serialize():
-    pass
+
+def test_from_dict_missing_keys():
+    d = {
+        "actor": actor
+    }
+    with pytest.raises(InvalidNotificationError) as e:
+        Notification.from_dict(d)
+    assert "Missing keys" in str(e.value)
+
+    with pytest.raises(InvalidNotificationError) as e:
+        Notification.from_dict(None)
+    assert "Can only run 'from_dict' on a dict" in str(e.value)
 
 
-def test_deserialize():
-    pass
+def test_serialization():
+    note = Notification(actor, verb_inf, note_object, source, level=level_id)
+    serial = note.serialize()
+    json_serial = json.loads(serial)
+        # serial = {
+        #     "i": self.id,
+        #     "a": self.actor,
+        #     "v": self.verb.id,
+        #     "o": self.object,
+        #     "s": self.source,
+        #     "t": self.target,
+        #     "l": self.level.id,
+        #     "c": self.created,
+        #     "e": self.expires,
+        #     "x": self.external_key
+        # }
+    assert "i" in json_serial
+    assert_is_uuid(json_serial['i'])
+    assert "a" in json_serial and json_serial['a'] == actor
+    assert "v" in json_serial and json_serial['v'] == verb_id
+    assert "o" in json_serial and json_serial['o'] == note_object
+    assert "s" in json_serial and json_serial['s'] == source
+    assert "l" in json_serial and json_serial['l'] == level_id
+    assert "c" in json_serial and json_serial['c'] == note.created
+    assert "e" in json_serial and json_serial['e'] == note.expires
+    assert "n" in json_serial and json_serial['n'] == None
+    assert "x" in json_serial and json_serial['x'] == None
+    assert "t" in json_serial and json_serial['t'] == None
+
+
+def test_serialization_all_kwargs():
+    note = Notification(actor, verb_inf, note_object, source, level=level_id,
+                        target=target, external_key=external_key, context=context)
+    serial = note.serialize()
+    json_serial = json.loads(serial)
+    assert "i" in json_serial
+    assert_is_uuid(json_serial['i'])
+    assert "a" in json_serial and json_serial['a'] == actor
+    assert "v" in json_serial and json_serial['v'] == verb_id
+    assert "o" in json_serial and json_serial['o'] == note_object
+    assert "s" in json_serial and json_serial['s'] == source
+    assert "l" in json_serial and json_serial['l'] == level_id
+    assert "c" in json_serial and json_serial['c'] == note.created
+    assert "e" in json_serial and json_serial['e'] == note.expires
+    assert "n" in json_serial and json_serial['n'] == context
+    assert "x" in json_serial and json_serial['x'] == external_key
+    assert "t" in json_serial and json_serial['t'] == target
+
+
+def test_deserialization():
+    note = Notification(actor, verb_inf, note_object, source, level=level_id,
+                        target=target, external_key=external_key, context=context)
+    serial = note.serialize()
+    note2 = Notification.deserialize(serial)
+    assert note2.id == note.id
+    assert note2.actor == note.actor
+    assert note2.verb.id == note.verb.id
+    assert note2.object == note.object
+    assert note2.source == note.source
+    assert note2.level.id == note.level.id
+    assert note2.target == note.target
+    assert note2.external_key == note.external_key
+    assert note2.context == note.context
+
+
+def test_deserialize_bad():
+    with pytest.raises(InvalidNotificationError) as e:
+        Notification.deserialize(None)
+    assert "Can't deserialize an input of 'None'" in str(e.value)
+
+    with pytest.raises(InvalidNotificationError) as e:
+        Notification.deserialize(json.dumps({'a': actor}))
+    assert "Missing keys" in str(e.value)
+
+    with pytest.raises(InvalidNotificationError) as e:
+        Notification.deserialize("foo")
+    assert "Can only deserialize a JSON string" in str(e.value)

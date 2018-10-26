@@ -5,7 +5,10 @@ from ..util import epoch_ms
 from .. import verbs
 from ..actor import validate_actor
 from .. import notification_level
-from feeds.exceptions import InvalidExpirationError
+from feeds.exceptions import (
+    InvalidExpirationError,
+    InvalidNotificationError
+)
 import datetime
 from feeds.config import get_config
 
@@ -145,7 +148,7 @@ class Notification(BaseActivity):
 
     def serialize(self):
         """
-        Serializes this notification for caching / simple storage.
+        Serializes this notification to a string for caching / simple storage.
         Assumes it's been validated.
         Just dumps it all to a json string.
         """
@@ -159,7 +162,8 @@ class Notification(BaseActivity):
             "l": self.level.id,
             "c": self.created,
             "e": self.expires,
-            "x": self.external_key
+            "x": self.external_key,
+            "n": self.context
         }
         return json.dumps(serial, separators=(',', ':'))
 
@@ -168,9 +172,18 @@ class Notification(BaseActivity):
         """
         Deserializes and returns a new Notification instance.
         """
-        if serial is None:
-            return None
-        struct = json.loads(serial)
+        try:
+            assert serial
+        except AssertionError:
+            raise InvalidNotificationError("Can't deserialize an input of 'None'")
+        try:
+            struct = json.loads(serial)
+        except json.JSONDecodeError:
+            raise InvalidNotificationError("Can only deserialize a JSON string")
+        required_keys = set(['a', 'v', 'o', 's', 'l', 't', 'c', 'i', 'e'])
+        missing_keys = required_keys.difference(struct.keys())
+        if missing_keys:
+            raise InvalidNotificationError('Missing keys: {}'.format(missing_keys))
         deserial = cls(
             struct['a'],
             str(struct['v']),
@@ -178,7 +191,7 @@ class Notification(BaseActivity):
             struct['s'],
             level=str(struct['l']),
             target=struct.get('t'),
-            context=struct.get('c'),
+            context=struct.get('n'),
             external_key=struct.get('x')
         )
         deserial.created = struct['c']
@@ -191,7 +204,16 @@ class Notification(BaseActivity):
         """
         Returns a new Notification from a serialized dictionary (e.g. used in Mongo)
         """
-        assert serial
+        try:
+            assert serial is not None and isinstance(serial, dict)
+        except AssertionError:
+            raise InvalidNotificationError("Can only run 'from_dict' on a dict.")
+        required_keys = set([
+            'actor', 'verb', 'object', 'source', 'level', 'created', 'expires', 'id'
+        ])
+        missing_keys = required_keys.difference(set(serial.keys()))
+        if missing_keys:
+            raise InvalidNotificationError('Missing keys: {}'.format(missing_keys))
         deserial = cls(
             serial['actor'],
             str(serial['verb']),

@@ -90,3 +90,10 @@ class InvalidExpirationError(Exception):
     Raised when trying to give a Notification an invalid expiration time.
     """
     pass
+
+
+class InvalidNotificationError(Exception):
+    """
+    Raised when trying to deserialize a Notification that has been stored badly.
+    """
+    pass
