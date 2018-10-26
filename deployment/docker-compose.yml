@@ -1,0 +1,28 @@
+services:
+  feeds:
+    ports:
+      - "5000":"5000"
+    environment:
+      - db-engine=mongodb
+      - db-name=feeds
+      - db-host=localhost
+      - db-port=27017
+      - auth-url=https://ci.kbase.us/services/auth
+      - workspace-url=https://ci.kbase.us/services/ws
+      - groups-url=https://ci.kbase.us/services/groups
+      - AUTH_TOKEN=fake_token
+    command:
+      - "-wait"
+      - "tcp://ci-mongo:27017"
+      - "-timeout"
+      - "-template"
+      - "/kb/module/deployment/conf/.templates/deploy.cfg.templ:/kb/module/deploy.cfg"
+      - "make start"
+    depends_on: ["ci-mongo"]
+
+  ci-mongo:
+    image: mongo:2
+    command:
+      - "--smallfiles"
+    ports:
+      - "27017:27017"

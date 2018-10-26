@@ -12,7 +12,10 @@ db-port=6379
 db-user=
 db-pw=
 
+# Service urls
 auth-url=https://ci.kbase.us/services/auth
+workspace-url=https://ci.kbase.us/services/ws
+groups-url=https://ci.kbase.us/services/groups
 
 # admins are allowed to use their auth tokens to create global notifications.
 # examples would be notices about KBase downtime or events.
