@@ -14,8 +14,8 @@ from feeds.config import get_config
 
 
 class Notification(BaseActivity):
-    def __init__(self, actor, verb, note_object, source, level='alert', target=None,
-                 context=None, expires=None, external_key=None):
+    def __init__(self, actor: str, verb, note_object: str, source: str, level='alert',
+                 target: list=None, context: dict=None, expires: int=None, external_key: str=None):
         """
         A notification is roughly of this form:
             actor, verb, object, (target)
@@ -83,7 +83,7 @@ class Notification(BaseActivity):
         self.validate_expiration(self.expires, self.created)
         validate_actor(self.actor)
 
-    def validate_expiration(self, expires, created):
+    def validate_expiration(self, expires: int, created: int):
         """
         Validates whether the expiration time is valid and after the created time.
         If yes, returns True. If not, raises an InvalidExpirationError.
@@ -101,13 +101,13 @@ class Notification(BaseActivity):
                 "Notifications should expire sometime after they are created"
             )
 
-    def _default_lifespan(self):
+    def _default_lifespan(self) -> int:
         """
         Returns the default lifespan of this notification in ms.
         """
         return get_config().lifespan * 24 * 60 * 60 * 1000
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """
         Returns a dict form of the Notification.
         Useful for storing in a document store, returns the id of each verb and level.
@@ -128,7 +128,7 @@ class Notification(BaseActivity):
         }
         return dict_form
 
-    def user_view(self):
+    def user_view(self) -> dict:
         """
         Returns a view of the Notification that's intended for the user.
         That means we leave out the target and external keys.
@@ -146,7 +146,7 @@ class Notification(BaseActivity):
         }
         return view
 
-    def serialize(self):
+    def serialize(self) -> str:
         """
         Serializes this notification to a string for caching / simple storage.
         Assumes it's been validated.
@@ -168,7 +168,7 @@ class Notification(BaseActivity):
         return json.dumps(serial, separators=(',', ':'))
 
     @classmethod
-    def deserialize(cls, serial):
+    def deserialize(cls, serial: str):
         """
         Deserializes and returns a new Notification instance.
         """
@@ -200,7 +200,7 @@ class Notification(BaseActivity):
         return deserial
 
     @classmethod
-    def from_dict(cls, serial):
+    def from_dict(cls, serial: dict):
         """
         Returns a new Notification from a serialized dictionary (e.g. used in Mongo)
         """
