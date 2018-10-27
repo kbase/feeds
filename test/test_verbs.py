@@ -86,3 +86,27 @@ def test_get_verb_fail():
 def test_serialize():
     v = verbs.get_verb('invite')
     assert v.serialize() == 1
+
+def test_translate_verb():
+    v = verbs.Request()
+    v_trans = verbs.translate_verb(v)
+    assert isinstance(v_trans, verbs.Request)
+
+    v = verbs.translate_verb(1)
+    assert isinstance(v, verbs.Invite)
+    assert v.infinitive == 'invite'
+
+    v = verbs.translate_verb('1')
+    assert isinstance(v, verbs.Invite)
+    assert v.infinitive == 'invite'
+
+    l = verbs.translate_verb('invite')
+    assert isinstance(l, verbs.Invite)
+
+    with pytest.raises(MissingVerbError) as e:
+        verbs.translate_verb('foo')
+    assert 'Verb "foo" not found' in str(e.value)
+
+    with pytest.raises(TypeError) as e:
+        verbs.translate_verb([])
+    assert 'Must be either a subclass of Verb or a string' in str(e.value)

@@ -1,7 +1,6 @@
 import os
 import configparser
 from .exceptions import ConfigError
-import logging
 
 DEFAULT_CONFIG_PATH = "deploy.cfg"
 ENV_CONFIG_PATH = "FEEDS_CONFIG"
@@ -9,23 +8,25 @@ ENV_CONFIG_BACKUP = "KB_DEPLOYMENT_CONFIG"
 ENV_AUTH_TOKEN = "AUTH_TOKEN"
 
 INI_SECTION = "feeds"
-DB_HOST = "redis-host"
-DB_HOST_PORT = "redis-port"
-DB_USER = "redis-user"
-DB_PW = "redis-pw"
-AUTH_URL = "auth-url"
+
+KEY_DB_HOST = "db-host"
+KEY_DB_PORT = "db-port"
+KEY_DB_USER = "db-user"
+KEY_DB_PW = "db-pw"
+KEY_DB_NAME = "db-name"
+KEY_DB_ENGINE = "db-engine"
+KEY_AUTH_URL = "auth-url"
+KEY_ADMIN_LIST = "admins"
+KEY_GLOBAL_FEED = "global-feed"
+KEY_DEBUG = "debug"
+KEY_LIFESPAN = "lifespan"
+
 
 class FeedsConfig(object):
     """
     Loads a config set from the root deploy.cfg file. This should be in ini format.
 
     Keys of note are:
-
-    redis-host
-    redis-port
-    redis-user
-    redis-pw
-    auth-url
     """
 
     def __init__(self):
@@ -36,16 +37,37 @@ class FeedsConfig(object):
         config_file = self._find_config_path()
         cfg = self._load_config(config_file)
         if not cfg.has_section(INI_SECTION):
-            raise ConfigError("Error parsing config file: section {} not found!".format(INI_SECTION))
-        self.redis_host = self._get_line(cfg, DB_HOST)
-        self.redis_port = self._get_line(cfg, DB_HOST_PORT)
-        self.redis_user = self._get_line(cfg, DB_USER, required=False)
-        self.redis_pw = self._get_line(cfg, DB_PW, required=False)
-        self.auth_url = self._get_line(cfg, AUTH_URL)
+            raise ConfigError(
+                "Error parsing config file: section {} not found!".format(INI_SECTION)
+            )
+        self.db_engine = self._get_line(cfg, KEY_DB_ENGINE)
+        self.db_host = self._get_line(cfg, KEY_DB_HOST)
+        self.db_port = self._get_line(cfg, KEY_DB_PORT)
+        try:
+            self.db_port = int(self.db_port)
+        except ValueError:
+            raise ConfigError("{} must be an int! Got {}".format(KEY_DB_PORT, self.db_port))
+        self.db_user = self._get_line(cfg, KEY_DB_USER, required=False)
+        self.db_pw = self._get_line(cfg, KEY_DB_PW, required=False)
+        self.db_name = self._get_line(cfg, KEY_DB_NAME, required=False)
+        self.global_feed = self._get_line(cfg, KEY_GLOBAL_FEED)
+        self.auth_url = self._get_line(cfg, KEY_AUTH_URL)
+        self.admins = self._get_line(cfg, KEY_ADMIN_LIST).split(",")
+        self.lifespan = self._get_line(cfg, KEY_LIFESPAN)
+        try:
+            self.lifespan = int(self._get_line(cfg, KEY_LIFESPAN))
+        except ValueError:
+            raise ConfigError("{} must be an int! Got {}".format(KEY_LIFESPAN, self.lifespan))
+        self.debug = self._get_line(cfg, KEY_DEBUG, required=False)
+        if not self.debug or self.debug.lower() != "true":
+            self.debug = False
+        else:
+            self.debug = True
 
     def _find_config_path(self):
         """
-        A little helper to test whether a given file path, or one given by an environment variable, exists.
+        A little helper to test whether a given file path, or one given by an
+        environment variable, exists.
         """
         for env in [ENV_CONFIG_PATH, ENV_CONFIG_BACKUP]:
             env_path = os.environ.get(env)
@@ -88,9 +110,11 @@ class FeedsConfig(object):
             raise ConfigError("Required option {} has no value!".format(key))
         return val
 
+
 __config = None
 
-def get_config():
+
+def get_config(from_disk=False):
     global __config
     if not __config:
         __config = FeedsConfig()

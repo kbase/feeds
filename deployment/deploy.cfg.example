@@ -1,0 +1,36 @@
+[feeds]
+# DB info
+# db-engine - allowed values = redis, mongodb. Others will raise an error on startup.
+db-engine=mongodb
+
+# db-name - name of the database to use. default = "feeds".
+db-name=feeds
+
+# Other db info. The usual - host, port, user, and password. You know the drill.
+db-host=localhost
+db-port=6379
+db-user=
+db-pw=
+
+# Service urls
+auth-url=https://ci.kbase.us/services/auth
+workspace-url=https://ci.kbase.us/services/ws
+groups-url=https://ci.kbase.us/services/groups
+
+# admins are allowed to use their auth tokens to create global notifications.
+# examples would be notices about KBase downtime or events.
+admins=wjriehl,scanon,kkeller,mmdrake
+
+# fake user name for the global feed. Should be something that's not a valid
+# user name.
+global-feed=_global_
+
+# Default lifetime for each notification in days. Notes older than this won't be
+# returned without explicitly looking them up by either their id or external key
+# (when given).
+lifespan=30
+
+# In debug mode, auth is effectively ignored.
+# Useful for testing, etc.
+# SET TO FALSE IN PRODUCTION!
+debug=False

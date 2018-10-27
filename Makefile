@@ -1,17 +1,17 @@
 install:
 	pip install -r requirements.txt
 
-build-docs:
+docs:
 	-rm -r docs
 	-rm -r docsource/internal_apis
 	mkdir -p docs
-	sphinx-apidoc --separate -o docsource/internal_apis src
+	sphinx-apidoc --separate -o docsource/internal_apis feeds
 
 test:
-	# flake8 feeds
-	pytest --verbose test --cov feeds
+	flake8 feeds
+	pytest --verbose test --cov --cov-report html feeds -s
 
 start:
-	gunicorn --worker-class gevent --timeout 300 --workers 10 --bind :5000 feeds.server:app
+	gunicorn --worker-class gevent --timeout 300 --workers 17 --bind :5000 feeds.server:app
 
-.PHONY: test
+.PHONY: test docs
