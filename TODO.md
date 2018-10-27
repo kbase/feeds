@@ -22,9 +22,6 @@
 * caching to avoid lookups
 * expire activities after configured time
 
-### Storage
-* prototype with MongoDB adapter
-
 ### Build & Deployment
 * build Dockerfile
 * build DockerCompose file

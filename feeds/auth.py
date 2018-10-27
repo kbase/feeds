@@ -9,7 +9,8 @@ import requests
 import json
 from .exceptions import (
     InvalidTokenError,
-    TokenLookupError
+    TokenLookupError,
+    MissingTokenError
 )
 from .util import epoch_ms
 from cachetools import (
@@ -104,6 +105,13 @@ def validate_user_ids(user_ids):
     __user_cache.update(found_users)
     users.update(found_users)
     return users
+
+
+def get_auth_token(request, required=True):
+    token = request.headers.get('Authorization')
+    if not token and required:
+        raise MissingTokenError()
+    return token
 
 
 def __fetch_token(token):

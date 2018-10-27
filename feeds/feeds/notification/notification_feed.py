@@ -25,8 +25,15 @@ class NotificationFeed(BaseFeed):
         logging.getLogger(__name__).info('Fetching timeline for ' + self.user_id)
         self.timeline = self.timeline_storage.get_timeline()
 
-    def get_notifications(self, count=10):
-        return self.get_activities(count=count)
+    def get_notifications(self, count=10, user_view=False):
+        activities = self.get_activities(count=count)
+        if user_view:
+            ret_list = list()
+            for act in activities:
+                ret_list.append(act.user_view())
+            return ret_list
+        else:
+            return activities
 
     def get_activities(self, count=10):
         """
