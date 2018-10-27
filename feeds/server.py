@@ -4,17 +4,11 @@ from flask import (
     Flask,
     request
 )
-import traceback
 import logging
 from http.client import responses
 from flask.logging import default_handler
 from .util import epoch_ms
 from .config import get_config
-from .auth import (
-    validate_service_token,
-    validate_user_token,
-    get_auth_token
-)
 from .exceptions import (
     MissingTokenError,
     InvalidTokenError,
@@ -23,9 +17,6 @@ from .exceptions import (
     MissingParameterError
 )
 from feeds.api.api_v1 import api_v1
-from feeds.managers.notification_manager import NotificationManager
-from feeds.activity.notification import Notification
-from feeds.feeds.notification.notification_feed import NotificationFeed
 from feeds.logger import (
     log,
     log_error
@@ -57,8 +48,6 @@ def _make_error(error, msg, status_code):
         "time": epoch_ms()
     }
     return (flask.jsonify({'error': err_response}), status_code)
-
-
 
 
 def create_app(test_config=None):

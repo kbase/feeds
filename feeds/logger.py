@@ -1,6 +1,7 @@
 import logging
 import traceback
 
+
 def get_log(name):
     return logging.getLogger(__name__)
 

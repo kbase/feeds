@@ -11,7 +11,9 @@ from feeds.auth import (
     get_auth_token
 )
 from feeds.exceptions import (
-    InvalidTokenError
+    InvalidTokenError,
+    IllegalParameterError,
+    MissingParameterError
 )
 from feeds.config import get_config
 from feeds.logger import log
@@ -109,33 +111,46 @@ def add_notification():
     return (flask.jsonify({'id': new_note.id}), 200)
 
 
-    # # @app.route('/api/V1/notifications/global', methods=['GET'])
-    # # def get_global_notifications():
+@api_v1.route('/notifications/global', methods=['GET'])
+def get_global_notifications():
+    raise NotImplementedError()
 
 
-    @app.route('/api/V1/notification/<note_id>', methods=['GET'])
-    def get_single_notification(note_id):
-        raise NotImplementedError()
+@api_v1.route('/notification/<note_id>', methods=['GET'])
+def get_single_notification(note_id):
+    raise NotImplementedError()
 
-    @app.route('/api/V1/notifications/unsee', methods=['POST'])
-    def mark_notifications_unseen():
-        """
-        Form data should have a list of notification ids to mark as unseen.
-        If any of these do not have the user's id (from the token) on the list,
-        raise an error.
-        Any of these ids that are global, do nothing... for now.
-        """
-        raise NotImplementedError()
 
-    @app.route('/api/V1/notifications/see', methods=['POST'])
-    def mark_notifications_seen():
-        """
-        Form data should have a list of notification ids to mark as unseen.
-        If any of these do not have the user's id (from the token) on the list,
-        raise an error.
-        Any of these ids that are global, do nothing... for now.
-        """
-        raise NotImplementedError()
+@api_v1.route('/notification/unsee/<note_id>', methods=['POST'])
+def mark_one_notification_unseen():
+    """
+    Form data should have a list of notification ids to mark as unseen.
+    If any of these do not have the user's id (from the token) on the list,
+    raise an error.
+    Any of these ids that are global, do nothing... for now.
+    """
+    raise NotImplementedError()
+
+
+@api_v1.route('/notification/unsee', methods=['POST'])
+def mark_notifications_unseen():
+    raise NotImplementedError()
+
+
+@api_v1.route('/notifications/see/<note_id>', methods=['POST'])
+def mark_one_notification_seen():
+    raise NotImplementedError()
+
+
+@api_v1.route('/api/V1/notifications/see', methods=['POST'])
+def mark_notifications_seen():
+    """
+    Form data should have a list of notification ids to mark as unseen.
+    If any of these do not have the user's id (from the token) on the list,
+    raise an error.
+    Any of these ids that are global, do nothing... for now.
+    """
+    raise NotImplementedError()
 
 
 def _get_notification_params(params):
@@ -165,4 +180,3 @@ def _get_notification_params(params):
         ))
     # TODO - add more checks
     return params
-
