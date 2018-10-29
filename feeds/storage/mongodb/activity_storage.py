@@ -29,10 +29,32 @@ class MongoActivityStorage(ActivityStorage):
     def remove_from_storage(self, activity_ids):
         raise NotImplementedError()
 
-    def change_seen_mark(self, act_id: str, user: str, seen: bool):
+    def set_unseen(self, act_ids: List[str], user: str):
         """
-        :param act_id: activity id
-        :user: user id
-        :seen: whether or not it's been seen. Boolean.
+        Setting unseen means adding the user to the list of unseens. But we should only do that for
+        docs that the user can't see anyway, so put that in the query.
         """
-        raise NotImplementedError()
+        coll = get_feeds_collection()
+        coll.update_many({
+            'id': {'$in': act_ids},
+            'users': {'$all': [user]},
+            'unseen': {'$nin': [user]}
+        }, {
+            '$addToSet': {'unseen': user}
+        })
+
+    def set_seen(self, act_ids: List[str], user: str):
+        """
+        Setting seen just means removing the user from the list of unseens.
+        The query should find all docs in the list of act_ids, where the user
+        is in the list of users, AND the list of unseens.
+        The update should remove the user from the list of unseens.
+        """
+        coll = get_feeds_collection()
+        coll.update_many({
+            'id': {'$in': act_ids},
+            'users': {'$all': [user]},
+            'unseen': {'$all': [user]}
+        }, {
+            '$pull': {'unseen': user}
+        })

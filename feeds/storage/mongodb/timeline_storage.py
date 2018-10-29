@@ -5,7 +5,7 @@ from .connection import get_feeds_collection
 
 class MongoTimelineStorage(TimelineStorage):
     def add_to_timeline(self, activity):
-        raise NotImplementedError()
+        raise NotImplemntedError()
 
     def get_timeline(self, count=10, include_seen=False, level=None, verb=None, sort=None):
         """
@@ -18,7 +18,7 @@ class MongoTimelineStorage(TimelineStorage):
         # TODO: input validation
         coll = get_feeds_collection()
         query = {
-            "users": [self.user_id]
+            "users": { "$all": [self.user_id] }
         }
         if not include_seen:
             query['unseen'] = [self.user_id]

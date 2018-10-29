@@ -55,8 +55,13 @@ class NotificationFeed(BaseFeed):
     def mark_activities(self, activity_ids, seen=False):
         """
         Marks the given list of activities as either seen (True) or unseen (False).
+        If the owner of this feed is not on the users list for an activity, nothing is
+        changed for that activity.
         """
-        pass
+        if seen:
+            self.activity_storage.set_seen(activity_ids, self.user_id)
+        else:
+            self.activity_storage.set_unseen(activity_ids, self.user_id)
 
     def add_notification(self, note):
         return self.add_activity(note)
@@ -66,9 +71,3 @@ class NotificationFeed(BaseFeed):
         Adds an activity to this user's feed
         """
         self.activity_storage.add_to_storage(note, [self.user_id])
-
-    def add_activities(self):
-        """
-        Adds several activities to this user's feed.
-        """
-        pass

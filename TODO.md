@@ -4,12 +4,6 @@
 * subclass, or otherwise mark context for each service
     * avoid subclassing, so we don't need to modify feeds whenever a new service is added
 
-### NotificationFeed
-* combine with global feed for maintenance, etc.
-
-### NotificatonManager
-* handle fanouts in a more consistent way
-
 ### TimelineStorage
 * abstract caching
 * filters on
