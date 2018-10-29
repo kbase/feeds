@@ -102,7 +102,9 @@ def add_notification():
         params.get('source'),
         params.get('level'),
         target=params.get('target'),
-        context=params.get('context')
+        context=params.get('context'),
+        expires=params.get('expires'),
+        external_key=params.get('external_key')
     )
     # pass it to the NotificationManager to dole out to its audience feeds.
     manager = NotificationManager()
@@ -111,9 +113,30 @@ def add_notification():
     return (flask.jsonify({'id': new_note.id}), 200)
 
 
+@api_v1.route('/notification/global', methods=['POST'])
+def add_global_notification():
+    user_id = validate_user_token(get_auth_token(request))
+    if user_id not in cfg.admins:
+        raise InvalidTokenError("{} does not have permission to create a global notification!")
+    params = _get_notification_params(json.loads(request.get_data()))
+    new_note = Notification(
+        'kbase',
+        params.get('verb'),
+        params.get('object'),
+        'kbase',
+        params.get('level'),
+        context=params.get('context')
+    )
+    global_feed = NotificationFeed(cfg.global_feed)
+    global_feed.add_notification(new_note)
+    return (flask.jsonify({'id': new_note.id}), 200)
+
+
 @api_v1.route('/notifications/global', methods=['GET'])
 def get_global_notifications():
-    raise NotImplementedError()
+    global_feed = NotificationFeed(cfg.global_feed)
+    global_notes = global_feed.get_notifications(user_view=True)
+    return flask.jsonify(global_notes)
 
 
 @api_v1.route('/notification/<note_id>', methods=['GET'])

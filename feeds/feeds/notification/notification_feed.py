@@ -65,7 +65,7 @@ class NotificationFeed(BaseFeed):
         """
         Adds an activity to this user's feed
         """
-        self.timeline_storage.add_to_timeline(note)
+        self.activity_storage.add_to_storage(note, [self.user_id])
 
     def add_activities(self):
         """
