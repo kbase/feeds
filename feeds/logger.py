@@ -1,4 +1,5 @@
 import logging
+import traceback
 
 
 def get_log(name):
@@ -6,8 +7,14 @@ def get_log(name):
 
 
 def log(name, msg, *args, level=logging.INFO):
-    logging.getLogger(__name__).log(level, msg, *args)
+    get_log(name).log(level, msg, *args)
 
 
 def log_error(name, error):
-    log(name, "Exception: " + str(error) + error, level=logging.ERROR)
+    formatted_error = ''.join(
+        traceback.format_exception(
+            etype=type(error),
+            value=error,
+            tb=error.__traceback__)
+        )
+    log(name, "Exception: " + formatted_error, level=logging.ERROR)
