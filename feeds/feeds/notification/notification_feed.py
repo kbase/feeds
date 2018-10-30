@@ -26,8 +26,12 @@ class NotificationFeed(BaseFeed):
         logging.getLogger(__name__).info('Fetching timeline for ' + self.user_id)
         self.timeline = self.timeline_storage.get_timeline()
 
-    def get_notifications(self, count=10, user_view=False):
-        activities = self.get_activities(count=count)
+    def get_notifications(self, count=10, include_seen=False, level=None, verb=None,
+                          reverse=False, user_view=False):
+        activities = self.get_activities(
+            count=count, include_seen=include_seen, verb=verb,
+            level=level, reverse=reverse, user_view=user_view
+        )
         if user_view:
             ret_list = list()
             for act in activities:
@@ -43,7 +47,8 @@ class NotificationFeed(BaseFeed):
         else:
             return Notification.from_dict(note)
 
-    def get_activities(self, count=10):
+    def get_activities(self, count=10, include_seen=False, level=None, verb=None,
+                       reverse=False, user_view=False):
         """
         Returns a selection of activities.
         :param count: Maximum number of Notifications to return (default 10)
@@ -56,7 +61,10 @@ class NotificationFeed(BaseFeed):
         # 4. Return them.
         if count < 1 or not isinstance(count, int):
             raise ValueError('Count must be an integer > 0')
-        serial_notes = self.timeline_storage.get_timeline(count=count)
+        serial_notes = self.timeline_storage.get_timeline(
+            count=count, include_seen=include_seen,
+            level=level, verb=verb, reverse=reverse
+        )
         note_list = [Notification.from_dict(note) for note in serial_notes]
         return note_list
 
