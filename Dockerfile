@@ -1,4 +1,4 @@
-FROM kbase/kb_python
+FROM kbase/kb_python:python3
 
 ARG BUILD_DATE
 ARG VCS_REF
