@@ -11,7 +11,7 @@ class MongoTimelineStorage(TimelineStorage):
     def add_to_timeline(self, activity):
         raise NotImplementedError()
 
-    def get_timeline(self, count=10, include_seen=False, level=None, verb=None, sort=None):
+    def get_timeline(self, count=10, include_seen=False, level=None, verb=None, reverse=False):
         """
         :param count: int > 0
         :param include_seen: boolean
@@ -30,7 +30,10 @@ class MongoTimelineStorage(TimelineStorage):
             query['level'] = level.id
         if verb is not None:
             query['verb'] = verb.id
-        timeline = coll.find(query).sort("created", pymongo.DESCENDING)
+        order = pymongo.DESCENDING
+        if reverse:
+            order = pymongo.ASCENDING
+        timeline = coll.find(query).sort("created", order)
         serial_notes = [note for note in timeline]
         return serial_notes
 

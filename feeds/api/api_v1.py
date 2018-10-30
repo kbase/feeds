@@ -18,6 +18,8 @@ from feeds.exceptions import (
 )
 from feeds.config import get_config
 from feeds.logger import log
+from feeds.notification_level import translate_level
+from feeds.verbs import translate_verb
 
 cfg = get_config()
 api_v1 = flask.Blueprint('api_v1', __name__)
@@ -44,11 +46,21 @@ def get_notifications():
     2. make user feed object
     3. query user feed for most recent, based on params
     """
-    # dummy code below
     max_notes = request.args.get('n', default=10, type=int)
+
     rev_sort = request.args.get('rev', default=0, type=int)
     rev_sort = False if rev_sort == 0 else True
-    # level_filter = request.args.get('f', default=None, type=str)
+
+    level_filter_input = request.args.get('l', default=None, type=str)
+    level_filter = None
+    if level_filter_input is not None:
+        level_filter = translate_level(level_filter_input)
+
+    verb_filter_input = request.args.get('v', default=None, type=str)
+    verb_filter = None
+    if verb_filter_input is not None:
+        verb_filter = translate_verb(verb_filter_input)
+
     include_seen = request.args.get('seen', default=1, type=int)
     include_seen = False if include_seen == 0 else True
     # return json.dumps({
@@ -60,7 +72,12 @@ def get_notifications():
     user_id = validate_user_token(get_auth_token(request))
     log(__name__, 'Getting feed for {}'.format(user_id))
     feed = NotificationFeed(user_id)
-    user_notes = feed.get_notifications(count=max_notes, user_view=True)
+    user_notes = feed.get_notifications(
+        count=max_notes, include_seen=include_seen, level=level_filter,
+        verb=verb_filter, reverse=rev_sort, user_view=True
+    )
+
+    # fetch the globals
     global_feed = NotificationFeed(cfg.global_feed)
     global_notes = global_feed.get_notifications(count=max_notes, user_view=True)
     return_vals = {
