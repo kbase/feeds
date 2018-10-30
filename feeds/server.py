@@ -14,7 +14,8 @@ from .exceptions import (
     InvalidTokenError,
     TokenLookupError,
     IllegalParameterError,
-    MissingParameterError
+    MissingParameterError,
+    NotificationNotFoundError
 )
 from feeds.api.api_v1 import api_v1
 from feeds.logger import (
@@ -98,6 +99,11 @@ def create_app(test_config=None):
     def handle_missing_token(err):
         _log_error(err)
         return _make_error(err, "Authentication token required", 403)
+
+    @app.errorhandler(NotificationNotFoundError)
+    def handle_missing_notification(err):
+        _log_error(err)
+        return _make_error(err, str(err), 404)
 
     @app.errorhandler(404)
     def not_found(err):

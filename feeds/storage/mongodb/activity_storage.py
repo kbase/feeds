@@ -23,7 +23,7 @@ class MongoActivityStorage(ActivityStorage):
         except PyMongoError as e:
             raise ActivityStorageError("Failed to store activity: " + str(e))
 
-    def get_from_storage(self, activity_ids):
+    def get_from_storage(self, activity_ids, user):
         pass
 
     def remove_from_storage(self, activity_ids):

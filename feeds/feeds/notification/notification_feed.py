@@ -4,6 +4,7 @@ from feeds.storage.mongodb.activity_storage import MongoActivityStorage
 from feeds.storage.mongodb.timeline_storage import MongoTimelineStorage
 from cachetools import TTLCache
 import logging
+from feeds.exceptions import NotificationNotFoundError
 
 
 class NotificationFeed(BaseFeed):
@@ -34,6 +35,13 @@ class NotificationFeed(BaseFeed):
             return ret_list
         else:
             return activities
+
+    def get_notification(self, note_id):
+        note = self.timeline_storage.get_single_activity_from_timeline(note_id)
+        if note is None:
+            raise NotificationNotFoundError("Cannot find notification with id {}.".format(note_id))
+        else:
+            return Notification.from_dict(note)
 
     def get_activities(self, count=10):
         """

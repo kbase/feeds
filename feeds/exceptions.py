@@ -97,3 +97,11 @@ class InvalidNotificationError(Exception):
     Raised when trying to deserialize a Notification that has been stored badly.
     """
     pass
+
+
+class NotificationNotFoundError(Exception):
+    """
+    Raised when trying to retrieve a Notification that either doesn't exist,
+    or isn't in the user's feed.
+    """
+    pass
