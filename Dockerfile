@@ -5,6 +5,7 @@ ARG VCS_REF
 ARG BRANCH=develop
 
 COPY ./ /kb/module
+WORKDIR /kb/module
 
 RUN pip install --upgrade pip setuptools wheel
 RUN while read requirement; do conda install --yes $requirement || pip install $requirement; done < /kb/module/requirements.txt
