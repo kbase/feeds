@@ -30,7 +30,7 @@ function main() {
                 tokenInfo = info.data;
                 tokenForm.renderTokenInfo(tokenInfo);
                 feedPoster.activate(inputToken);
-                myFeed.renderFeed(inputToken);
+                myFeed.initialize(inputToken);
             })
             .catch(err => {
                 console.log('AN ERROR HAPPENED');

@@ -65,7 +65,6 @@ export function getNotifications (options) {
     if (options.includeSeen) {
         params.push('seen=1');
     }
-    let path = '/';
-    // let path = 'api/V1/notifications?' + params.join('&');
+    let path = 'api/V1/notifications?' + params.join('&');
     return makeApiCall('GET', path, options.token);
 };

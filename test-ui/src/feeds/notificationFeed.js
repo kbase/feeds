@@ -1,14 +1,16 @@
 import * as Feeds from '../api/feeds';
+import Notification from './notification';
 
 export default class NotificationFeed {
     constructor() {
         this.token = null;
-        this.notes = {};
+        this.notes = [];
         this.element = document.createElement('div');
     }
 
-    renderFeed(token) {
+    initialize(token) {
         this.token = token;
+        this.removeFeed();
         this.refreshFeed();
     }
 
@@ -20,10 +22,20 @@ export default class NotificationFeed {
         Feeds.getNotifications({token: this.token})
             .then(feed => {
                 console.log(feed);
+                this.renderFeed(feed.data);
             })
             .catch(err => {
                 this.renderError(err);
             });
+    }
+
+    renderFeed(feed) {
+        this.notes = [];
+        feed.user.forEach(note => {
+            let feedElem = document.createElement('div');
+            this.element.appendChild(feedElem);
+            this.notes.push(new Notification(note, feedElem));
+        });
     }
 
     renderError(err) {

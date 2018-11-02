@@ -17,7 +17,7 @@ export default class TokenInput {
         let controlsForm = `
             <form class='form-inline'>
                 <div class='form-group mx-sm-3 mb-2'>
-                    <label for="token-input">Set your CI auth token </label>
+                    <div for="token-input" style="padding-right:10px">Set your CI auth token</div>
                     <input type="password" class="form-control" id="token-input">
                 </div>
                 <button type="submit" class="btn btn-primary mb-2">Submit</button>
@@ -54,5 +54,3 @@ export default class TokenInput {
         this.element.querySelector('#token-response').innerHTML = error;
     }
 }
-
-//6YC7NL232MOYOF67L2TMHXTZYHJC3VBW
