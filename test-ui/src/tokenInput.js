@@ -1,5 +1,5 @@
 const ADMIN_ROLE = 'FEEDS_ADMIN';
-export default class Controls {
+export default class TokenInput {
     constructor(tokenLookupFn) {
         this.element = document.createElement('div');
         this.token = null;
@@ -9,7 +9,6 @@ export default class Controls {
          * customroles: array,
          * display: name
          * user: user name
-         *
          */
         this.render();
     }
@@ -24,7 +23,6 @@ export default class Controls {
                 <button type="submit" class="btn btn-primary mb-2">Submit</button>
             </form>
             <div id='token-response'></div>
-            <div id='feed-input' style='display: none'>input!</div>
         `;
         this.element.innerHTML = controlsForm;
         this.element.querySelector('.btn').onclick = e => {
@@ -34,12 +32,10 @@ export default class Controls {
     }
 
     renderTokenInfo(token) {
-        console.log(token);
         let adminMsg = '';
         if (token.customroles.includes(ADMIN_ROLE)) {
             this.isAdmin = true;
             adminMsg = `<br>You're an admin, and can post global messages.`;
-            this.element.querySelector('#feed-input').style.display = 'inline';
         }
         let message = `
             <div class="alert alert-success">

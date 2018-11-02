@@ -1,8 +1,9 @@
 /**
  * Basic feeds API.
  */
-
-const feedsUrl = "http://ci.kbase.us/services/feeds/"
+import axios from 'axios';
+// const feedsUrl = 'https://ci.kbase.us/services/feeds/';
+const feedsUrl = 'http://localhost:5000/';
 
 /**
  *
@@ -21,6 +22,7 @@ function makeApiCall (method, path, token, data) {
         throw new Error('Method ' + method + ' not usable');
     }
     let request = {
+        url: feedsUrl + path,
         method: method,
         cache: 'no-cache',
         headers: {
@@ -28,13 +30,13 @@ function makeApiCall (method, path, token, data) {
             'Authorization': token
         },
         redirect: 'follow',
-        referrer: 'no-referrer'
+        referrer: 'no-referrer',
+        maxRedirects: 5
     }
     if (data) {
-        request.body = JSON.stringify(data);
+        request.data = data;
     }
-    return fetch(feedsUrl + path, request)
-        .then(response => response.json());
+    return axios(request);
 }
 
 /**
@@ -63,6 +65,7 @@ export function getNotifications (options) {
     if (options.includeSeen) {
         params.push('seen=1');
     }
-    let path = 'notifications?' + params.join('&');
+    let path = '/';
+    // let path = 'api/V1/notifications?' + params.join('&');
     return makeApiCall('GET', path, options.token);
 };

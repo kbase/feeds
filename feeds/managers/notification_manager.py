@@ -11,10 +11,10 @@ from .base import BaseManager
 from ..activity.notification import Notification
 from ..storage.mongodb.activity_storage import MongoActivityStorage
 from feeds.config import get_config
-from fanout_modules.groups import GroupsFanout
-from fanout_modules.workspace import WorkspaceFanout
-from fanout_modules.jobs import JobsFanout
-from fanout_modules.kbase import KBaseFanout
+from .fanout_modules.groups import GroupsFanout
+from .fanout_modules.workspace import WorkspaceFanout
+from .fanout_modules.jobs import JobsFanout
+from .fanout_modules.kbase import KBaseFanout
 
 
 class NotificationManager(BaseManager):

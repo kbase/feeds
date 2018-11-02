@@ -30,7 +30,7 @@ function makeApiCall (method, path, token, data) {
         crossDomain: true
     }
     if (data) {
-        request.body = JSON.stringify(data);
+        request.data = data;
     }
     return axios(request);
 }

@@ -1,14 +1,14 @@
 import Header from './header';
-import Controls from './controls';
+import TokenInput from './tokenInput';
+import FeedPoster from './feeds/poster';
 import NotificationFeed from './feeds/notificationFeed';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './css/feeds.css';
-import * as Feeds from './api/feeds';
-import { getTokenInfo, getMyInfo } from './api/auth';
+import { getMyInfo } from './api/auth';
 
 function main() {
-    let token = null;
+    let tokenInfo = null;
     let header = new Header();
     document.body.appendChild(header.element);
 
@@ -16,23 +16,27 @@ function main() {
     mainElement.classList.add('feeds-main');
     document.body.appendChild(mainElement);
 
-    let controls = new Controls(handleTokenLookup);
+    let tokenForm = new TokenInput(handleTokenLookup);
+    let feedPoster = new FeedPoster();
     let myFeed = new NotificationFeed();
 
-    mainElement.appendChild(controls.element);
+    mainElement.appendChild(tokenForm.element);
+    mainElement.appendChild(feedPoster.element);
     mainElement.appendChild(myFeed.element);
 
     function handleTokenLookup(inputToken) {
         getMyInfo(inputToken)
             .then(info => {
-                token = info.data;
-                controls.renderTokenInfo(token);
-                myFeed.renderFeed(token);
+                tokenInfo = info.data;
+                tokenForm.renderTokenInfo(tokenInfo);
+                feedPoster.activate(inputToken);
+                myFeed.renderFeed(inputToken);
             })
             .catch(err => {
                 console.log('AN ERROR HAPPENED');
                 console.error(err);
-                controls.renderTokenError();
+                tokenForm.renderTokenError();
+                feedPoster.deactivate();
                 myFeed.removeFeed();
             });
     }
