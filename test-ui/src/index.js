@@ -4,6 +4,7 @@ import FeedPoster from './feeds/poster';
 import NotificationFeed from './feeds/notificationFeed';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import '@fortawesome/fontawesome-free/js/all';
 import './css/feeds.css';
 import { getMyInfo } from './api/auth';
 
@@ -27,10 +28,11 @@ function main() {
     function handleTokenLookup(inputToken) {
         getMyInfo(inputToken)
             .then(info => {
+                console.log(info);
                 tokenInfo = info.data;
                 tokenForm.renderTokenInfo(tokenInfo);
                 feedPoster.activate(inputToken);
-                myFeed.initialize(inputToken);
+                myFeed.initialize(tokenInfo.display, inputToken);
             })
             .catch(err => {
                 console.log('AN ERROR HAPPENED');

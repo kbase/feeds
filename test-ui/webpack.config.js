@@ -28,6 +28,17 @@ module.exports = {
             {
                 test: /\.css$/,
                 use: ['style-loader', 'css-loader']
+            },
+            {
+                test: /\.woff2?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+                use: 'url-loader?limit=10000'
+            },
+            {
+                test: /font-awesome\.config\.js/,
+                use: [
+                    { loader: 'style-loader' },
+                    { loader: 'font-awesome-loader' }
+                ]
             }
         ]
     },

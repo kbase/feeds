@@ -38,3 +38,7 @@
 ### Docs
 * Do so, in general
 * annotate deploy.cfg.example
+
+### Context
+* Make some reserved keys for the context
+* "link" and "text" to start with
