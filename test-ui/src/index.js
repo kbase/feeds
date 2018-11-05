@@ -1,6 +1,7 @@
 import Header from './header';
 import TokenInput from './tokenInput';
-import FeedPoster from './feeds/poster';
+import GlobalFeedPoster from './feeds/globalPoster';
+import TargetedFeedPoster from './feeds/targetedPoster';
 import NotificationFeed from './feeds/notificationFeed';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -18,13 +19,17 @@ function main() {
     document.body.appendChild(mainElement);
 
     let tokenForm = new TokenInput(handleTokenLookup);
-    let feedPoster = new FeedPoster(() => {
+    let globalPoster = new GlobalFeedPoster(() => {
+        myFeed.refreshFeed();
+    });
+    let targetedPoster = new TargetedFeedPoster(() => {
         myFeed.refreshFeed();
     });
     let myFeed = new NotificationFeed();
 
     mainElement.appendChild(tokenForm.element);
-    mainElement.appendChild(feedPoster.element);
+    mainElement.appendChild(globalPoster.element);
+    mainElement.appendChild(targetedPoster.element);
     mainElement.appendChild(myFeed.element);
 
     function handleTokenLookup(inputToken) {
@@ -33,14 +38,16 @@ function main() {
                 console.log(info);
                 tokenInfo = info.data;
                 tokenForm.renderTokenInfo(tokenInfo);
-                feedPoster.activate(inputToken);
+                globalPoster.activate(inputToken);
+                targetedPoster.activate(inputToken);
                 myFeed.initialize(tokenInfo.display, inputToken);
             })
             .catch(err => {
                 console.log('AN ERROR HAPPENED');
                 console.error(err);
                 tokenForm.renderTokenError();
-                feedPoster.deactivate();
+                globalPoster.deactivate();
+                targetedPoster.deactivate();
                 myFeed.removeFeed();
             });
     }
