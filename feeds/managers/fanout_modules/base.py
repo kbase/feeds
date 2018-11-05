@@ -13,4 +13,8 @@ class FanoutModule(object):
 
     @abstractmethod
     def get_target_users(self):
+        """
+        This should always return a list, even an empty one.
+        Ideally, it'll be a list of users that should see the notification.
+        """
         pass

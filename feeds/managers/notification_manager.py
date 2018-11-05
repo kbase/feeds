@@ -43,7 +43,7 @@ class NotificationManager(BaseManager):
         TODO: add adapters, maybe subclass notifications to handle each source?
         """
         fanout = None
-        if note.source == 'ws':
+        if note.source == 'ws' or note.source == 'workspace':
             fanout = WorkspaceFanout(note)
         elif note.source == 'groups':
             fanout = GroupsFanout(note)
@@ -60,4 +60,4 @@ class NotificationManager(BaseManager):
                 user_list = user_list + note.target
             elif note.source == 'kbase':
                 user_list.append(get_config().global_feed)
-            return user_list
+        return user_list
