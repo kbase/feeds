@@ -1,12 +1,12 @@
 export default class FeedPoster {
-    constructor() {
+    constructor(afterSubmitFn) {
         this.token = null;
         this.element = document.createElement('div');
         this.element.style.display = 'none';
         this.element.classList.add(['card']);
         const verbs = ['invite', 'accept', 'reject', 'share', 'unshare', 'join', 'leave', 'request', 'update'];
         const levels = ['alert', 'warning', 'error', 'request'];
-        const contextKeys = ['link', 'text'];
+        this.afterSubmitFn = afterSubmitFn;
 
         this.element.innerHTML = `
             <div class='card-header'>
@@ -47,6 +47,14 @@ export default class FeedPoster {
                 </div>
                 <button type="submit" class="btn btn-primary mb-2">Submit</button>
             </div>`;
+        this.bindEvents();
+    }
+
+    bindEvents() {
+        this.element.querySelector('.btn').onclick = () => {
+            let verb = this.element.querySelector('#verb-select').value;
+            let object = this.element.querySelector('#object-input').value;
+        }
     }
 
     activate(token) {

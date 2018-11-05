@@ -42,3 +42,10 @@
 ### Context
 * Make some reserved keys for the context
 * "link" and "text" to start with
+
+### UI
+* bind submit new global note event
+* add refresh to feeds (auto refresh on new global event)
+* add optional service-spoof event
+* better styles for notification rows
+* add link out where appropriate
