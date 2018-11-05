@@ -46,7 +46,7 @@ export default class NotificationFeed {
     }
 
     refreshFeed() {
-        Feeds.getNotifications({token: this.token})
+        Feeds.getNotifications({}, this.token)
             .then(feed => {
                 console.log(feed);
                 this.renderFeed(feed.data);
@@ -57,6 +57,7 @@ export default class NotificationFeed {
     }
 
     renderFeed(feed) {
+        this.removeFeed();
         this.notes = [];
         let globalBody = this.globalCard.querySelector('.card-body');
         let globalFeed = document.createElement('div');

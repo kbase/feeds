@@ -18,7 +18,9 @@ function main() {
     document.body.appendChild(mainElement);
 
     let tokenForm = new TokenInput(handleTokenLookup);
-    let feedPoster = new FeedPoster();
+    let feedPoster = new FeedPoster(() => {
+        myFeed.refreshFeed();
+    });
     let myFeed = new NotificationFeed();
 
     mainElement.appendChild(tokenForm.element);

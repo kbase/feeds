@@ -1,3 +1,5 @@
+import * as Feeds from '../api/feeds';
+
 export default class FeedPoster {
     constructor(afterSubmitFn) {
         this.token = null;
@@ -25,7 +27,7 @@ export default class FeedPoster {
                     <small class="form-text text-muted"></small>
                 </div>
                 <div class='form-group mx-sm-3 mb-2'>
-                    <label for="level-input"><b>Level</b> - this sets the "importance" of a notification, useful for filtering</label>
+                    <label for="level-select"><b>Level</b> - this sets the "importance" of a notification, useful for filtering</label>
                     <select class="form-control custom-select" id="level-select">
                         ${levels.map(level => `<option value="${level}">${level}</option>`)}
                     </select>
@@ -52,8 +54,21 @@ export default class FeedPoster {
 
     bindEvents() {
         this.element.querySelector('.btn').onclick = () => {
-            let verb = this.element.querySelector('#verb-select').value;
-            let object = this.element.querySelector('#object-input').value;
+            let verb = this.element.querySelector('#verb-select').value,
+                object = this.element.querySelector('#object-input').value,
+                level = this.element.querySelector('#level-select').value,
+                contextText = this.element.querySelector('#context-text').value,
+                contextLink = this.element.querySelector('#context-link').value;
+            Feeds.postGlobalNotification({
+                verb: verb,
+                object: object,
+                level: level,
+                context: {
+                    text: contextText,
+                    link: contextLink
+                }
+            }, this.token)
+                .then(this.afterSubmitFn);
         }
     }
 

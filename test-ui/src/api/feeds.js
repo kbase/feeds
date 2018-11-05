@@ -48,8 +48,8 @@ function makeApiCall (method, path, token, data) {
  *  - includeSeen - boolean
  *  - token - string, auth token
  */
-export function getNotifications (options) {
-    if (!options.token) {
+export function getNotifications (options, token) {
+    if (!token) {
         throw new Error('Auth token required');
     }
     let params = [];
@@ -66,5 +66,24 @@ export function getNotifications (options) {
         params.push('seen=1');
     }
     let path = 'api/V1/notifications?' + params.join('&');
-    return makeApiCall('GET', path, options.token);
+    return makeApiCall('GET', path, token);
 };
+
+/**
+ *
+ * @param {object} data
+ * - verb
+ * - object
+ * - level
+ * - context (keys text, link)
+ * - token
+ */
+export function postNotification (data, token) {
+    let path = 'api/V1/notification';
+    return makeApiCall('POST', path, token, data);
+}
+
+export function postGlobalNotification (data, token) {
+    let path = 'api/V1/notification/global';
+    return makeApiCall('POST', path, token, data);
+}

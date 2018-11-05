@@ -1,3 +1,5 @@
+import * as Feeds from '../api/feeds';
+
 export default class Notification {
     /**
      *
@@ -7,7 +9,7 @@ export default class Notification {
     constructor(note) {
         this.note = note;
         this.element = document.createElement('div');
-        this.element.classList.add('row');
+        this.element.classList.add('row', 'alert');
         this.render();
     }
 
@@ -18,11 +20,31 @@ export default class Notification {
         }
         this.element.innerHTML = `
             <div class="col-1">${this.renderLevel()}</div>
-            <div class="col-1">${this.renderSeen()}</div>
-            <div class="col-2">${this.renderCreated()}</div>
-            <div class="col-1">${this.renderSource()}</div>
-            <div class="col-7">${this.renderMessage()}</div>
+            <div class="col-10">${this.renderBody()}</div>
+            <div class="col-1">${this.renderControl()}</div>
         `;
+
+        // this.element.innerHTML = `
+        //     <div class="col-1">${this.renderLevel()}</div>
+        //     <div class="col-1">${this.renderSeen()}</div>
+        //     <div class="col-2">${this.renderCreated()}</div>
+        //     <div class="col-1">${this.renderSource()}</div>
+        //     <div class="col-7">${this.renderMessage()}</div>
+        // `;
+    }
+
+    renderBody() {
+        let text = `
+            <div>${this.renderMessage()}</div>
+        `;
+        let infoStamp = `
+            <small>${this.renderCreated()} - ${this.note.source}</small>
+        `;
+        return text + infoStamp;
+    }
+
+    renderControl() {
+        return '<span><i class="far fa-eye"></i></span>'
     }
 
     renderLevel() {
@@ -30,18 +52,22 @@ export default class Notification {
         switch(this.note.level) {
             case 'error':
                 icon = 'fas fa-ban';
+                this.element.classList.add('alert-error');
                 break;
             case 'request':
                 icon = 'fas fa-question-circle';
+                this.element.classList.add('alert-success');
                 break;
             case 'warning':
                 icon = 'fas fa-exclamation-triangle';
+                this.element.classList.add('alert-warning');
                 break;
             case 'alert':
             default:
                 icon = 'fas fa-info';
+                this.element.classList.add('alert-primary');
         }
-        return `<span><i class="${icon}"></i></span>`;
+        return `<span style="font-size: 2em;"><i class="${icon}"></i></span>`;
     }
 
     renderSeen() {
@@ -53,7 +79,7 @@ export default class Notification {
 
     renderCreated() {
         let date = new Date(this.note.created);
-        return date.toLocaleDateString() + '<br>' + date.toLocaleTimeString();
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
     }
 
     renderSource() {
@@ -67,5 +93,9 @@ export default class Notification {
         else {
             return this.note.actor + ' ' + this.note.verb + ' ' + this.note.object;
         }
+    }
+
+    bindEvents() {
+
     }
 }

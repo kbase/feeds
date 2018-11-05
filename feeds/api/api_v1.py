@@ -114,6 +114,7 @@ def add_notification():
         service = validate_service_token(get_auth_token(request))  # can also be an admin user
         if not service:
             raise InvalidTokenError("Token must come from a service, not a user!")
+    log(__name__, request.get_data())
     params = _get_notification_params(json.loads(request.get_data()))
     # create a Notification from params.
     new_note = Notification(
@@ -140,7 +141,8 @@ def add_global_notification():
     user_id = validate_user_token(get_auth_token(request))
     if user_id not in cfg.admins:
         raise InvalidTokenError("{} does not have permission to create a global notification!")
-    params = _get_notification_params(json.loads(request.get_data()))
+
+    params = _get_notification_params(json.loads(request.get_data()), is_global=True)
     new_note = Notification(
         'kbase',
         params.get('verb'),
@@ -214,7 +216,7 @@ def mark_notifications_seen():
     raise NotImplementedError()
 
 
-def _get_notification_params(params):
+def _get_notification_params(params, is_global=False):
     """
     Parses and verifies all the notification params are present.
     Raises a MissingParameter error otherwise.
@@ -230,7 +232,9 @@ def _get_notification_params(params):
 
     if not isinstance(params, dict):
         raise IllegalParameterError('Expected a JSON object as an input.')
-    required_list = ['actor', 'verb', 'target', 'object', 'level']
+    required_list = ['verb', 'object', 'level']
+    if not is_global:
+        required_list = required_list + ['actor', 'target']
     missing = [r for r in required_list if r not in params]
     if missing:
         raise MissingParameterError("Missing parameter{} - {}".format(
