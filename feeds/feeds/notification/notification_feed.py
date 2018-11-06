@@ -65,7 +65,13 @@ class NotificationFeed(BaseFeed):
             count=count, include_seen=include_seen,
             level=level, verb=verb, reverse=reverse
         )
-        note_list = [Notification.from_dict(note) for note in serial_notes]
+        note_list = list()
+        for note in serial_notes:
+            if self.user_id not in note["unseen"]:
+                note['seen'] = True
+            else:
+                note['seen'] = False
+            note_list.append(Notification.from_dict(note))
         return note_list
 
     def mark_activities(self, activity_ids, seen=False):

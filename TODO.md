@@ -6,25 +6,22 @@
 
 ### TimelineStorage
 * abstract caching
-* filters on
-    * seen
-    * service
-    * level
-* add remove notification
 
 ### ActivityStorage
 * caching to avoid lookups
 * expire activities after configured time
 
 ### Build & Deployment
-* build Dockerfile
-* build DockerCompose file
-* Dockerize
 * Sphinx docs
 * make service token and encrypt
 
 ### Server
-* add params to GET notifications endpoint
+* TESTS TESTS TESTS
+* Mark seen / unseen
+* options for admin usage
+* Change from using configured admins -> auth roles
+* Option to translate from document -> understandable text
+* Option for free text when creating notification
 
 ### Test Interface
 * make one.
@@ -42,3 +39,13 @@
 * Do so, in general
 * annotate deploy.cfg.example
 
+### Context
+* Make some reserved keys for the context
+* "link" and "text" to start with
+
+### UI
+* bind submit new global note event
+* add refresh to feeds (auto refresh on new global event)
+* add optional service-spoof event
+* better styles for notification rows
+* add link out where appropriate

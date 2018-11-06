@@ -15,7 +15,8 @@ from feeds.config import get_config
 
 class Notification(BaseActivity):
     def __init__(self, actor: str, verb, note_object: str, source: str, level='alert',
-                 target: list=None, context: dict=None, expires: int=None, external_key: str=None):
+                 target: list=None, context: dict=None, expires: int=None, external_key: str=None,
+                 seen: bool=False):
         """
         A notification is roughly of this form:
             actor, verb, object, (target)
@@ -44,6 +45,8 @@ class Notification(BaseActivity):
         :param expires: if not None, set a new expiration date - should be an int, ms since epoch
         :param external_key: an optional special key given by the service that created the
             notification
+        :param seen: if True, then this Notification has been seen before. This will be context-dependent,
+            based on who is requesting this Notification.
 
         TODO:
             * decide on global ids for admin use
@@ -74,6 +77,7 @@ class Notification(BaseActivity):
         self.validate_expiration(expires, self.created)
         self.expires = expires
         self.external_key = external_key
+        self.seen = seen
 
     def validate(self):
         """
@@ -112,6 +116,7 @@ class Notification(BaseActivity):
         Returns a dict form of the Notification.
         Useful for storing in a document store, returns the id of each verb and level.
         Less useful, but not terrible, for returning to a user.
+        Seen is a transient state and isn't included.
         """
         dict_form = {
             "id": self.id,
@@ -142,7 +147,8 @@ class Notification(BaseActivity):
             "context": self.context,
             "level": self.level.name,
             "created": self.created,
-            "expires": self.expires
+            "expires": self.expires,
+            "seen": self.seen
         }
         return view
 
@@ -222,7 +228,8 @@ class Notification(BaseActivity):
             level=str(serial['level']),
             target=serial.get('target'),
             context=serial.get('context'),
-            external_key=serial.get('external_key')
+            external_key=serial.get('external_key'),
+            seen=serial.get('seen', False)
         )
         deserial.created = serial['created']
         deserial.expires = serial['expires']

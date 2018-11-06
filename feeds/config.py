@@ -15,12 +15,14 @@ KEY_DB_USER = "db-user"
 KEY_DB_PW = "db-pw"
 KEY_DB_NAME = "db-name"
 KEY_DB_ENGINE = "db-engine"
-KEY_AUTH_URL = "auth-url"
 KEY_ADMIN_LIST = "admins"
 KEY_GLOBAL_FEED = "global-feed"
 KEY_DEBUG = "debug"
 KEY_LIFESPAN = "lifespan"
-
+KEY_AUTH_URL = "auth-url"
+KEY_NJS_URL = "njs-url"
+KEY_GROUPS_URL = "groups-url"
+KEY_WS_URL = "workspace-url"
 
 class FeedsConfig(object):
     """
@@ -51,7 +53,6 @@ class FeedsConfig(object):
         self.db_pw = self._get_line(cfg, KEY_DB_PW, required=False)
         self.db_name = self._get_line(cfg, KEY_DB_NAME, required=False)
         self.global_feed = self._get_line(cfg, KEY_GLOBAL_FEED)
-        self.auth_url = self._get_line(cfg, KEY_AUTH_URL)
         self.admins = self._get_line(cfg, KEY_ADMIN_LIST).split(",")
         self.lifespan = self._get_line(cfg, KEY_LIFESPAN)
         try:
@@ -63,6 +64,10 @@ class FeedsConfig(object):
             self.debug = False
         else:
             self.debug = True
+        self.auth_url = self._get_line(cfg, KEY_AUTH_URL)
+        self.njs_url = self._get_line(cfg, KEY_NJS_URL)
+        self.ws_url = self._get_line(cfg, KEY_WS_URL)
+        self.groups_url = self._get_line(cfg, KEY_GROUPS_URL)
 
     def _find_config_path(self):
         """
