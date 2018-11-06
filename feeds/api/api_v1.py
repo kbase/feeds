@@ -180,40 +180,77 @@ def get_single_notification(note_id):
     return (flask.jsonify({'notification': note.user_view()}), 200)
 
 
-@api_v1.route('/notification/unsee/<note_id>', methods=['POST'])
+@api_v1.route('/notifications/unsee', methods=['POST'])
 @cross_origin()
-def mark_one_notification_unseen():
+def mark_notifications_unseen():
     """
     Form data should have a list of notification ids to mark as unseen.
     If any of these do not have the user's id (from the token) on the list,
     raise an error.
     Any of these ids that are global, do nothing... for now.
     """
-    raise NotImplementedError()
+
+    user_id = validate_user_token(get_auth_token(request))
+
+    params = _get_mark_notification_params(json.loads(request.get_data()))
+    note_ids = params.get('note_ids')
+
+    feed = NotificationFeed(user_id)
+    unauthorized_notes = list()
+    for note_id in note_ids:
+        try:
+            feed.get_notification(note_id)
+        except NotificationNotFoundError:
+            unauthorized_notes.append(note_id)
+
+    unseen_notes = list(set(note_ids) - set(unauthorized_notes))
+    feed.mark_activities(unseen_notes, seen=False)
+
+    return (flask.jsonify({'unseen_notes': unseen_notes,
+                           'unauthorized_notes': unauthorized_notes}), 200)
 
 
-@api_v1.route('/notification/unsee', methods=['POST'])
-@cross_origin()
-def mark_notifications_unseen():
-    raise NotImplementedError()
-
-
-@api_v1.route('/notifications/see/<note_id>', methods=['POST'])
-@cross_origin()
-def mark_one_notification_seen():
-    raise NotImplementedError()
-
-
-@api_v1.route('/api/V1/notifications/see', methods=['POST'])
+@api_v1.route('/notifications/see', methods=['POST'])
 @cross_origin()
 def mark_notifications_seen():
     """
-    Form data should have a list of notification ids to mark as unseen.
+    Form data should have a list of notification ids to mark as seen.
     If any of these do not have the user's id (from the token) on the list,
     raise an error.
     Any of these ids that are global, do nothing... for now.
     """
-    raise NotImplementedError()
+
+    user_id = validate_user_token(get_auth_token(request))
+
+    params = _get_mark_notification_params(json.loads(request.get_data()))
+    note_ids = params.get('note_ids')
+
+    feed = NotificationFeed(user_id)
+    unauthorized_notes = list()
+    for note_id in note_ids:
+        try:
+            feed.get_notification(note_id)
+        except NotificationNotFoundError:
+            unauthorized_notes.append(note_id)
+
+    seen_notes = list(set(note_ids) - set(unauthorized_notes))
+    feed.mark_activities(seen_notes, seen=True)
+
+    return (flask.jsonify({'seen_notes': seen_notes,
+                           'unauthorized_notes': unauthorized_notes}), 200)
+
+
+def _get_mark_notification_params(params):
+    if not isinstance(params, dict):
+        raise IllegalParameterError('Expected a JSON object as an input.')
+
+    if 'note_ids' not in params:
+        raise MissingParameterError("Missing parameter note_ids")
+
+    if not isinstance(params.get('note_ids'), list):
+        raise IllegalParameterError('Expected a List object as note_ids.')
+
+    return params
 
 
 def _get_notification_params(params, is_global=False):
