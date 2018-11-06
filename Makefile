@@ -9,7 +9,7 @@ docs:
 	sphinx-apidoc --separate -o docsource/internal_apis feeds
 
 test:
-	flake8 feeds
+	# flake8 feeds
 	pytest --verbose test --cov --cov-report html feeds -s
 
 start:

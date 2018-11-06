@@ -1,5 +1,6 @@
 import flask
 from flask import request
+from flask_cors import cross_origin
 import json
 
 from feeds.activity.notification import Notification
@@ -38,6 +39,7 @@ def root():
 
 
 @api_v1.route('/notifications', methods=['GET'])
+@cross_origin()
 def get_notifications():
     # TODO: add filtering
     """
@@ -88,6 +90,7 @@ def get_notifications():
 
 
 @api_v1.route('/notification', methods=['POST'])
+@cross_origin()
 def add_notification():
     """
     Adds a new notification for other users to see.
@@ -111,6 +114,7 @@ def add_notification():
         service = validate_service_token(get_auth_token(request))  # can also be an admin user
         if not service:
             raise InvalidTokenError("Token must come from a service, not a user!")
+    log(__name__, request.get_data())
     params = _get_notification_params(json.loads(request.get_data()))
     # create a Notification from params.
     new_note = Notification(
@@ -132,11 +136,13 @@ def add_notification():
 
 
 @api_v1.route('/notification/global', methods=['POST'])
+@cross_origin()
 def add_global_notification():
     user_id = validate_user_token(get_auth_token(request))
     if user_id not in cfg.admins:
         raise InvalidTokenError("{} does not have permission to create a global notification!")
-    params = _get_notification_params(json.loads(request.get_data()))
+
+    params = _get_notification_params(json.loads(request.get_data()), is_global=True)
     new_note = Notification(
         'kbase',
         params.get('verb'),
@@ -151,6 +157,7 @@ def add_global_notification():
 
 
 @api_v1.route('/notifications/global', methods=['GET'])
+@cross_origin()
 def get_global_notifications():
     global_feed = NotificationFeed(cfg.global_feed)
     global_notes = global_feed.get_notifications(user_view=True)
@@ -158,6 +165,7 @@ def get_global_notifications():
 
 
 @api_v1.route('/notification/<note_id>', methods=['GET'])
+@cross_origin()
 def get_single_notification(note_id):
     """
     Should only return the note with that id if it's in the user's feed.
@@ -173,6 +181,7 @@ def get_single_notification(note_id):
 
 
 @api_v1.route('/notification/unsee/<note_id>', methods=['POST'])
+@cross_origin()
 def mark_one_notification_unseen():
     """
     Form data should have a list of notification ids to mark as unseen.
@@ -184,16 +193,19 @@ def mark_one_notification_unseen():
 
 
 @api_v1.route('/notification/unsee', methods=['POST'])
+@cross_origin()
 def mark_notifications_unseen():
     raise NotImplementedError()
 
 
 @api_v1.route('/notifications/see/<note_id>', methods=['POST'])
+@cross_origin()
 def mark_one_notification_seen():
     raise NotImplementedError()
 
 
 @api_v1.route('/api/V1/notifications/see', methods=['POST'])
+@cross_origin()
 def mark_notifications_seen():
     """
     Form data should have a list of notification ids to mark as unseen.
@@ -204,7 +216,7 @@ def mark_notifications_seen():
     raise NotImplementedError()
 
 
-def _get_notification_params(params):
+def _get_notification_params(params, is_global=False):
     """
     Parses and verifies all the notification params are present.
     Raises a MissingParameter error otherwise.
@@ -220,7 +232,9 @@ def _get_notification_params(params):
 
     if not isinstance(params, dict):
         raise IllegalParameterError('Expected a JSON object as an input.')
-    required_list = ['actor', 'verb', 'target', 'object', 'level']
+    required_list = ['verb', 'object', 'level']
+    if not is_global:
+        required_list = required_list + ['actor', 'target']
     missing = [r for r in required_list if r not in params]
     if missing:
         raise MissingParameterError("Missing parameter{} - {}".format(

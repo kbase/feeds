@@ -18,7 +18,6 @@ class MongoTimelineStorage(TimelineStorage):
         :param level: Level or None
         :param verb: Verb or None
         """
-        # TODO: add filtering
         # TODO: input validation
         coll = get_feeds_collection()
         query = {

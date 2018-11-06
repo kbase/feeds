@@ -1,5 +1,9 @@
 import json
 import flask
+from flask_cors import (
+    CORS,
+    cross_origin
+)
 from flask import (
     Flask,
     request
@@ -57,6 +61,7 @@ def create_app(test_config=None):
 
     app = Flask(__name__, instance_relative_config=True)
     app.config['DEBUG'] = cfg.debug
+    app.config['CORS_HEADERS'] = 'Content-Type'
     app.url_map.strict_slashes = False
     app.register_blueprint(api_v1, url_prefix='/api/V1')
 
@@ -77,6 +82,7 @@ def create_app(test_config=None):
         return response
 
     @app.route('/', methods=['GET'])
+    @cross_origin()
     def root():
         return flask.jsonify({
             "service": "Notification Feeds Service",
