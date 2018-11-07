@@ -15,7 +15,6 @@ KEY_DB_USER = "db-user"
 KEY_DB_PW = "db-pw"
 KEY_DB_NAME = "db-name"
 KEY_DB_ENGINE = "db-engine"
-KEY_ADMIN_LIST = "admins"
 KEY_GLOBAL_FEED = "global-feed"
 KEY_DEBUG = "debug"
 KEY_LIFESPAN = "lifespan"
@@ -53,7 +52,6 @@ class FeedsConfig(object):
         self.db_pw = self._get_line(cfg, KEY_DB_PW, required=False)
         self.db_name = self._get_line(cfg, KEY_DB_NAME, required=False)
         self.global_feed = self._get_line(cfg, KEY_GLOBAL_FEED)
-        self.admins = self._get_line(cfg, KEY_ADMIN_LIST).split(",")
         self.lifespan = self._get_line(cfg, KEY_LIFESPAN)
         try:
             self.lifespan = int(self._get_line(cfg, KEY_LIFESPAN))

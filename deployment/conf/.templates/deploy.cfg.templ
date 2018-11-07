@@ -14,7 +14,7 @@ db-pw = {{ default .Env.db_pw "fake_password" }}
 
 # admins are allowed to use their auth tokens to create global notifications.
 # examples would be notices about KBase downtime or events.
-admins = {{ default .Env.admins "wjriehl,scanon,kkeller,drakemm" }}
+# admins are assigned 'FEEDS_ADMIN' customroles in Auth
 
 # fake user name for the global feed. Should be something that's not a valid
 # user name.
