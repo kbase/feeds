@@ -16,7 +16,7 @@ export default class Feed {
         `;
         this.ctrlState = {
             includeSeen: false,
-            reverseSort: true,
+            reverseSort: false,
             level: null,
             verb: null,
             source: null
@@ -94,7 +94,7 @@ export default class Feed {
             filterHtml = `
                 <div class="input-group input-group-sm float-right" style="max-width: 350px">
                     <button class="btn btn-outline-secondary" type="button" id="seen-btn">
-                        <i class="far fa-eye"></i>
+                        <i class="far fa-eye-slash"></i>
                     </button>
                     <button class="btn btn-outline-secondary" type="button" id="sort-btn">
                         <i class="fa fa-sort-numeric-up"></i>

@@ -4,7 +4,6 @@ let webpack = require('webpack');
 module.exports = {
     mode: 'none',
     entry: [
-        'font-awesome-loader!./font-awesome.config.js',
         './src/index.js'
     ],
     output: {
