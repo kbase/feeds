@@ -12,8 +12,8 @@ export default class FeedController {
         this.header.innerText = "Notification Feed";
         this.header.style.paddingTop = '20px';
 
-        this.globalFeed = new Feed('Global');
-        this.userFeed = new Feed();
+        this.globalFeed = new Feed('Global', this.refreshFeed.bind(this));
+        this.userFeed = new Feed('User', this.refreshFeed.bind(this));
 
         this.element.appendChild(this.header);
         this.element.appendChild(this.globalFeed.element);
@@ -25,7 +25,7 @@ export default class FeedController {
         this.displayName = displayName;
         this.userFeed.setUserName(displayName + "'s");
         this.removeFeed();
-        this.refreshFeed();
+        this.refreshFeed({});
     }
 
     removeFeed() {
@@ -34,8 +34,19 @@ export default class FeedController {
         this.userFeed.remove();
     }
 
-    refreshFeed() {
-        FeedsAPI.getNotifications({}, this.token)
+    /**
+     *
+     * @param {object} filters
+     *  - reverseSort - boolean
+     *  - verb - string or int
+     *  - level - string or int
+     *  - source - string
+     *  - includeSeen - boolean
+     */
+    refreshFeed(filters) {
+        console.log(filters);
+        console.log(this.token);
+        FeedsAPI.getNotifications(filters, this.token)
             .then(feed => {
                 console.log(feed);
                 this.renderFeed(feed.data);

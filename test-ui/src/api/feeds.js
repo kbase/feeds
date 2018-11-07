@@ -46,7 +46,7 @@ function makeApiCall (method, path, token, data) {
  *  - verb - string or int
  *  - level - string or int
  *  - includeSeen - boolean
- *  - token - string, auth token
+ * @param {string} token - auth token
  */
 export function getNotifications (options, token) {
     if (!token) {
@@ -88,10 +88,12 @@ export function postGlobalNotification (data, token) {
     return makeApiCall('POST', path, token, data);
 }
 
-export function markSeen(noteId, token) {
-    let path = 'api/V1/';
+export function markSeen(noteIds, token) {
+    let path = 'api/V1/notifications/see';
+    return makeApiCall('POST', path, token, {note_ids: noteIds});
 }
 
-export function markUnseen(noteId, token) {
-
+export function markUnseen(noteIds, token) {
+    let path = 'api/V1/notifications/unsee';
+    return makeApiCall('POST', path, token, {note_ids: noteIds});
 }

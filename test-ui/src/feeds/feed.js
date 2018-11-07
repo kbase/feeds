@@ -15,10 +15,11 @@ export default class Feed {
             <div class="card-body"></div>
         `;
         this.ctrlState = {
-            seen: false,
-            descending: true,
-            levelFilter: null,
-            sourceFilter: null
+            includeSeen: false,
+            reverseSort: true,
+            level: null,
+            verb: null,
+            source: null
         };
         this.bindEvents();
     }
@@ -30,11 +31,11 @@ export default class Feed {
             let btnIcon = ctrls.querySelector('#seen-btn svg');
             if (btnIcon.getAttribute('data-icon') === 'eye-slash') {
                 btnIcon.setAttribute('data-icon', 'eye');
-                this.ctrlState.seen = true;
+                this.ctrlState.includeSeen = true;
             }
             else {
                 btnIcon.setAttribute('data-icon', 'eye-slash');
-                this.ctrlState.seen = false;
+                this.ctrlState.includeSeen = false;
             }
             this.refresh();
         }
@@ -44,11 +45,11 @@ export default class Feed {
             let btnIcon = ctrls.querySelector('#sort-btn svg');
             if (btnIcon.getAttribute('data-icon') === 'sort-numeric-down') {
                 btnIcon.setAttribute('data-icon', 'sort-numeric-up');
-                this.ctrlState.descending = false;
+                this.ctrlState.reverseSort = false;
             }
             else {
                 btnIcon.setAttribute('data-icon', 'sort-numeric-down');
-                this.ctrlState.descending = true;
+                this.ctrlState.reverseSort = true;
             }
             this.refresh();
         }
@@ -57,10 +58,10 @@ export default class Feed {
         ctrls.querySelector('#level-filter').onchange = (e) => {
             console.log(e);
             if (e.target.selectedIndex === 0) {
-                this.ctrlState.levelFilter = null;
+                this.ctrlState.level = null;
             }
             else {
-                this.ctrlState.levelFilter = e.target.value;
+                this.ctrlState.level = e.target.value;
             }
             this.refresh();
         }
@@ -68,10 +69,10 @@ export default class Feed {
         // source filter
         ctrls.querySelector('#source-filter').onchange = (e) => {
             if (e.target.selectedIndex === 0) {
-                this.ctrlState.sourceFilter = null;
+                this.ctrlState.source = null;
             }
             else {
-                this.ctrlState.sourceFilter = e.target.value;
+                this.ctrlState.source = e.target.value;
             }
             this.refresh();
         }
@@ -81,7 +82,10 @@ export default class Feed {
         // get filter info from controls
         // run the refresh function
         // update this feed with the results
+        console.log('refreshing');
+        console.log(this);
         console.log(this.ctrlState);
+        this.refreshFn(this.ctrlState);
     }
 
     renderFilters() {
@@ -93,7 +97,7 @@ export default class Feed {
                         <i class="far fa-eye"></i>
                     </button>
                     <button class="btn btn-outline-secondary" type="button" id="sort-btn">
-                        <i class="fa fa-sort-numeric-down"></i>
+                        <i class="fa fa-sort-numeric-up"></i>
                     </button>
                     <select class="custom-select" id="level-filter">
                         <option selected>Filter Level</option>
@@ -117,7 +121,7 @@ export default class Feed {
         this.remove();
         let userFeed = this.element.querySelector('.card-body');
         feed.forEach(note => {
-            let noteObj = new Notification(note, token, this.refresh);
+            let noteObj = new Notification(note, token, this.refresh.bind(this));
             userFeed.appendChild(noteObj.element);
         });
     }

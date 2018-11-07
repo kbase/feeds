@@ -99,12 +99,12 @@ export default class Notification {
         this.element.querySelector('#seen-icon').onclick = () => {
             let action;
             if (this.note.seen) {
-                action = Feeds.markUnseen(this.note.id, this.token);
+                action = Feeds.markUnseen([this.note.id], this.token);
             }
             else {
-                action = Feeds.markSeen(this.note.id, this.token);
+                action = Feeds.markSeen([this.note.id], this.token);
             }
-            action.then(this.refreshFn());
+            action.then(() => { this.refreshFn() } );
         }
     }
 }
