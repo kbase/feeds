@@ -47,8 +47,8 @@ export default class FeedController {
 
     renderFeed(feed) {
         this.removeFeed();
-        this.globalFeed.updateFeed(feed.global);
-        this.userFeed.updateFeed(feed.user);
+        this.globalFeed.updateFeed(feed.global, this.token);
+        this.userFeed.updateFeed(feed.user, this.token);
         this.element.style.removeProperty('display');
     }
 

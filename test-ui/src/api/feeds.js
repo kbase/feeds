@@ -87,3 +87,11 @@ export function postGlobalNotification (data, token) {
     let path = 'api/V1/notification/global';
     return makeApiCall('POST', path, token, data);
 }
+
+export function markSeen(noteId, token) {
+    let path = 'api/V1/';
+}
+
+export function markUnseen(noteId, token) {
+
+}

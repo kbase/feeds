@@ -6,6 +6,7 @@ export default class Feed {
 
         this.element = document.createElement('div');
         this.element.classList.add('card');
+        this.element.style.marginTop = '20px';
         this.element.innerHTML = `
             <div class="card-header">
                 <b><span id="user-feed-name">${userName}</span> notifications</b>
@@ -112,11 +113,11 @@ export default class Feed {
         this.element.querySelector('.card-body').innerHTML = '';
     }
 
-    updateFeed(feed) {
+    updateFeed(feed, token) {
         this.remove();
         let userFeed = this.element.querySelector('.card-body');
         feed.forEach(note => {
-            let noteObj = new Notification(note);
+            let noteObj = new Notification(note, token, this.refresh);
             userFeed.appendChild(noteObj.element);
         });
     }

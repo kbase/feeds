@@ -6,8 +6,10 @@ export default class Notification {
      * @param {object} note
      * has keys: actor, context, created, expires, id, level, object, source, verb
      */
-    constructor(note) {
+    constructor(note, token, refreshFn) {
         this.note = note;
+        this.token = token;
+        this.refreshFn = refreshFn;
         this.element = document.createElement('div');
         this.element.classList.add('row', 'alert');
         this.render();
@@ -23,6 +25,7 @@ export default class Notification {
             <div class="col-10">${this.renderBody()}</div>
             <div class="col-1">${this.renderControl()}</div>
         `;
+        this.bindEvents();
     }
 
     renderBody() {
@@ -67,7 +70,11 @@ export default class Notification {
         if (this.note.seen) {
             icon = "far fa-eye";
         }
-        return `<span style="font-size: 2em"><i class="${icon}"></i></span>`;
+        return `
+            <span style="font-size: 1.5em; cursor: pointer;" id="seen-icon">
+                <i class="${icon}"></i>
+            </span>
+        `;
     }
 
     renderCreated() {
@@ -89,6 +96,15 @@ export default class Notification {
     }
 
     bindEvents() {
-
+        this.element.querySelector('#seen-icon').onclick = () => {
+            let action;
+            if (this.note.seen) {
+                action = Feeds.markUnseen(this.note.id, this.token);
+            }
+            else {
+                action = Feeds.markSeen(this.note.id, this.token);
+            }
+            action.then(this.refreshFn());
+        }
     }
 }
