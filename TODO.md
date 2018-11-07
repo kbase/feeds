@@ -23,10 +23,6 @@
 * Option to translate from document -> understandable text
 * Option for free text when creating notification
 
-### Test Interface
-* make one.
-* maybe jump straight into KBase-UI module.
-
 ### Actor
 * validate actor properly
 * include groups as an actor
@@ -45,7 +41,6 @@
 
 ### UI
 * bind submit new global note event
-* add refresh to feeds (auto refresh on new global event)
-* add optional service-spoof event
-* better styles for notification rows
 * add link out where appropriate
+
+

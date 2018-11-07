@@ -6,8 +6,10 @@ export default class Notification {
      * @param {object} note
      * has keys: actor, context, created, expires, id, level, object, source, verb
      */
-    constructor(note) {
+    constructor(note, token, refreshFn) {
         this.note = note;
+        this.token = token;
+        this.refreshFn = refreshFn;
         this.element = document.createElement('div');
         this.element.classList.add('row', 'alert');
         this.render();
@@ -23,14 +25,7 @@ export default class Notification {
             <div class="col-10">${this.renderBody()}</div>
             <div class="col-1">${this.renderControl()}</div>
         `;
-
-        // this.element.innerHTML = `
-        //     <div class="col-1">${this.renderLevel()}</div>
-        //     <div class="col-1">${this.renderSeen()}</div>
-        //     <div class="col-2">${this.renderCreated()}</div>
-        //     <div class="col-1">${this.renderSource()}</div>
-        //     <div class="col-7">${this.renderMessage()}</div>
-        // `;
+        this.bindEvents();
     }
 
     renderBody() {
@@ -44,7 +39,7 @@ export default class Notification {
     }
 
     renderControl() {
-        return '<span><i class="far fa-eye"></i></span>'
+        return this.renderSeen();
     }
 
     renderLevel() {
@@ -52,7 +47,7 @@ export default class Notification {
         switch(this.note.level) {
             case 'error':
                 icon = 'fas fa-ban';
-                this.element.classList.add('alert-error');
+                this.element.classList.add('alert-danger');
                 break;
             case 'request':
                 icon = 'fas fa-question-circle';
@@ -67,14 +62,19 @@ export default class Notification {
                 icon = 'fas fa-info';
                 this.element.classList.add('alert-primary');
         }
-        return `<span style="font-size: 2em;"><i class="${icon}"></i></span>`;
+        return `<span style="font-size: 1.5em;"><i class="${icon}"></i></span>`;
     }
 
     renderSeen() {
-        if (!this.note.seen) {
-            return '<span><i class="far fa-eye"></i></span>';
+        let icon = "fa fa-times";
+        if (this.note.seen) {
+            icon = "far fa-eye";
         }
-        return '';
+        return `
+            <span style="font-size: 1.5em; cursor: pointer;" id="seen-icon">
+                <i class="${icon}"></i>
+            </span>
+        `;
     }
 
     renderCreated() {
@@ -96,6 +96,15 @@ export default class Notification {
     }
 
     bindEvents() {
-
+        this.element.querySelector('#seen-icon').onclick = () => {
+            let action;
+            if (this.note.seen) {
+                action = Feeds.markUnseen([this.note.id], this.token);
+            }
+            else {
+                action = Feeds.markSeen([this.note.id], this.token);
+            }
+            action.then(() => { this.refreshFn() } );
+        }
     }
 }

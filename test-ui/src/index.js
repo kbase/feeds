@@ -2,7 +2,7 @@ import Header from './header';
 import TokenInput from './tokenInput';
 import GlobalFeedPoster from './feeds/globalPoster';
 import TargetedFeedPoster from './feeds/targetedPoster';
-import NotificationFeed from './feeds/notificationFeed';
+import FeedController from './feeds/controller';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/js/all';
@@ -25,7 +25,7 @@ function main() {
     let targetedPoster = new TargetedFeedPoster(() => {
         myFeed.refreshFeed();
     });
-    let myFeed = new NotificationFeed();
+    let myFeed = new FeedController();
 
     mainElement.appendChild(tokenForm.element);
     mainElement.appendChild(globalPoster.element);
