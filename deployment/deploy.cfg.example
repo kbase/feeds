@@ -16,10 +16,11 @@ db-pw=
 auth-url=https://ci.kbase.us/services/auth
 workspace-url=https://ci.kbase.us/services/ws
 groups-url=https://ci.kbase.us/services/groups
+njs-url=https://ci.kbase.us/services/njs_wrapper
 
 # admins are allowed to use their auth tokens to create global notifications.
 # examples would be notices about KBase downtime or events.
-admins=wjriehl,scanon,kkeller,mmdrake
+# admins are assigned 'FEEDS_ADMIN' customroles in Auth
 
 # fake user name for the global feed. Should be something that's not a valid
 # user name.

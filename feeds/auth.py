@@ -57,10 +57,23 @@ def validate_service_token(token):
     token = __fetch_token(token)
     if token.get('type') == 'Service':
         return token.get('name')
-    elif token.get('user') in config.admins:
+    elif token.get('customroles') and 'FEEDS_ADMIN' in token.get('customroles'):
         return token.get('user')
     else:
         raise InvalidTokenError("Token is not a Service token!")
+
+
+def is_feeds_admin(token):
+    """
+    check token associated user has 'FEEDS_ADMIN' customroles
+    """
+
+    try:
+        validate_service_token(token)
+    except InvalidTokenError:
+        return False
+    else:
+        return True
 
 
 def validate_user_token(token):
@@ -127,6 +140,10 @@ def __fetch_token(token):
         try:
             r = __auth_request('token', token)
             token_info = json.loads(r.content)
+            # includes customroles info
+            r_me = __auth_request('me', token)
+            token_me_info = json.loads(r_me.content)
+            token_info['customroles'] = token_me_info.get('customroles')
             __token_cache[token] = token_info
             return token_info
         except requests.HTTPError as e:

@@ -20,7 +20,6 @@ GOOD_CONFIG = [
     'workspace-url=ws',
     'groups-url=groups',
     'global-feed=global',
-    'admins=admin1,admin2,admin3',
     'lifespan=30'
 ]
 
