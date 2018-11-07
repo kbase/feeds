@@ -1,4 +1,5 @@
 import * as Feeds from '../api/feeds';
+import $ from 'jquery';
 
 export default class TargetedFeedPoster {
     constructor(afterSubmitFn) {
@@ -96,6 +97,21 @@ export default class TargetedFeedPoster {
             }, this.token)
                 .then(this.afterSubmitFn);
         }
+        this.element.querySelector('.card-header .btn').onclick = () => {
+            let btnIcon = $(this.element).find('.card-header svg');
+            if (btnIcon.attr('data-icon') === 'toggle-off') {
+                btnIcon.attr('data-icon', 'toggle-on');
+            }
+            else {
+                btnIcon.attr('data-icon', 'toggle-off');
+            }
+
+            // this.element.querySelector('.card-header svg')..remove('fa-toggle-off');
+            // this.element.querySelector('.card-header svg').classList.add('fa-toggle-on');
+            // $(this.element).find('.card-header .fa').toggleClass('fa-toggle-off').toggleClass('fa-toggle-on');
+        }
+        // $('#targetedFeedInput').on('show.bs.collapse', () => {
+        // });
     }
 
     activate(token) {

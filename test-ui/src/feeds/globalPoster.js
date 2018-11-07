@@ -75,6 +75,15 @@ export default class GlobalFeedPoster {
             }, this.token)
                 .then(this.afterSubmitFn);
         }
+        this.element.querySelector('.card-header .btn').onclick = () => {
+            let btnIcon = $(this.element).find('.card-header svg');
+            if (btnIcon.attr('data-icon') === 'toggle-off') {
+                btnIcon.attr('data-icon', 'toggle-on');
+            }
+            else {
+                btnIcon.attr('data-icon', 'toggle-off');
+            }
+        }
     }
 
     activate(token) {

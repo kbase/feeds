@@ -23,14 +23,6 @@ export default class Notification {
             <div class="col-10">${this.renderBody()}</div>
             <div class="col-1">${this.renderControl()}</div>
         `;
-
-        // this.element.innerHTML = `
-        //     <div class="col-1">${this.renderLevel()}</div>
-        //     <div class="col-1">${this.renderSeen()}</div>
-        //     <div class="col-2">${this.renderCreated()}</div>
-        //     <div class="col-1">${this.renderSource()}</div>
-        //     <div class="col-7">${this.renderMessage()}</div>
-        // `;
     }
 
     renderBody() {
@@ -44,7 +36,7 @@ export default class Notification {
     }
 
     renderControl() {
-        return '<span><i class="far fa-eye"></i></span>'
+        return this.renderSeen();
     }
 
     renderLevel() {
@@ -52,7 +44,7 @@ export default class Notification {
         switch(this.note.level) {
             case 'error':
                 icon = 'fas fa-ban';
-                this.element.classList.add('alert-error');
+                this.element.classList.add('alert-danger');
                 break;
             case 'request':
                 icon = 'fas fa-question-circle';
@@ -67,14 +59,15 @@ export default class Notification {
                 icon = 'fas fa-info';
                 this.element.classList.add('alert-primary');
         }
-        return `<span style="font-size: 2em;"><i class="${icon}"></i></span>`;
+        return `<span style="font-size: 1.5em;"><i class="${icon}"></i></span>`;
     }
 
     renderSeen() {
-        if (!this.note.seen) {
-            return '<span><i class="far fa-eye"></i></span>';
+        let icon = "fa fa-times";
+        if (this.note.seen) {
+            icon = "far fa-eye";
         }
-        return '';
+        return `<span style="font-size: 2em"><i class="${icon}"></i></span>`;
     }
 
     renderCreated() {

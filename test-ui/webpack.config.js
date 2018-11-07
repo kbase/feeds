@@ -3,7 +3,10 @@ let webpack = require('webpack');
 
 module.exports = {
     mode: 'none',
-    entry: './src/index.js',
+    entry: [
+        'font-awesome-loader!./font-awesome.config.js',
+        './src/index.js'
+    ],
     output: {
         filename: 'main.js',
         path: path.resolve(__dirname, 'dist')
@@ -32,6 +35,10 @@ module.exports = {
             {
                 test: /\.woff2?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
                 use: 'url-loader?limit=10000'
+            },
+            {
+                test: /\.(ttf|eot|svg)(\?[\s\S]+)?$/,
+                loader: 'file'
             },
             {
                 test: /font-awesome\.config\.js/,
