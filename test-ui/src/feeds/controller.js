@@ -12,8 +12,16 @@ export default class FeedController {
         this.header.innerText = "Notification Feed";
         this.header.style.paddingTop = '20px';
 
-        this.globalFeed = new Feed('Global', this.refreshFeed.bind(this));
-        this.userFeed = new Feed('User', this.refreshFeed.bind(this));
+        this.globalFeed = new Feed(this.refreshFeed.bind(this), {
+            userName: 'Global',
+            showControls: false,
+            showSeen: false
+        });
+        this.userFeed = new Feed(this.refreshFeed.bind(this), {
+            userName: 'User',
+            showControls: true,
+            showSeen: true
+        });
 
         this.element.appendChild(this.header);
         this.element.appendChild(this.globalFeed.element);
@@ -44,11 +52,8 @@ export default class FeedController {
      *  - includeSeen - boolean
      */
     refreshFeed(filters) {
-        console.log(filters);
-        console.log(this.token);
         FeedsAPI.getNotifications(filters, this.token)
             .then(feed => {
-                console.log(feed);
                 this.renderFeed(feed.data);
             })
             .catch(err => {

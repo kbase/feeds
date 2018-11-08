@@ -1,16 +1,19 @@
 import Notification from './notification';
 
 export default class Feed {
-    constructor(userName, refreshFn) {
+    constructor(refreshFn, options) {
         this.refreshFn = refreshFn;
+        this.userName = options.userName || '';
+        this.showControls = options.showControls || false;
+        this.showSeen = (options.showSeen === undefined || options.showSeen === null) ? true : options.showSeen;
 
         this.element = document.createElement('div');
         this.element.classList.add('card');
         this.element.style.marginTop = '20px';
         this.element.innerHTML = `
             <div class="card-header">
-                <b><span id="user-feed-name">${userName}</span> notifications</b>
-                ${this.renderFilters()}
+                <b><span id="user-feed-name">${this.userName}</span> notifications</b>
+                ${this.showControls ? this.renderFilters() : ''}
             </div>
             <div class="card-body"></div>
         `;
@@ -21,7 +24,9 @@ export default class Feed {
             verb: null,
             source: null
         };
-        this.bindEvents();
+        if (this.showControls) {
+            this.bindEvents();
+        }
     }
 
     bindEvents() {
@@ -56,7 +61,6 @@ export default class Feed {
 
         // level filter
         ctrls.querySelector('#level-filter').onchange = (e) => {
-            console.log(e);
             if (e.target.selectedIndex === 0) {
                 this.ctrlState.level = null;
             }
@@ -82,9 +86,6 @@ export default class Feed {
         // get filter info from controls
         // run the refresh function
         // update this feed with the results
-        console.log('refreshing');
-        console.log(this);
-        console.log(this.ctrlState);
         this.refreshFn(this.ctrlState);
     }
 
@@ -121,7 +122,7 @@ export default class Feed {
         this.remove();
         let userFeed = this.element.querySelector('.card-body');
         feed.forEach(note => {
-            let noteObj = new Notification(note, token, this.refresh.bind(this));
+            let noteObj = new Notification(note, token, this.refresh.bind(this), this.showSeen);
             userFeed.appendChild(noteObj.element);
         });
     }
