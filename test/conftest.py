@@ -104,7 +104,7 @@ def mock_valid_service_token(requests_mock):
     return auth_valid_service_token
 
 @pytest.fixture
-def mock_valid_admin_token(request_mock):
+def mock_valid_admin_token(requests_mock):
     def auth_valid_admin_token(user_id, user_name):
         cfg = test_config()
         auth_url = cfg.get('feeds', 'auth-url')

@@ -21,7 +21,6 @@ config = get_config()
 AUTH_URL = config.auth_url
 AUTH_API_PATH = '/api/V2/'
 CACHE_EXPIRE_TIME = 300  # seconds
-CACHE_SIZE = 1000
 
 
 class TokenCache(TTLCache):
@@ -38,8 +37,8 @@ class TokenCache(TTLCache):
             return token
 
 
-__token_cache = TokenCache(CACHE_SIZE, CACHE_EXPIRE_TIME)
-__user_cache = TTLCache(CACHE_SIZE, CACHE_EXPIRE_TIME)
+__token_cache = TokenCache(1000, CACHE_EXPIRE_TIME)
+__user_cache = TTLCache(1000, CACHE_EXPIRE_TIME)
 
 
 def validate_service_token(token):
@@ -119,10 +118,6 @@ def validate_user_ids(user_ids):
 
 
 def get_auth_token(request, required=True):
-    """
-    Returns the auth token from the proper header.
-    If it's not there, and it's required, raises a MissingTokenError.
-    """
     token = request.headers.get('Authorization')
     if not token and required:
         raise MissingTokenError()
@@ -135,8 +130,11 @@ def __fetch_token(token):
     If the token is invalid or there's any other auth problems, either
     an InvalidTokenError or TokenLookupError gets raised.
     """
-    fetched = __token_cache.get(token)
-    if fetched:
+    try:
+        fetched = __token_cache.get(token)
+    except KeyError:  # this wants to throw a KeyError in some tests. Don't know why.
+        fetched = None
+    if fetched is not None:
         return fetched
     else:
         try:

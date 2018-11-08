@@ -111,7 +111,7 @@ def create_app(test_config=None):
             },
             'permissions': {
                 'POST': [],
-                'GET': ['/notifications/global']
+                'GET': ['/api/V1/notifications/global']
             }
         }
         token = get_auth_token(request, required=False)
