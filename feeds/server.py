@@ -14,7 +14,8 @@ from flask.logging import default_handler
 from .auth import (
     get_auth_token,
     validate_service_token,
-    validate_user_token
+    validate_user_token,
+    is_feeds_admin
 )
 from .util import epoch_ms
 from .config import get_config
@@ -105,18 +106,37 @@ def create_app(test_config=None):
         perms = {
             'token': {
                 'user': None,
-                'service': None
+                'service': None,
+                'admin': False
             },
             'permissions': {
-                'POST': []
+                'POST': [],
                 'GET': ['/notifications/global']
             }
         }
-        token = get_auth_token(required=False)
+        token = get_auth_token(request, required=False)
         if token is not None:
             try:
-                user = validate_
-
+                user = validate_user_token(token)
+                if user is not None:
+                    perms['token']['user'] = user
+                    perms['permissions']['GET'] = perms['permissions']['GET'] + \
+                        ['/api/V1/notifications', '/api/V1/notification/<note_id>']
+                    perms['permissions']['POST'] = perms['permissions']['POST'] + \
+                        ['/api/V1/notifications/see', '/api/V1/notifications/unsee']
+            except InvalidTokenError:
+                pass
+            try:
+                service = validate_service_token(token)
+                # TODO - add filter so only specific services can see these
+                perms['token']['service'] = service
+                perms['permissions']['POST'].append('/api/V1/notification')
+            except InvalidTokenError:
+                pass
+            if is_feeds_admin(token):
+                perms['token']['admin'] = True
+                perms['permissions']['POST'].append('/api/V1/notification/global')
+        return (flask.jsonify(perms), 200)
 
     @app.errorhandler(IllegalParameterError)
     @app.errorhandler(json.JSONDecodeError)

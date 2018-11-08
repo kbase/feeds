@@ -26,15 +26,6 @@ def test_validate_service_token_ok(requests_mock):
                       text=json.dumps({}))
     assert (validate_service_token(token) == test_name)
 
-    # test feeds admin user token
-    token = 'fake_token' + str(uuid.uuid4())
-    test_user = 'test_user'
-    requests_mock.get('{}/api/V2/token'.format(cfg.get('feeds', 'auth-url')),
-                      text=json.dumps({'user': test_user}))
-    requests_mock.get('{}/api/V2/me'.format(cfg.get('feeds', 'auth-url')),
-                      text=json.dumps({'customroles': ['FEEDS_ADMIN']}))
-    assert (validate_service_token(token) == test_user)
-
 
 def test_validate_service_token_fail(requests_mock):
 
@@ -51,14 +42,14 @@ def test_validate_service_token_fail(requests_mock):
 
 
 def test_is_feeds_admin_ok(requests_mock):
-    # test service token
+    # test service token - should fail
     token = 'fake_token' + str(uuid.uuid4())
     test_name = 'test_name'
     requests_mock.get('{}/api/V2/token'.format(cfg.get('feeds', 'auth-url')),
                       text=json.dumps({'type': 'Service', 'name': test_name}))
     requests_mock.get('{}/api/V2/me'.format(cfg.get('feeds', 'auth-url')),
                       text=json.dumps({}))
-    assert is_feeds_admin(token)
+    assert is_feeds_admin(token) == False
 
     # test feeds admin user token
     token = 'fake_token' + str(uuid.uuid4())
