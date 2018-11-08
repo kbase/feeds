@@ -10,7 +10,7 @@ docs:
 
 test:
 	# flake8 feeds
-	pytest --verbose test --cov --cov-report html feeds -s
+	pytest --verbose test --cov=feeds --cov-report html feeds -s
 
 start:
 	gunicorn --worker-class gevent --timeout 300 --workers 1 --bind :5000 feeds.server:app

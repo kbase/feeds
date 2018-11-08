@@ -33,7 +33,12 @@ def root():
         'routes': {
             'root': 'GET /',
             'add_notification': 'POST /notification',
-            'get_notifications': 'GET /notifications'
+            'add_global_notification': 'POST /notification/global',
+            'get_notifications': 'GET /notifications',
+            'get_global_notifications': 'GET /notifications/global',
+            'get_specific_notification': 'GET /notification/<note_id>',
+            'mark_notifications_seen': 'POST /notifications/see',
+            'mark_notifications_unseen': 'POST /notifications/unsee'
         }
     }
     return flask.jsonify(resp)
@@ -64,14 +69,8 @@ def get_notifications():
     if verb_filter_input is not None:
         verb_filter = translate_verb(verb_filter_input)
 
-    include_seen = request.args.get('seen', default=1, type=int)
+    include_seen = request.args.get('seen', default=0, type=int)
     include_seen = False if include_seen == 0 else True
-    # return json.dumps({
-    #     "max_notes": max_notes,
-    #     "rev_sort": rev_sort,
-    #     "level_filter": level_filter,
-    #     "include_seen": include_seen
-    # })
     user_id = validate_user_token(get_auth_token(request))
     log(__name__, 'Getting feed for {}'.format(user_id))
     feed = NotificationFeed(user_id)
