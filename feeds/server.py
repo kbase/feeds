@@ -11,6 +11,11 @@ from flask import (
 import logging
 from http.client import responses
 from flask.logging import default_handler
+from .auth import (
+    get_auth_token,
+    validate_service_token,
+    validate_user_token
+)
 from .util import epoch_ms
 from .config import get_config
 from .exceptions import (
@@ -89,6 +94,29 @@ def create_app(test_config=None):
             "version": VERSION,
             "servertime": epoch_ms()
         })
+
+    @app.route('/permissions', methods=['GET'])
+    @cross_origin()
+    def permissions():
+        """
+        Returns permissions based on the token.
+        """
+        # default permissions without a token
+        perms = {
+            'token': {
+                'user': None,
+                'service': None
+            },
+            'permissions': {
+                'POST': []
+                'GET': ['/notifications/global']
+            }
+        }
+        token = get_auth_token(required=False)
+        if token is not None:
+            try:
+                user = validate_
+
 
     @app.errorhandler(IllegalParameterError)
     @app.errorhandler(json.JSONDecodeError)

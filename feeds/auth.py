@@ -108,6 +108,10 @@ def validate_user_ids(user_ids):
 
 
 def get_auth_token(request, required=True):
+    """
+    Returns the auth token from the proper header.
+    If it's not there, and it's required, raises a MissingTokenError.
+    """
     token = request.headers.get('Authorization')
     if not token and required:
         raise MissingTokenError()
