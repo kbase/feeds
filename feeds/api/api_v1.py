@@ -32,7 +32,12 @@ def root():
         'routes': {
             'root': 'GET /',
             'add_notification': 'POST /notification',
-            'get_notifications': 'GET /notifications'
+            'add_global_notification': 'POST /notification/global',
+            'get_notifications': 'GET /notifications',
+            'get_global_notifications': 'GET /notifications/global',
+            'get_specific_notification': 'GET /notification/<note_id>',
+            'mark_notifications_seen': 'POST /notifications/see',
+            'mark_notifications_unseen': 'POST /notifications/unsee'
         }
     }
     return flask.jsonify(resp)
