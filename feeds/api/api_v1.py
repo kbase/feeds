@@ -9,7 +9,8 @@ from feeds.feeds.notification.notification_feed import NotificationFeed
 from feeds.auth import (
     validate_user_token,
     validate_service_token,
-    get_auth_token
+    get_auth_token,
+    is_feeds_admin
 )
 from feeds.exceptions import (
     InvalidTokenError,
@@ -137,8 +138,8 @@ def add_notification():
 @api_v1.route('/notification/global', methods=['POST'])
 @cross_origin()
 def add_global_notification():
-    user_id = validate_user_token(get_auth_token(request))
-    if user_id not in cfg.admins:
+    token = get_auth_token(request)
+    if not is_feeds_admin(token):
         raise InvalidTokenError("{} does not have permission to create a global notification!")
 
     params = _get_notification_params(json.loads(request.get_data()), is_global=True)

@@ -8,7 +8,7 @@ export default class Header {
         this.element.innerHTML = `
             <div class='navbar navbar-dark bg-dark'>
                 <a href='#' class='navbar-brand'>
-                    KBase Feeds Test UI -- NOT FOR PRODUCTION
+                    KBase Feeds Test UI -- NOT FOR PRODUCTION. The real thing won't look like this. Calm down.
                 </a>
             </div>
         `;

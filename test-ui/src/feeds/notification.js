@@ -6,10 +6,11 @@ export default class Notification {
      * @param {object} note
      * has keys: actor, context, created, expires, id, level, object, source, verb
      */
-    constructor(note, token, refreshFn) {
+    constructor(note, token, refreshFn, showSeen) {
         this.note = note;
         this.token = token;
         this.refreshFn = refreshFn;
+        this.showSeen = showSeen;
         this.element = document.createElement('div');
         this.element.classList.add('row', 'alert');
         this.render();
@@ -39,6 +40,9 @@ export default class Notification {
     }
 
     renderControl() {
+        if (!this.showSeen) {
+            return '';
+        }
         return this.renderSeen();
     }
 
@@ -96,6 +100,9 @@ export default class Notification {
     }
 
     bindEvents() {
+        if (!this.showSeen) {
+            return;
+        }
         this.element.querySelector('#seen-icon').onclick = () => {
             let action;
             if (this.note.seen) {
