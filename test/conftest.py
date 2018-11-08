@@ -43,6 +43,12 @@ def runner(app):
 
 @pytest.fixture
 def mock_valid_user(requests_mock):
+    """
+    Use this to mock a valid user. Can use as a fixture as follows:
+    def test_something(mock_valid_user):
+        mock_valid_user("wjriehl", "Bill Riehl")
+        ... continue with test that uses auth. Now wjriehl is the expected user ...
+    """
     def auth_valid_user(user_id, user_name):
         cfg = test_config()
         requests_mock.get('{}/api/V2/users?list={}'.format(cfg.get('feeds', 'auth-url'), user_id), text=json.dumps({user_id: user_name}))
@@ -50,6 +56,12 @@ def mock_valid_user(requests_mock):
 
 @pytest.fixture
 def mock_invalid_user(requests_mock):
+    """
+    User this to mock an invalid user. Use as follows:
+    def test_bad_user(mock_invalid_user):
+        mock_invalid_user("not_a_real_user")
+        ... continue with test. auth will fail, and should return "not_a_real_user" as the user that was attempted ...
+    """
     def auth_invalid_user(user_id):
         cfg = test_config()
         requests_mock.get('{}/api/V2/users?list={}'.format(cfg.get('feeds', 'auth-url'), user_id), text="{}")
