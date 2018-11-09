@@ -13,6 +13,6 @@ test:
 	pytest --verbose test --cov=feeds --cov-report html feeds -s
 
 start:
-	gunicorn --worker-class gevent --timeout 300 --workers 1 --bind :5000 feeds.server:app
+	gunicorn --worker-class gevent --timeout 300 --workers 5 --bind :5000 feeds.server:app
 
 .PHONY: test docs
