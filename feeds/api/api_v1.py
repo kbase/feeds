@@ -110,10 +110,16 @@ def add_notification():
     Once validated, will be used as the Source of the notification,
     and used in logic to determine which feeds get notified.
     """
-    if not cfg.debug:
-        service = validate_service_token(get_auth_token(request))  # can also be an admin user
-        if not service:
-            raise InvalidTokenError("Token must come from a service, not a user!")
+    token = get_auth_token(request)
+    try:
+        service = validate_service_token(token)
+    except InvalidTokenError:
+        if cfg.debug:
+            if not is_feeds_admin(token):
+                raise InvalidTokenError('Auth token must be either a Service token '
+                    'or from a user with the FEEDS_ADMIN role!')
+        else:
+            raise
     log(__name__, request.get_data())
     params = _get_notification_params(json.loads(request.get_data()))
     # create a Notification from params.

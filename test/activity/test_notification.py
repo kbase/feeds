@@ -215,7 +215,8 @@ def test_user_view():
     assert "target" not in v
     assert v["context"] is None
     assert v["level"] == level_name
-    assert "external_key" not in v
+    assert "external_key" in v
+    assert v["external_key"] is None
 
 
 def test_from_dict():
@@ -258,18 +259,6 @@ def test_serialization():
     note = Notification(actor, verb_inf, note_object, source, level=level_id)
     serial = note.serialize()
     json_serial = json.loads(serial)
-        # serial = {
-        #     "i": self.id,
-        #     "a": self.actor,
-        #     "v": self.verb.id,
-        #     "o": self.object,
-        #     "s": self.source,
-        #     "t": self.target,
-        #     "l": self.level.id,
-        #     "c": self.created,
-        #     "e": self.expires,
-        #     "x": self.external_key
-        # }
     assert "i" in json_serial
     assert_is_uuid(json_serial['i'])
     assert "a" in json_serial and json_serial['a'] == actor

@@ -51,7 +51,9 @@ def mock_valid_user(requests_mock):
     """
     def auth_valid_user(user_id, user_name):
         cfg = test_config()
-        requests_mock.get('{}/api/V2/users?list={}'.format(cfg.get('feeds', 'auth-url'), user_id), text=json.dumps({user_id: user_name}))
+        auth_url = cfg.get('feeds', 'auth-url')
+        requests_mock.get('{}/api/V2/users?list={}'.format(auth_url, user_id),
+            text=json.dumps({user_id: user_name}))
     return auth_valid_user
 
 @pytest.fixture
@@ -66,3 +68,54 @@ def mock_invalid_user(requests_mock):
         cfg = test_config()
         requests_mock.get('{}/api/V2/users?list={}'.format(cfg.get('feeds', 'auth-url'), user_id), text="{}")
     return auth_invalid_user
+
+@pytest.fixture
+def mock_valid_user_token(requests_mock):
+    def auth_valid_user_token(user_id, user_name):
+        cfg = test_config()
+        auth_url = cfg.get('feeds', 'auth-url')
+        requests_mock.get('{}/api/V2/token'.format(auth_url), text=json.dumps({
+            'user': user_id,
+            'type': 'Login',
+            'name': None
+        }))
+        requests_mock.get('{}/api/V2/me'.format(auth_url), text=json.dumps({
+            'customroles': [],
+            'display': user_name,
+            'user': user_id
+        }))
+    return auth_valid_user_token
+
+@pytest.fixture
+def mock_valid_service_token(requests_mock):
+    def auth_valid_service_token(user_id, user_name, service_name):
+        cfg = test_config()
+        auth_url = cfg.get('feeds', 'auth-url')
+        requests_mock.get('{}/api/V2/token'.format(auth_url), text=json.dumps({
+            'user': user_id,
+            'type': 'Service',
+            'name': service_name
+        }))
+        requests_mock.get('{}/api/V2/me'.format(auth_url), text=json.dumps({
+            'customroles': [],
+            'display': user_name,
+            'user': user_id
+        }))
+    return auth_valid_service_token
+
+@pytest.fixture
+def mock_valid_admin_token(requests_mock):
+    def auth_valid_admin_token(user_id, user_name):
+        cfg = test_config()
+        auth_url = cfg.get('feeds', 'auth-url')
+        requests_mock.get('{}/api/V2/token'.format(auth_url), text=json.dumps({
+            'user': user_id,
+            'type': 'Login',
+            'name': None
+        }))
+        requests_mock.get('{}/api/V2/me'.format(auth_url), text=json.dumps({
+            'customroles': ['FEEDS_ADMIN'],
+            'display': user_name,
+            'user': user_id
+        }))
+    return auth_valid_admin_token

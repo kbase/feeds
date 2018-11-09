@@ -47,9 +47,6 @@ def validate_service_token(token):
     If invalid, raises an InvalidTokenError. If any other errors occur, raises
     a TokenLookupError.
 
-    Also returns a valid response - the token's user - if that user is in the
-    configured list of admins.
-
     TODO: I know this is going to be rife with issues. The name of the token doesn't have
     to be the service. But as long as it's a Service token, then it came from in KBase, so
     everything should be ok.
@@ -57,8 +54,6 @@ def validate_service_token(token):
     token = __fetch_token(token)
     if token.get('type') == 'Service':
         return token.get('name')
-    elif token.get('customroles') and 'FEEDS_ADMIN' in token.get('customroles'):
-        return token.get('user')
     else:
         raise InvalidTokenError("Token is not a Service token!")
 
@@ -67,13 +62,15 @@ def is_feeds_admin(token):
     """
     check token associated user has 'FEEDS_ADMIN' customroles
     """
-
     try:
-        validate_service_token(token)
+        token = __fetch_token(token)
+        roles = token.get('customroles')
+        if roles is not None and 'FEEDS_ADMIN' in roles:
+            return True
+        else:
+            return False
     except InvalidTokenError:
         return False
-    else:
-        return True
 
 
 def validate_user_token(token):
@@ -133,8 +130,11 @@ def __fetch_token(token):
     If the token is invalid or there's any other auth problems, either
     an InvalidTokenError or TokenLookupError gets raised.
     """
-    fetched = __token_cache.get(token)
-    if fetched:
+    try:
+        fetched = __token_cache.get(token)
+    except KeyError:  # this wants to throw a KeyError in some tests. Don't know why.
+        fetched = None
+    if fetched is not None:
         return fetched
     else:
         try:
