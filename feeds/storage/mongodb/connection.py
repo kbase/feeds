@@ -61,7 +61,9 @@ class FeedsMongoConnection(object):
             host=self.cfg.db_host,
             port=self.cfg.db_port,
             username=self.cfg.db_user,
-            password=self.cfg.db_pw)
+            password=self.cfg.db_pw,
+            authSource=self.cfg.db_name
+            )
         self.db = self.conn[self.cfg.db_name]
         self._setup_indexes()
         self._setup_schema()
