@@ -62,7 +62,7 @@ class Notification(BaseActivity):
         assert source is not None, "source must not be None"
         assert level is not None, "level must not be None"
         assert target is None or isinstance(target, list), "target must be either a list or None"
-        assert users is None or isinstance(target, list), "target must be either a list or None"
+        assert users is None or isinstance(users, list), "users must be either a list or None"
         assert context is None or isinstance(context, dict), "context must be either a dict or None"
         self.id = str(uuid.uuid4())
         self.actor = actor
