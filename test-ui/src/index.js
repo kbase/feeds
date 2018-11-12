@@ -20,10 +20,10 @@ function main() {
 
     let tokenForm = new TokenInput(handleTokenLookup);
     let globalPoster = new GlobalFeedPoster(() => {
-        myFeed.refreshFeed();
+        myFeed.refreshFeed({});
     });
     let targetedPoster = new TargetedFeedPoster(() => {
-        myFeed.refreshFeed();
+        myFeed.refreshFeed({});
     });
     let myFeed = new FeedController();
 

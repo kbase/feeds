@@ -7,6 +7,7 @@ from .conftest import test_config
 from uuid import uuid4
 cfg = test_config()
 
+
 @pytest.mark.parametrize('path', (
     '/api/V1/notifications',
     '/api/V1/notifications?',
@@ -19,6 +20,7 @@ def test_server_get_paths_noauth(client, path):
     assert data['error'].get('http_code') == 403
     assert data['error'].get('http_status') == 'Forbidden'
     assert 'Authentication token required' in data['error'].get('message')
+
 
 @pytest.mark.parametrize('path', (
     '/api/V1/notification',
@@ -34,6 +36,7 @@ def test_server_post_paths_noauth(client, path):
     assert data['error'].get('http_status') == 'Forbidden'
     assert 'Authentication token required' in data['error'].get('message')
 
+
 def test_root(client):
     response = client.get('/')
     data = json.loads(response.data)
@@ -42,11 +45,6 @@ def test_root(client):
     assert 'service' in data and data['service'] == 'Notification Feeds Service'
     assert 'version' in data
 
-def test_api_root(client):
-    response = client.get('/api/V1')
-    data = json.loads(response.data)
-    assert 'routes' in data
-    assert len(data['routes']) == 8
 
 def test_permissions_noauth(client, requests_mock):
     response = client.get('/permissions')
@@ -55,6 +53,7 @@ def test_permissions_noauth(client, requests_mock):
     assert data['token'] == {'service': None, 'user': None, 'admin': False}
     assert 'permissions' in data
     assert data['permissions'] == {'GET': ['/api/V1/notifications/global'], 'POST': []}
+
 
 def test_permissions_user(client, requests_mock, mock_valid_user_token):
     user_id = 'a_user'
@@ -103,3 +102,14 @@ def test_permissions_admin(client, requests_mock, mock_valid_admin_token):
     assert valid_gets == set(data['permissions']['GET'])
     valid_posts = set(['/api/V1/notifications/see', '/api/V1/notifications/unsee', '/api/V1/notification/global'])
     assert valid_posts == set(data['permissions']['POST'])
+
+
+def test_permissions_bad_token(client, mock_invalid_user_token):
+    user_id = 'bad_user'
+    mock_invalid_user_token(user_id)
+    response = client.get('/permissions', headers={'Authorization': 'bad_token-'+str(uuid4())})
+    data = json.loads(response.data)
+    assert 'token' in data
+    assert data['token'] == {'service': None, 'user': None, 'admin': False}
+    assert 'permissions' in data
+    assert data['permissions'] == {'GET': ['/api/V1/notifications/global'], 'POST': []}

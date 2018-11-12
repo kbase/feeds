@@ -74,16 +74,16 @@ def mock_valid_user_token(requests_mock):
     def auth_valid_user_token(user_id, user_name):
         cfg = test_config()
         auth_url = cfg.get('feeds', 'auth-url')
-        requests_mock.get('{}/api/V2/token'.format(auth_url), text=json.dumps({
+        requests_mock.get('{}/api/V2/token'.format(auth_url), json={
             'user': user_id,
             'type': 'Login',
             'name': None
-        }))
-        requests_mock.get('{}/api/V2/me'.format(auth_url), text=json.dumps({
+        })
+        requests_mock.get('{}/api/V2/me'.format(auth_url), json={
             'customroles': [],
             'display': user_name,
             'user': user_id
-        }))
+        })
     return auth_valid_user_token
 
 @pytest.fixture
@@ -91,16 +91,16 @@ def mock_valid_service_token(requests_mock):
     def auth_valid_service_token(user_id, user_name, service_name):
         cfg = test_config()
         auth_url = cfg.get('feeds', 'auth-url')
-        requests_mock.get('{}/api/V2/token'.format(auth_url), text=json.dumps({
+        requests_mock.get('{}/api/V2/token'.format(auth_url), json={
             'user': user_id,
             'type': 'Service',
             'name': service_name
-        }))
-        requests_mock.get('{}/api/V2/me'.format(auth_url), text=json.dumps({
+        })
+        requests_mock.get('{}/api/V2/me'.format(auth_url), json={
             'customroles': [],
             'display': user_name,
             'user': user_id
-        }))
+        })
     return auth_valid_service_token
 
 @pytest.fixture
@@ -108,14 +108,32 @@ def mock_valid_admin_token(requests_mock):
     def auth_valid_admin_token(user_id, user_name):
         cfg = test_config()
         auth_url = cfg.get('feeds', 'auth-url')
-        requests_mock.get('{}/api/V2/token'.format(auth_url), text=json.dumps({
+        requests_mock.get('{}/api/V2/token'.format(auth_url), json={
             'user': user_id,
             'type': 'Login',
             'name': None
-        }))
-        requests_mock.get('{}/api/V2/me'.format(auth_url), text=json.dumps({
+        })
+        requests_mock.get('{}/api/V2/me'.format(auth_url), json={
             'customroles': ['FEEDS_ADMIN'],
             'display': user_name,
             'user': user_id
-        }))
+        })
     return auth_valid_admin_token
+
+@pytest.fixture
+def mock_invalid_user_token(requests_mock):
+    def auth_invalid_user_token(user_id):
+        cfg = test_config()
+        auth_url = cfg.get('feeds', 'auth-url')
+        requests_mock.register_uri('GET', '{}/api/V2/token'.format(auth_url),
+            status_code=401,
+            json={
+                "error": {
+                    "appcode": 10020,
+                    "apperror": "Invalid token",
+                    "httpcode": 401,
+                    "httpstatus": "Unauthorized"
+                }
+            }
+        )
+    return auth_invalid_user_token

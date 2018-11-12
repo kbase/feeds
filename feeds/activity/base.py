@@ -8,4 +8,4 @@ class BaseActivity(object):
     """
     @abstractmethod
     def to_dict(self):
-        pass
+        raise NotImplementedError

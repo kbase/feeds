@@ -2,8 +2,8 @@
  * Basic feeds API.
  */
 import axios from 'axios';
-// const feedsUrl = 'https://ci.kbase.us/services/feeds/';
-const feedsUrl = 'http://localhost:5000/';
+const feedsUrl = 'https://ci.kbase.us/services/feeds/';
+// const feedsUrl = 'http://localhost:5000/';
 
 /**
  *
