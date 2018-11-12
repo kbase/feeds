@@ -7,4 +7,7 @@ class JobsFanout(FanoutModule):
     def get_target_users(self):
         cfg = get_config()
         njs = NarrativeJobService(url=cfg.njs_url)
-        return self.note.target
+        if self.note.users:
+            return self.note.users
+        else:
+            return self.note.target

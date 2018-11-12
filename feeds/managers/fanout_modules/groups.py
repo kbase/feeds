@@ -3,4 +3,8 @@ from .base import FanoutModule
 
 class GroupsFanout(FanoutModule):
     def get_target_users(self):
-        return self.note.target
+
+        if self.note.users:
+            return self.note.users
+        else:
+            return self.note.target
