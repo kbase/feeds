@@ -168,7 +168,8 @@ def test_server_405(client):
 
 def test_server_auth_error(client, mock_auth_error):
     response = client.get('/api/V1/notifications', headers={'Authorization': 'token-'+str(uuid4())})
-    _validate_error(response.data, {
+    data = json.loads(response.data)
+    _validate_error(data, {
         "http_code": 500,
         "http_status": "Internal Server Error",
         "message": "Unable to fetch authentication information"
