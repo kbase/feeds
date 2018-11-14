@@ -229,12 +229,11 @@ def test_user_view():
     assert v["source"] == source
     assert isinstance(v["expires"], int) and v["expires"] == note.expires
     assert isinstance(v["created"], int) and v["created"] == note.created
-    assert "target" not in v
+    assert v["target"] is None
     assert v["context"] is None
     assert v["level"] == level_name
     assert "external_key" in v
     assert v["external_key"] is None
-    assert v["users"] is None
 
 
 def test_from_dict():

@@ -148,12 +148,12 @@ class Notification(BaseActivity):
             "object": self.object,
             "source": self.source,
             "context": self.context,
+            "target": self.target,
             "level": self.level.name,
             "created": self.created,
             "expires": self.expires,
             "seen": self.seen,
-            "external_key": self.external_key,
-            "users": self.users
+            "external_key": self.external_key
         }
         return view
 
