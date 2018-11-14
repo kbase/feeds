@@ -8,7 +8,4 @@ class WorkspaceFanout(FanoutModule):
         cfg = get_config()
         ws = Workspace(url=cfg.ws_url)
 
-        if self.note.users:
-            return self.note.users
-        else:
-            return self.note.target
+        return list(set(self.note.users + self.note.target))

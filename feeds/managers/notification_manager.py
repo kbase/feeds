@@ -55,10 +55,6 @@ class NotificationManager(BaseManager):
         if fanout is not None:
             user_list = fanout.get_target_users()
         else:
-            user_list = list()
+            user_list = list(set(note.users + note.target))
 
-            if note.users:  # user notification with `users`
-                user_list = user_list + note.users
-            elif note.target:  # user notification with no `users`
-                user_list = user_list + note.target
         return user_list
