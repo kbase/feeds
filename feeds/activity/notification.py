@@ -16,7 +16,7 @@ from feeds.config import get_config
 class Notification(BaseActivity):
     def __init__(self, actor: str, verb, note_object: str, source: str, level='alert',
                  target: list=None, context: dict=None, expires: int=None, external_key: str=None,
-                 seen: bool=False):
+                 seen: bool=False, users: list=None):
         """
         A notification is roughly of this form:
             actor, verb, object, (target)
@@ -62,6 +62,7 @@ class Notification(BaseActivity):
         assert source is not None, "source must not be None"
         assert level is not None, "level must not be None"
         assert target is None or isinstance(target, list), "target must be either a list or None"
+        assert users is None or isinstance(users, list), "users must be either a list or None"
         assert context is None or isinstance(context, dict), "context must be either a dict or None"
         self.id = str(uuid.uuid4())
         self.actor = actor
@@ -78,6 +79,7 @@ class Notification(BaseActivity):
         self.expires = expires
         self.external_key = external_key
         self.seen = seen
+        self.users = users
 
     def validate(self):
         """
@@ -129,7 +131,8 @@ class Notification(BaseActivity):
             "level": self.level.id,
             "created": self.created,
             "expires": self.expires,
-            "external_key": self.external_key
+            "external_key": self.external_key,
+            "users": self.users
         }
         return dict_form
 
@@ -145,6 +148,7 @@ class Notification(BaseActivity):
             "object": self.object,
             "source": self.source,
             "context": self.context,
+            "target": self.target,
             "level": self.level.name,
             "created": self.created,
             "expires": self.expires,
@@ -170,7 +174,8 @@ class Notification(BaseActivity):
             "c": self.created,
             "e": self.expires,
             "x": self.external_key,
-            "n": self.context
+            "n": self.context,
+            "u": self.users
         }
         return json.dumps(serial, separators=(',', ':'))
 
@@ -199,7 +204,8 @@ class Notification(BaseActivity):
             level=str(struct['l']),
             target=struct.get('t'),
             context=struct.get('n'),
-            external_key=struct.get('x')
+            external_key=struct.get('x'),
+            users=struct.get('u')
         )
         deserial.created = struct['c']
         deserial.id = struct['i']
@@ -230,7 +236,8 @@ class Notification(BaseActivity):
             target=serial.get('target'),
             context=serial.get('context'),
             external_key=serial.get('external_key'),
-            seen=serial.get('seen', False)
+            seen=serial.get('seen', False),
+            users=serial.get('users')
         )
         deserial.created = serial['created']
         deserial.expires = serial['expires']

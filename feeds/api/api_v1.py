@@ -117,7 +117,7 @@ def add_notification():
         if cfg.debug:
             if not is_feeds_admin(token):
                 raise InvalidTokenError('Auth token must be either a Service token '
-                    'or from a user with the FEEDS_ADMIN role!')
+                                        'or from a user with the FEEDS_ADMIN role!')
         else:
             raise
     log(__name__, request.get_data())
@@ -132,7 +132,8 @@ def add_notification():
         target=params.get('target'),
         context=params.get('context'),
         expires=params.get('expires'),
-        external_key=params.get('external_key')
+        external_key=params.get('external_key'),
+        users=params.get('users')
     )
     # pass it to the NotificationManager to dole out to its audience feeds.
     manager = NotificationManager()
@@ -277,7 +278,7 @@ def _get_notification_params(params, is_global=False):
         raise IllegalParameterError('Expected a JSON object as an input.')
     required_list = ['verb', 'object', 'level']
     if not is_global:
-        required_list = required_list + ['actor', 'target']
+        required_list = required_list + ['actor', 'target', 'source']
     missing = [r for r in required_list if r not in params]
     if missing:
         raise MissingParameterError("Missing parameter{} - {}".format(

@@ -27,10 +27,12 @@ target = ["target_actor"]
 context = {"some": "context"}
 expires = epoch_ms() + (10 * 24 * 60 * 60 * 1000) # 10 days
 external_key = "an_external_key"
+users = ["user_actor"]
+
 
 def assert_note_ok(note, **kwargs):
     keys = [
-        'actor', 'object', 'source', 'target', 'context', 'expires', 'external_key'
+        'actor', 'object', 'source', 'target', 'context', 'expires', 'external_key', 'users'
     ]
     for k in keys:
         if k in kwargs:
@@ -75,6 +77,12 @@ def test_note_new_target():
     note = Notification(actor, verb_inf, note_object, source, target=target)
     assert_note_ok(note, actor=actor, verb_inf=verb_inf,
                    object=note_object, source=source, target=target)
+
+
+def test_note_new_users():
+    note = Notification(actor, verb_inf, note_object, source, users=users)
+    assert_note_ok(note, actor=actor, verb_inf=verb_inf,
+                   object=note_object, source=source, users=users)
 
 
 def test_note_new_context():
@@ -144,6 +152,14 @@ def test_note_new_bad_target():
         assert "target must be either a list or None" in str(e.value)
 
 
+def test_note_new_bad_users():
+    bad_users = [{}, "foo", 123, False]
+    for bad in bad_users:
+        with pytest.raises(AssertionError) as e:
+            Notification(actor, verb_inf, note_object, source, users=bad)
+        assert "users must be either a list or None" in str(e.value)
+
+
 def test_note_new_bad_context():
     bad_context = [[], "foo", 123, False]
     for bad in bad_context:
@@ -201,6 +217,7 @@ def test_to_dict():
     assert d["context"] is None
     assert d["level"] == level_id
     assert d["external_key"] is None
+    assert d["users"] is None
 
 
 def test_user_view():
@@ -212,7 +229,7 @@ def test_user_view():
     assert v["source"] == source
     assert isinstance(v["expires"], int) and v["expires"] == note.expires
     assert isinstance(v["created"], int) and v["created"] == note.created
-    assert "target" not in v
+    assert v["target"] is None
     assert v["context"] is None
     assert v["level"] == level_name
     assert "external_key" in v
@@ -232,7 +249,8 @@ def test_from_dict():
         "target": target,
         "context": context,
         "external_key": external_key,
-        "id": act_id
+        "id": act_id,
+        "users": users
     }
     for v in verb:
         for l in level:
@@ -271,11 +289,12 @@ def test_serialization():
     assert "n" in json_serial and json_serial['n'] == None
     assert "x" in json_serial and json_serial['x'] == None
     assert "t" in json_serial and json_serial['t'] == None
+    assert "u" in json_serial and json_serial['u'] == None
 
 
 def test_serialization_all_kwargs():
     note = Notification(actor, verb_inf, note_object, source, level=level_id,
-                        target=target, external_key=external_key, context=context)
+                        target=target, external_key=external_key, context=context, users=users)
     serial = note.serialize()
     json_serial = json.loads(serial)
     assert "i" in json_serial
@@ -290,11 +309,13 @@ def test_serialization_all_kwargs():
     assert "n" in json_serial and json_serial['n'] == context
     assert "x" in json_serial and json_serial['x'] == external_key
     assert "t" in json_serial and json_serial['t'] == target
+    assert "u" in json_serial and json_serial['u'] == users
 
 
 def test_deserialization():
     note = Notification(actor, verb_inf, note_object, source, level=level_id,
-                        target=target, external_key=external_key, context=context)
+                        target=target, external_key=external_key, context=context,
+                        users=users)
     serial = note.serialize()
     note2 = Notification.deserialize(serial)
     assert note2.id == note.id
@@ -306,6 +327,7 @@ def test_deserialization():
     assert note2.target == note.target
     assert note2.external_key == note.external_key
     assert note2.context == note.context
+    assert note2.users == note.users
 
 
 def test_deserialize_bad():
