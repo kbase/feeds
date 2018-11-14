@@ -55,9 +55,6 @@ class NotificationManager(BaseManager):
         if fanout is not None:
             user_list = fanout.get_target_users()
         else:
-            user_list = list()
-            if note.target:
-                user_list = user_list + note.target
-            elif note.source == 'kbase':
-                user_list.append(get_config().global_feed)
+            user_list = list(set(note.users + note.target))
+
         return user_list
