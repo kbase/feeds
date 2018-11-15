@@ -144,11 +144,17 @@ curl -X GET
 ```
 
 ### Get a single notification
-If you have the id of a notification and want to get its structure, just add it to the path.
+If you have the id of a notification and want to get its structure, just add it to the path. This will search the user's feed for that notification. If present on the user's feed, it will be returned. If not present, or if this notification cannot be seen by the user, this will raise a "404 Not Found" error.
 * Path: `/api/V1/notification/<note_id>`
 * Method: `GET`
 * Required header: `Authorization`
 * Returns: a single Notification
+* Possible errors:
+    * 404 Not Found
+        * If the notification does not exist.
+        * If the notification is real but does not exist in the user's feed.
+    * 401 Not Authenticated - If an auth token is not provided.
+    * 403 Forbidden - If an invalid auth token is provided.
 
 ### Get global notifications
 To just return the list of global notifications, use the global path. It returns only a list of notifications in descending chronological order (newest first).

@@ -147,7 +147,7 @@ def add_notification():
 def add_global_notification():
     token = get_auth_token(request)
     if not is_feeds_admin(token):
-        raise InvalidTokenError("{} does not have permission to create a global notification!")
+        raise InvalidTokenError("You do not have permission to create a global notification!")
 
     params = _get_notification_params(json.loads(request.get_data()), is_global=True)
     new_note = Notification(
@@ -183,7 +183,6 @@ def get_single_notification(note_id):
         note = feed.get_notification(note_id)
     except NotificationNotFoundError:
         note = NotificationFeed(cfg.global_feed).get_notification(note_id)
-
     return (flask.jsonify({'notification': note.user_view()}), 200)
 
 

@@ -19,8 +19,8 @@ def test_server_get_paths_noauth(client, path):
     response = client.get(path)
     data = json.loads(response.data)
     assert 'error' in data
-    assert data['error'].get('http_code') == 403
-    assert data['error'].get('http_status') == 'Forbidden'
+    assert data['error'].get('http_code') == 401
+    assert data['error'].get('http_status') == 'Unauthorized'
     assert 'Authentication token required' in data['error'].get('message')
 
 
@@ -34,8 +34,8 @@ def test_server_post_paths_noauth(client, path):
     response = client.post(path)
     data = json.loads(response.data)
     assert 'error' in data
-    assert data['error'].get('http_code') == 403
-    assert data['error'].get('http_status') == 'Forbidden'
+    assert data['error'].get('http_code') == 401
+    assert data['error'].get('http_status') == 'Unauthorized'
     assert 'Authentication token required' in data['error'].get('message')
 
 
@@ -110,10 +110,9 @@ def test_permissions_bad_token(client, mock_invalid_user_token):
     mock_invalid_user_token(user_id)
     response = client.get('/permissions', headers={'Authorization': 'bad_token-'+str(uuid4())})
     data = json.loads(response.data)
-    assert 'token' in data
-    assert data['token'] == {'service': None, 'user': None, 'admin': False}
-    assert 'permissions' in data
-    assert data['permissions'] == {'GET': ['/api/V1/notifications/global'], 'POST': []}
+    assert 'error' in data
+    assert data['error']['http_code'] == 403
+    assert data['error']['message'] == 'Invalid token'
 
 
 def test_server_illegal_param(client, mock_valid_service_token):
@@ -128,7 +127,7 @@ def test_server_invalid_token(client, mock_invalid_user_token):
     mock_invalid_user_token(user_id)
     response = client.get('/api/V1/notifications', headers={'Authorization': 'token-'+str(uuid4())})
     data = json.loads(response.data)
-    _validate_error(data, {'http_code': 401, 'http_status': 'Unauthorized', 'message': 'Invalid token'})
+    _validate_error(data, {'http_code': 403, 'http_status': 'Forbidden', 'message': 'Invalid token'})
 
 
 def test_server_note_not_found(client, mock_valid_user_token):

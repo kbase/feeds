@@ -166,12 +166,12 @@ def mock_invalid_user_token(requests_mock):
         cfg = test_config()
         auth_url = cfg.get('feeds', 'auth-url')
         requests_mock.register_uri('GET', '{}/api/V2/token'.format(auth_url),
-            status_code=401,
+            status_code=403,
             json={
                 "error": {
                     "appcode": 10020,
                     "apperror": "Invalid token",
-                    "httpcode": 401,
+                    "httpcode": 403,
                     "httpstatus": "Unauthorized"
                 }
             }

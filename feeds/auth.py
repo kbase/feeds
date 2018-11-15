@@ -62,14 +62,11 @@ def is_feeds_admin(token):
     """
     check token associated user has 'FEEDS_ADMIN' customroles
     """
-    try:
-        token = __fetch_token(token)
-        roles = token.get('customroles')
-        if roles is not None and 'FEEDS_ADMIN' in roles:
-            return True
-        else:
-            return False
-    except InvalidTokenError:
+    token = __fetch_token(token)
+    roles = token.get('customroles')
+    if roles is not None and 'FEEDS_ADMIN' in roles:
+        return True
+    else:
         return False
 
 
@@ -165,7 +162,7 @@ def __auth_request(path, token):
 
 
 def _handle_errors(err):
-    if err.response.status_code == 401:
+    if err.response.status_code == 403:
         err_content = json.loads(err.response.content)
         err_msg = err_content.get('error', {}).get('apperror', 'Invalid token')
         raise InvalidTokenError(msg=err_msg, http_error=err)
