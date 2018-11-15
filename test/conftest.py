@@ -3,6 +3,8 @@ import configparser
 import pytest
 import tempfile
 import json
+import mongomock
+import feeds
 
 def pytest_sessionstart(session):
     os.environ['AUTH_TOKEN'] = 'foo'
@@ -10,6 +12,35 @@ def pytest_sessionstart(session):
 
 def pytest_sessionfinish(session, exitstatus):
     pass
+
+def mock_notifications_collection():
+    coll = mongomock.MongoClient().db.collection
+    objects = [
+        {
+            "id": "1",
+            "actor" : "kbasetest",
+            "verb" : 4,
+            "object" : "123",
+            "source" : "ws",
+            "context" : None,
+            "target" : [
+                "wjriehl"
+            ],
+            "level" : 2,
+            "created" : "1540877025814",
+            "expires" : "1543469025814",
+            "external_key" : None,
+            "users" : [
+                "wjriehl"
+            ],
+            "unseen" : [
+                "wjriehl"
+            ]
+        }
+    ]
+    for obj in objects:
+        obj['_id'] = coll.insert_one(obj)
+    return coll
 
 def test_config():
     """
@@ -180,3 +211,7 @@ def mock_auth_error(requests_mock):
                 "apperror": "Something very bad happened, mm'kay?"
             }
         })
+
+@pytest.fixture(autouse=True)
+def get_document_collection(monkeypatch):
+    monkeypatch.setattr(feeds.storage.mongodb.connection, "get_feeds_collection", mock_notifications_collection)
