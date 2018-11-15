@@ -5,6 +5,7 @@ import pytest
 from pprint import pprint
 from .conftest import test_config
 from uuid import uuid4
+import mongomock
 cfg = test_config()
 
 
@@ -129,7 +130,8 @@ def test_server_invalid_token(client, mock_invalid_user_token):
     _validate_error(data, {'http_code': 401, 'http_status': 'Unauthorized', 'message': 'Invalid token'})
 
 
-def test_server_note_not_found(client, mock_valid_user_token):
+@mongomock.patch(servers=(('localhost', 27017),))
+def test_server_note_not_found(client, mock_valid_user_token, mongodb):
     user_id = 'a_user'
     user_name = 'A User'
     mock_valid_user_token(user_id, user_name)
