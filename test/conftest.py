@@ -44,7 +44,8 @@ def runner(app):
 @pytest.fixture
 def mock_valid_user(requests_mock):
     """
-    Use this to mock a valid user. Can use as a fixture as follows:
+    Use this to mock a valid user name sent to the service as a target or recipient of a
+    notification. Can use as a fixture as follows:
     def test_something(mock_valid_user):
         mock_valid_user("wjriehl", "Bill Riehl")
         ... continue with test that uses auth. Now wjriehl is the expected user ...
@@ -59,7 +60,8 @@ def mock_valid_user(requests_mock):
 @pytest.fixture
 def mock_invalid_user(requests_mock):
     """
-    User this to mock an invalid user. Use as follows:
+    Use this to mock an invalid user name being sent to the service as a target or recipient of
+    a notification. Use as follows:
     def test_bad_user(mock_invalid_user):
         mock_invalid_user("not_a_real_user")
         ... continue with test. auth will fail, and should return "not_a_real_user" as the user that was attempted ...
@@ -71,51 +73,110 @@ def mock_invalid_user(requests_mock):
 
 @pytest.fixture
 def mock_valid_user_token(requests_mock):
+    """
+    Use this to mock a valid authenticated request coming from a user (not an admin or service).
+    Use the fixture as follows:
+    def test_something(mock_valid_user_token):
+        mock_valid_user_token('someuser', 'Some User')
+        ... continue test ...
+    """
     def auth_valid_user_token(user_id, user_name):
         cfg = test_config()
         auth_url = cfg.get('feeds', 'auth-url')
-        requests_mock.get('{}/api/V2/token'.format(auth_url), text=json.dumps({
+        requests_mock.get('{}/api/V2/token'.format(auth_url), json={
             'user': user_id,
             'type': 'Login',
             'name': None
-        }))
-        requests_mock.get('{}/api/V2/me'.format(auth_url), text=json.dumps({
+        })
+        requests_mock.get('{}/api/V2/me'.format(auth_url), json={
             'customroles': [],
             'display': user_name,
             'user': user_id
-        }))
+        })
     return auth_valid_user_token
 
 @pytest.fixture
 def mock_valid_service_token(requests_mock):
+    """
+    Use this to mock a valid authenticated request coming from a service (not a user).
+    Use as follows:
+    def test_something(mock_valid_service_token):
+        mock_valid_service_token('some_user', 'Some User', 'MyKBaseService')
+        ...continue test...
+    """
     def auth_valid_service_token(user_id, user_name, service_name):
         cfg = test_config()
         auth_url = cfg.get('feeds', 'auth-url')
-        requests_mock.get('{}/api/V2/token'.format(auth_url), text=json.dumps({
+        requests_mock.get('{}/api/V2/token'.format(auth_url), json={
             'user': user_id,
             'type': 'Service',
             'name': service_name
-        }))
-        requests_mock.get('{}/api/V2/me'.format(auth_url), text=json.dumps({
+        })
+        requests_mock.get('{}/api/V2/me'.format(auth_url), json={
             'customroles': [],
             'display': user_name,
             'user': user_id
-        }))
+        })
     return auth_valid_service_token
 
 @pytest.fixture
 def mock_valid_admin_token(requests_mock):
+    """
+    Use this to mock a valid authenticated request coming from a Feeds admin (i.e. a user
+    with the FEEDS_ADMIN custom role). Use as follows:
+        def test_something(mock_valid_admin_token):
+            mock_valid_admin_token('some_admin', 'Valid Admin')
+            ... rest of test ...
+    """
     def auth_valid_admin_token(user_id, user_name):
         cfg = test_config()
         auth_url = cfg.get('feeds', 'auth-url')
-        requests_mock.get('{}/api/V2/token'.format(auth_url), text=json.dumps({
+        requests_mock.get('{}/api/V2/token'.format(auth_url), json={
             'user': user_id,
             'type': 'Login',
             'name': None
-        }))
-        requests_mock.get('{}/api/V2/me'.format(auth_url), text=json.dumps({
+        })
+        requests_mock.get('{}/api/V2/me'.format(auth_url), json={
             'customroles': ['FEEDS_ADMIN'],
             'display': user_name,
             'user': user_id
-        }))
+        })
     return auth_valid_admin_token
+
+@pytest.fixture
+def mock_invalid_user_token(requests_mock):
+    """
+    Mocks an invalid (for whatever reason) user token. Probably should be treated as present,
+    but expired.
+    As above, just call it inside your test as:
+    mock_invalid_user_token(user_id)
+    """
+    def auth_invalid_user_token(user_id):
+        cfg = test_config()
+        auth_url = cfg.get('feeds', 'auth-url')
+        requests_mock.register_uri('GET', '{}/api/V2/token'.format(auth_url),
+            status_code=401,
+            json={
+                "error": {
+                    "appcode": 10020,
+                    "apperror": "Invalid token",
+                    "httpcode": 401,
+                    "httpstatus": "Unauthorized"
+                }
+            }
+        )
+    return auth_invalid_user_token
+
+@pytest.fixture
+def mock_auth_error(requests_mock):
+    cfg = test_config()
+    auth_url = cfg.get('feeds', 'auth-url')
+    requests_mock.register_uri('GET', '{}/api/V2/token'.format(auth_url),
+        status_code=500,
+        json={
+            "error": {
+                "httpcode": 500,
+                "httpstatus": "FAIL",
+                "apperror": "Something very bad happened, mm'kay?"
+            }
+        })

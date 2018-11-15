@@ -7,6 +7,7 @@ export default class Notification {
      * has keys: actor, context, created, expires, id, level, object, source, verb
      */
     constructor(note, token, refreshFn, showSeen) {
+        console.log(note);
         this.note = note;
         this.token = token;
         this.refreshFn = refreshFn;
@@ -40,10 +41,18 @@ export default class Notification {
     }
 
     renderControl() {
-        if (!this.showSeen) {
-            return '';
+        let control = '';
+        if (this.showSeen) {
+            control += this.renderSeen();
         }
-        return this.renderSeen();
+        if (this.note.context && this.note.context.link) {
+            control += this.renderLink(this.note.context.link);
+        }
+        return control;
+    }
+
+    renderLink(url) {
+        return `<span style="font-size: 1.5em;"><a href="${url}" target="_blank"><i class="fas fa-external-link-alt"></i></a></span>`;
     }
 
     renderLevel() {
@@ -95,7 +104,22 @@ export default class Notification {
             return this.note.context.text;
         }
         else {
-            return this.note.actor + ' ' + this.note.verb + ' ' + this.note.object;
+            let msg;
+            switch(this.note.verb) {
+                case "invited":
+                    let obj = this.note.object;
+                    if (this.note.context && this.note.context.groupid) {
+                        obj = this.note.context.groupid;
+                    }
+                    msg = this.note.actor + ' ' + this.note.verb + ' you to join ' + obj;
+                    break;
+                case "shared":
+                    msg = this.note.actor + ' ' + this.note.verb + ' with you.';
+                    break;
+                default:
+                    msg = this.note.actor + ' ' + this.note.verb + ' ' + this.note.object;
+            }
+            return msg;
         }
     }
 
