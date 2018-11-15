@@ -55,7 +55,7 @@ def validate_service_token(token):
     if token.get('type') == 'Service':
         return token.get('name')
     else:
-        raise InvalidTokenError("Token is not a Service token!")
+        raise InvalidTokenError("Authentication token must be a Service token.")
 
 
 def is_feeds_admin(token):

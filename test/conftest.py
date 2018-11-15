@@ -14,30 +14,10 @@ def pytest_sessionfinish(session, exitstatus):
     pass
 
 def mock_notifications_collection():
+    test_db_path = os.path.join(os.path.dirname(__file__), "_data", "mongo", "notifications.json")
+    with open(test_db_path, "r") as db_file:
+        objects = json.loads(db_file.read())
     coll = mongomock.MongoClient().db.collection
-    objects = [
-        {
-            "id": "1",
-            "actor" : "kbasetest",
-            "verb" : 4,
-            "object" : "123",
-            "source" : "ws",
-            "context" : None,
-            "target" : [
-                "wjriehl"
-            ],
-            "level" : 2,
-            "created" : "1540877025814",
-            "expires" : "1543469025814",
-            "external_key" : None,
-            "users" : [
-                "wjriehl"
-            ],
-            "unseen" : [
-                "wjriehl"
-            ]
-        }
-    ]
     for obj in objects:
         obj['_id'] = coll.insert_one(obj)
     return coll

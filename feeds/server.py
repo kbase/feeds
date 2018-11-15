@@ -147,7 +147,10 @@ def create_app(test_config=None):
     @app.errorhandler(InvalidTokenError)
     def handle_invalid_token(err):
         _log_error(err)
-        return _make_error(err, "Invalid token", 401)
+        msg = "Invalid auth token"
+        if str(err):
+            msg = str(err)
+        return _make_error(err, msg, 401)
 
     @app.errorhandler(MissingTokenError)
     def handle_missing_token(err):
