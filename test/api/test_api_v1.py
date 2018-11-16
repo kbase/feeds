@@ -16,12 +16,14 @@ def test_api_root(client):
 ###
 
 def test_get_notifications(client, mock_valid_user_token):
-    user_id="wjriehl"
-    user_name="William Riehl"
+    user_id="test_user"
+    user_name="Test User"
     mock_valid_user_token(user_id, user_name)
     response = client.get('/api/V1/notifications', headers={"Authorization": "token-"+str(uuid4())})
     # Got the fake db in _data/mongo/notifications.json
     data = json.loads(response.data)
+    assert len(data['user']) == 2
+
     for note in data['global'] + data['user']:
         _validate_notification(note)
 
@@ -134,7 +136,6 @@ def test_get_single_notification_wrong_user(client, mock_valid_user_token):
     mock_valid_user_token("wrong_user", "Test User")
     response = client.get('/api/V1/notification/1', headers={"Authorization": "token-"+str(uuid4())})
     data = json.loads(response.data)
-    pprint(data)
     assert 'error' in data
     assert data['error']['http_code'] == 404
     assert data['error']['message'] == 'Cannot find notification with id 1.'
@@ -175,7 +176,11 @@ def test_mark_notifications_unseen_no_auth(client):
     assert data['error']['message'] == 'Authentication token required'
 
 def test_mark_notifications_unseen_invalid_auth(client, mock_invalid_user_token):
-    pass
+    mock_invalid_user_token('fake_user')
+    response = client.post('/api/V1/notifications/unsee', headers={"Authorization": "bad_token-"+str(uuid4())})
+    data = json.loads(response.data)
+    assert 'error' in data
+    assert data['error']['http_code'] == 403
 
 
 def _validate_notification(note):

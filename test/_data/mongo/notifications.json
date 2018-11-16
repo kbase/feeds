@@ -2,43 +2,211 @@
     {
         "id": "1",
         "actor" : "kbasetest",
-        "verb" : 4,
+        "verb" : 1,
         "object" : "123",
         "source" : "ws",
         "context" : null,
         "target" : [
-            "wjriehl"
+            "test_user"
         ],
-        "level" : 2,
+        "level" : 1,
         "created" : 1540877025814,
         "expires" : 1543469025814,
-        "external_key" : null,
+        "external_key" : "key1",
         "users" : [
-            "wjriehl"
+            "test_user"
         ],
         "unseen" : [
-            "wjriehl"
+            "test_user"
         ]
     },
     {
         "id": "2",
-        "actor" : "test_user_2",
-        "verb" : 4,
+        "actor" : "kbasetest",
+        "verb" : 1,
         "object" : "123",
         "source" : "ws",
         "context" : null,
         "target" : [
-            "wjriehl"
+            "test_user"
+        ],
+        "level" : 1,
+        "created" : 1540877025820,
+        "expires" : 1543469025814,
+        "external_key" : "key2",
+        "users" : [
+            "test_user"
+        ],
+        "unseen" : [
+            "test_user"
+        ]
+    },
+    {
+        "id": "3",
+        "actor" : "kbasetest",
+        "verb" : 2,
+        "object" : "123",
+        "source" : "ws",
+        "context" : null,
+        "target" : [
+            "test_user"
+        ],
+        "level" : 1,
+        "created" : 1540877026814,
+        "expires" : 1543469025814,
+        "external_key" : "key3",
+        "users" : [
+            "test_user"
+        ],
+        "unseen" : [
+            "test_user"
+        ]
+    },
+    {
+        "id": "4",
+        "actor" : "kbasetest",
+        "verb" : 2,
+        "object" : "123",
+        "source" : "ws",
+        "context" : null,
+        "target" : [
+            "test_user"
         ],
         "level" : 2,
-        "created" : 1540877025814,
+        "created" : 1540877027814,
         "expires" : 1543469025814,
         "external_key" : null,
         "users" : [
-            "wjriehl"
+            "test_user"
         ],
         "unseen" : [
-            "wjriehl"
+            "test_user"
+        ]
+    },
+    {
+        "id": "5",
+        "actor" : "kbasetest",
+        "verb" : 2,
+        "object" : "123",
+        "source" : "ws",
+        "context" : null,
+        "target" : [
+            "test_user"
+        ],
+        "level" : 2,
+        "created" : 1540877028814,
+        "expires" : 1543469025814,
+        "external_key" : null,
+        "users" : [
+            "test_user"
+        ],
+        "unseen" : [
+            "test_user"
+        ]
+    },
+    {
+        "id": "6",
+        "actor" : "kbasetest",
+        "verb" : 3,
+        "object" : "123",
+        "source" : "groups",
+        "context" : null,
+        "target" : [
+            "test_user"
+        ],
+        "level" : 2,
+        "created" : 1540877029814,
+        "expires" : 1543469025814,
+        "external_key" : null,
+        "users" : [
+            "test_user", "test_user2"
+        ],
+        "unseen" : [
+            "test_user", "test_user2"
+        ]
+    },
+    {
+        "id": "7",
+        "actor" : "kbasetest",
+        "verb" : 3,
+        "object" : "123",
+        "source" : "groups",
+        "context" : null,
+        "target" : [
+            "test_user"
+        ],
+        "level" : 3,
+        "created" : 1540877030814,
+        "expires" : 1543469025814,
+        "external_key" : null,
+        "users" : [
+            "test_user", "test_user2"
+        ],
+        "unseen" : [
+            "test_user", "test_user2"
+        ]
+    },
+    {
+        "id": "8",
+        "actor" : "kbasetest",
+        "verb" : 3,
+        "object" : "123",
+        "source" : "groups",
+        "context" : null,
+        "target" : [
+            "test_user"
+        ],
+        "level" : 3,
+        "created" : 1540877031814,
+        "expires" : 1543469025814,
+        "external_key" : null,
+        "users" : [
+            "test_user", "test_user2", "test_user3"
+        ],
+        "unseen" : [
+            "test_user2", "test_user3"
+        ]
+    },
+    {
+        "id": "9",
+        "actor" : "kbasetest",
+        "verb" : 4,
+        "object" : "123",
+        "source" : "groups",
+        "context" : null,
+        "target" : [
+            "test_user"
+        ],
+        "level" : 3,
+        "created" : 1540877032814,
+        "expires" : 1543469025814,
+        "external_key" : null,
+        "users" : [
+            "test_user", "test_user2", "test_user3"
+        ],
+        "unseen" : [
+            "test_user2", "test_user3"
+        ]
+    },
+    {
+        "id": "10",
+        "actor" : "kbasetest",
+        "verb" : 4,
+        "object" : "123",
+        "source" : "groups",
+        "context" : null,
+        "target" : [
+            "test_user"
+        ],
+        "level" : 4,
+        "created" : 1540877033814,
+        "expires" : 1543469025814,
+        "external_key" : null,
+        "users" : [
+            "test_user", "test_user2", "test_user3"
+        ],
+        "unseen" : [
+            "test_user2", "test_user3"
         ]
     }
 ]
