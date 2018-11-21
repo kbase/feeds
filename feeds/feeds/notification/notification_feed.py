@@ -65,6 +65,7 @@ class NotificationFeed(BaseFeed):
             count=count, include_seen=include_seen,
             level=level, verb=verb, reverse=reverse
         )
+        logging.getLogger(__name__).info(serial_notes)
         note_list = list()
         for note in serial_notes:
             if self.user_id not in note["unseen"]:
@@ -72,6 +73,7 @@ class NotificationFeed(BaseFeed):
             else:
                 note['seen'] = False
             note_list.append(Notification.from_dict(note))
+        logging.getLogger(__name__).info(serial_notes)
         return note_list
 
     def mark_activities(self, activity_ids, seen=False):

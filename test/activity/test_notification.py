@@ -3,8 +3,10 @@ import json
 from feeds.activity.notification import Notification
 import uuid
 from feeds.util import epoch_ms
-from ..conftest import test_config
-from ..util import assert_is_uuid
+from ..util import (
+    assert_is_uuid,
+    test_config
+)
 from feeds.exceptions import (
     MissingVerbError,
     MissingLevelError,

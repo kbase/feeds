@@ -3,8 +3,11 @@ import configparser
 import pytest
 import tempfile
 import json
-import mongomock
 import feeds
+import test.util as test_util
+from .util import test_config
+from .mongo_controller import MongoController
+
 
 def pytest_sessionstart(session):
     os.environ['AUTH_TOKEN'] = 'foo'
@@ -13,26 +16,25 @@ def pytest_sessionstart(session):
 def pytest_sessionfinish(session, exitstatus):
     pass
 
-def mock_notifications_collection():
-    test_db_path = os.path.join(os.path.dirname(__file__), "_data", "mongo", "notifications.json")
-    with open(test_db_path, "r") as db_file:
-        objects = json.loads(db_file.read())
-    coll = mongomock.MongoClient().db.collection
-    for obj in objects:
-        obj['_id'] = coll.insert_one(obj)
-    return coll
+@pytest.fixture(scope="module")
+def mongo():
+    mongoexe = test_util.get_mongo_exe()
+    tempdir = test_util.get_temp_dir()
+    mongo = MongoController(mongoexe, tempdir)
+    print("running MongoDB {} on port {} in dir {}".format(
+        mongo.db_version, mongo.port, mongo.temp_dir
+    ))
+    feeds.config.__config.db_port = mongo.port
+    feeds.storage.mongodb.connection._connection = None
 
-def test_config():
-    """
-    Returns a ConfigParser.
-    Because I'm lazy.
-    """
-    cfg = configparser.ConfigParser()
-    with open(os.environ['FEEDS_CONFIG'], 'r') as f:
-        cfg.read_file(f)
-    return cfg
+    yield mongo
+    del_temp = test_util.get_delete_temp_files()
+    print("Shutting down MongoDB,{} deleting temp files".format(" not" if not del_temp else ""))
+    mongo.destroy(del_temp)
+    if del_temp:
+        shutil.rmtree(test_util.get_temp_dir())
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def app():
     from feeds.server import create_app
     db_fd, db_path = tempfile.mkstemp()
@@ -44,13 +46,9 @@ def app():
     os.close(db_fd)
     os.unlink(db_path)
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def client(app):
     return app.test_client()
-
-@pytest.fixture
-def runner(app):
-    return app.test_cli_runner()
 
 @pytest.fixture
 def mock_valid_user(requests_mock):
@@ -191,7 +189,3 @@ def mock_auth_error(requests_mock):
                 "apperror": "Something very bad happened, mm'kay?"
             }
         })
-
-@pytest.fixture(autouse=True)
-def get_document_collection(monkeypatch):
-    monkeypatch.setattr(feeds.storage.mongodb.connection, "get_feeds_collection", mock_notifications_collection)

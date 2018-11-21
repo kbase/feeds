@@ -3,8 +3,8 @@ import requests
 import json
 import os
 from feeds.actor import validate_actor
-from .conftest import test_config
 from feeds.exceptions import InvalidActorError
+from .util import test_config
 
 cfg = test_config()
 def test_validate_actor(mock_valid_user):

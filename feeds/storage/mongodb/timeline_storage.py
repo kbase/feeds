@@ -1,6 +1,7 @@
 import pymongo
 from ..base import TimelineStorage
 from .connection import get_feeds_collection
+import logging
 
 
 class MongoTimelineStorage(TimelineStorage):
@@ -21,10 +22,10 @@ class MongoTimelineStorage(TimelineStorage):
         # TODO: input validation
         coll = get_feeds_collection()
         query = {
-            "users": {"$all": [self.user_id]}
+            "users": self.user_id #{"$all": [self.user_id]}
         }
         if not include_seen:
-            query['unseen'] = [self.user_id]
+            query['unseen'] = self.user_id
         if level is not None:
             query['level'] = level.id
         if verb is not None:

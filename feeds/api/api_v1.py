@@ -47,7 +47,6 @@ def root():
 @api_v1.route('/notifications', methods=['GET'])
 @cross_origin()
 def get_notifications():
-    # TODO: add filtering
     """
     General flow should be:
     1. validate/authenticate user

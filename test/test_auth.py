@@ -9,7 +9,7 @@ from feeds.auth import (
     get_auth_token,
     is_feeds_admin
 )
-from .conftest import test_config
+from .util import test_config
 from feeds.exceptions import InvalidTokenError
 
 cfg = test_config()

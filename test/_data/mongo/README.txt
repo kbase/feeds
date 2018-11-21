@@ -28,3 +28,5 @@ test_user
     * 1-10 all have test_user
     * 6-10 have test_user2
     * 8,9,10 have test_user3
+* external key:
+    * 1,2,3 have external keys
