@@ -33,7 +33,7 @@ class MongoTimelineStorage(TimelineStorage):
         order = pymongo.DESCENDING
         if reverse:
             order = pymongo.ASCENDING
-        timeline = coll.find(query).sort("created", order)
+        timeline = coll.find(query).sort("created", order).limit(count)
         serial_notes = [note for note in timeline]
         return serial_notes
 

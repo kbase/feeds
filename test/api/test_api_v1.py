@@ -39,16 +39,28 @@ def test_get_notifications(client, mock_valid_user_token, mongo_notes):
     for note in data['global'] + data['user']:
         _validate_notification(note)
 
-# # @pytest.mark.parametrize("filters,expected", [
-# #     (
-# #         {"n":2},
-# #     )
-# # ])
-# def test_get_notifications_filtered(client, mock_valid_user_token):
-#     user_id="test_user"
-#     user_name="Test User"
-#     mock_valid_user_token(user_id, user_name)
-
+@pytest.mark.parametrize("filters,expected", [
+    ("n=2", ['7', '6']),
+    ("n=10", ['7', '6', '5', '4', '3', '2', '1']),
+    ("rev=1", ['1', '2', '3', '4', '5', '6', '7']),
+    ("seen=1", ['10', '9', '8', '7', '6', '5', '4', '3', '2', '1']),
+    ("n=2&seen=1", ['10', '9']),
+    ("v=1", ['2', '1']),
+    ("v=invite", ['2', '1']),
+    ("v=invited", ['2', '1']),
+    ("l=alert", ['3', '2', '1']),
+    ("l=1", ['3', '2', '1'])
+])
+def test_get_notifications_filtered(client, mock_valid_user_token, filters, expected):
+    user_id="test_user"
+    user_name="Test User"
+    mock_valid_user_token(user_id, user_name)
+    route = '/api/V1/notifications?' + filters
+    response = client.get(route, headers={"Authorization": "token-"+str(uuid4())})
+    data = json.loads(response.data)
+    assert len(data['user']) == len(expected)
+    note_order = [n['id'] for n in data['user']]
+    assert note_order == expected
 
 def test_get_notifications_no_auth(client):
     response = client.get('/api/V1/notifications')
