@@ -128,11 +128,11 @@ def add_notification():
         params.get('object'),
         params.get('source'),
         params.get('level'),
-        target=params.get('target'),
+        target=params.get('target', []),
         context=params.get('context'),
         expires=params.get('expires'),
         external_key=params.get('external_key'),
-        users=params.get('users')
+        users=params.get('users', [])
     )
     # pass it to the NotificationManager to dole out to its audience feeds.
     manager = NotificationManager()

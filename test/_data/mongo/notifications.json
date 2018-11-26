@@ -208,5 +208,21 @@
         "unseen" : [
             "test_user2", "test_user3"
         ]
+    },
+    {
+        "id": "global-1",
+        "actor": "kbasetest",
+        "verb": 4,
+        "object": "123",
+        "source": "kbase",
+        "context": {
+            "text": "This is a test."
+        },
+        "level": 1,
+        "created" : 1540877034814,
+        "expires" : 1543469025814,
+        "external_key": null,
+        "users": ["_kbase_"],
+        "unseen": ["_kbase_"]
     }
 ]

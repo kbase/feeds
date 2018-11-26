@@ -82,8 +82,35 @@ def test_get_notifications_invalid_auth(client, mock_invalid_user_token):
 # POST /notification
 ###
 
-def test_post_notification_ok(client, mock_valid_service_token):
-    pass
+def test_post_notification_ok(client, mock_valid_service_token, mock_valid_user_token, mock_valid_user):
+    service = "a_service"
+    test_user = "test_note"
+    test_actor = "test_actor"
+    mock_valid_user(test_actor, "Test Actor")
+    mock_valid_user(test_user, "Test User")
+    mock_valid_service_token("user", "pw", service)
+    note = {
+        "actor": test_actor,
+        "target": [test_user],
+        "verb": 1,
+        "level": 1,
+        "object": "stuff",
+        "source": service
+    }
+    response = client.post(
+        "/api/V1/notification",
+        headers={"Authorization": "token-"+str(uuid4())},
+        json=note
+    )
+    post_return = json.loads(response.data)
+    assert 'id' in post_return
+    note_id = post_return['id']
+    mock_valid_user_token(test_user, "Some Name")
+    response = client.get("/api/V1/notifications", headers={"Authorization": "token-"+str(uuid4())})
+    data_return = json.loads(response.data)
+    assert len(data_return['user']) == 1
+    assert data_return['user'][0]['id'] == note_id
+
 
 def test_post_notification_no_auth(client):
     response = client.post('/api/V1/notification')
@@ -114,10 +141,27 @@ def test_post_notification_invalid_auth(client, mock_invalid_user_token):
 ###
 
 def test_add_global_notification(client, mock_valid_admin_token):
-    pass
+    note = {
+        "verb": 1,
+        "object": "2",
+        "level": 1
+    }
+    mock_valid_admin_token("kbase_admin", "KBase Admin")
+    response = client.post(
+        "/api/V1/notification/global",
+        headers={"Authorization": "token-"+str(uuid4())},
+        json=note
+    )
+    data = json.loads(response.data)
+    assert "id" in data
 
 def test_add_global_notification_user_auth(client, mock_valid_user_token):
-    pass
+    mock_valid_user_token("not_admin", "Not Admin")
+    response = client.post('/api/V1/notification/global', headers={"Authorization": "token-"+str(uuid4())})
+    data = json.loads(response.data)
+    assert "error" in data
+    assert data["error"]["http_code"] == 403
+    assert data["error"]["message"] == "You do not have permission to create a global notification!"
 
 def test_add_global_notification_invalid_auth(client, mock_invalid_user_token):
     mock_invalid_user_token("test_user")
@@ -140,17 +184,24 @@ def test_add_global_notification_no_auth(client):
 ###
 
 def test_get_global_notifications(client):
-    pass
+    response = client.get('/api/V1/notifications/global')
+    data = json.loads(response.data)
+    assert len(data) >= 1 and data[-1]["id"] == "global-1"
 
 ###
 # GET /notification/<note_id>
 ###
 
-@pytest.mark.parametrize("test_id,expected", [
-    ("fake_id", "fake result")
-])
-def test_get_single_notification(client, mongo_notes, mock_valid_user_token, test_id, expected):
-    pass
+def test_get_single_notification(client, mock_valid_user_token):
+    test_ids = ['1', '8']
+    mock_valid_user_token("test_user", "Test User")
+    auth = {"Authorization": "token-"+str(uuid4())}
+    for id_ in test_ids:
+        response = client.get("/api/V1/notification/" + id_, headers=auth)
+        result = json.loads(response.data)
+        assert "notification" in result
+        note = result["notification"]
+        assert "id" in note and note["id"] == id_
 
 def test_get_single_notification_no_auth(client, mongo_notes):
     response = client.get('/api/V1/notification/12345')

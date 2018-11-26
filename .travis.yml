@@ -20,7 +20,7 @@ install:
   - pip install -r dev-requirements.txt
 
 script:
-  - wget http://fastdl.mongodb.org/linux/$MONGODB_VER.tgz
+  - wget https://fastdl.mongodb.org/linux/$MONGODB_VER.tgz
   - tar xfz $MONGODB_VER.tgz
   - export MONGOD=`pwd`/$MONGODB_VER/bin/mongod
   - sed -i "s#^mongo-exe.*#mongo-exe=$MONGOD#" test/test.cfg
