@@ -224,7 +224,6 @@ def mark_notifications_seen():
     raise an error.
     Any of these ids that are global, do nothing... for now.
     """
-
     user_id = validate_user_token(get_auth_token(request))
 
     params = _get_mark_notification_params(json.loads(request.get_data()))
@@ -243,6 +242,27 @@ def mark_notifications_seen():
 
     return (flask.jsonify({'seen_notes': seen_notes,
                            'unauthorized_notes': unauthorized_notes}), 200)
+
+@api_v1.route('/notification/expire', methods=['POST'])
+@cross_origin
+def expire_notification():
+    """
+    Notifications can be forced to expire (set their expiration time to now).
+    This can be done by:
+        * The service who created the notification
+        * An admin
+    """
+    token = get_auth_token(request)
+    try:
+        service = validate_service_token(token)
+    except InvalidTokenError:
+        if cfg.debug:
+            if not is_feeds_admin(token):
+                raise InvalidTokenError('Auth token must be either a Service token '
+                                        'or from a user with the FEEDS_ADMIN role!')
+        else:
+            raise
+
 
 
 def _get_mark_notification_params(params):
