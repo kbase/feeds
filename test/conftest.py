@@ -7,6 +7,7 @@ import feeds
 import test.util as test_util
 from .util import test_config
 from .mongo_controller import MongoController
+import shutil
 
 
 def pytest_sessionstart(session):

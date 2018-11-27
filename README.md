@@ -17,7 +17,10 @@ This starts a server on port 5000.
 See the Makefile to change the number of `gunicorn` workers. (Default=5).
 
 ## Run tests
-After installing dependencies in your environment, run
+1. Install Python dependencies (just run `make install` as above).
+2. Install MongoDB on your system. 
+3. In `test/test.cfg` set the `mongo-exe` key (in the `[test]` section) to the location of your `mongod` executable. On a Linux / MacOS system, you can find this with `which mongod`. You're on your own with Windows.
+4. Finally, run tests with:
 ```
 make test
 ```
