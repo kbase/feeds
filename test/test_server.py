@@ -12,33 +12,6 @@ import test.util as test_util
 cfg = test_config()
 
 
-# @pytest.fixture(scope="module")
-# def mongo():
-#     mongoexe = test_util.get_mongo_exe()
-#     tempdir = test_util.get_temp_dir()
-#     mongo = MongoController(mongoexe, tempdir)
-#     print("running MongoDB {} on port {} in dir {}".format(
-#         mongo.db_version, mongo.port, mongo.temp_dir
-#     ))
-#     feeds.config.__config.db_port = mongo.port
-#     feeds.storage.mongodb.connection._connection = None
-
-#     # test_db_path = os.path.join(os.path.dirname(__file__), "..", "_data", "mongo", "notifications.json")
-#     # with open(test_db_path, "r") as db_file:
-#     #     objects = json.loads(db_file.read())
-#     # client = mongo.client
-#     # for obj in objects:
-#     #     client['feeds']['notifications'].insert_one(obj)
-#     #     # obj['_id'] = coll.insert_one(obj)
-
-#     yield mongo
-#     del_temp = test_util.get_delete_temp_files()
-#     print("Shutting down MongoDB,{} deleting temp files".format(" not" if not del_temp else ""))
-#     mongo.destroy(del_temp)
-#     if del_temp:
-#         shutil.rmtree(test_util.get_temp_dir())
-
-
 @pytest.mark.parametrize('path', (
     '/api/V1/notifications',
     '/api/V1/notifications?',
