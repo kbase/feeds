@@ -47,4 +47,10 @@ class MongoTimelineStorage(TimelineStorage):
             "users": {"$all": [self.user_id]}
         }
         note_serial = coll.find_one(query)
+        if note_serial is None:
+            return None
+        if self.user_id in note_serial['unseen']:
+            note_serial['seen'] = False
+        else:
+            note_serial['seen'] = True
         return note_serial

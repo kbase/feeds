@@ -148,7 +148,7 @@ def test_server_illegal_param(client, mock_valid_service_token):
     mock_valid_service_token('serv_user', 'serv_pw', 'SomeService')
     response = client.post('/api/V1/notification', headers={'Authorization': 'token-'+str(uuid4())}, json=['bad', 'format'])
     data = json.loads(response.data)
-    _validate_error(data, {'http_code': 400, 'http_status': 'Bad Request', 'message': 'Incorrect data format'})
+    _validate_error(data, {'http_code': 400, 'http_status': 'Bad Request', 'message': 'Expected a JSON object as an input.'})
 
 
 def test_server_invalid_token(client, mock_invalid_user_token):

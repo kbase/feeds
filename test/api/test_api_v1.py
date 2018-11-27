@@ -16,7 +16,6 @@ def mongo_notes(mongo):
         objects = json.loads(db_file.read())
     mongo.client['feeds']['notifications'].insert_many(objects)
 
-
 def test_api_root(client):
     response = client.get('/api/V1')
     data = json.loads(response.data)
@@ -231,7 +230,37 @@ def test_get_single_notification_wrong_user(client, mongo_notes, mock_valid_user
 ###
 
 def test_mark_notifications_seen(client, mongo_notes, mock_valid_user_token):
-    pass
+    note_id = 'see-test'
+    mock_valid_user_token("test_see", "Test Seer")
+    auth = {"Authorization": "token-"+str(uuid4())}
+    response = client.post(
+        "/api/V1/notifications/see",
+        json={"note_ids": [note_id]},
+        headers=auth
+    )
+    data = json.loads(response.data)
+    assert 'seen_notes' in data
+    assert 'unauthorized_notes' in data
+    assert note_id in data['seen_notes']
+    response = client.get('/api/V1/notification/' + note_id, headers=auth)
+    data = json.loads(response.data)
+    print(data)
+    assert data['notification']['id'] == note_id
+    assert data['notification']['seen'] == True
+
+def test_mark_notes_seen_not_allowed(client, mongo_notes, mock_valid_user_token):
+    note_id = "not-a-real-note"
+    mock_valid_user_token("test_see", "Test Seer")
+    auth = {"Authorization": "token-"+str(uuid4())}
+    response = client.post(
+        "/api/V1/notifications/see",
+        json={"note_ids": [note_id]},
+        headers=auth
+    )
+    data = json.loads(response.data)
+    assert 'seen_notes' in data
+    assert 'unauthorized_notes' in data
+    assert note_id in data['unauthorized_notes']
 
 def test_mark_notifications_seen_no_auth(client, mongo_notes):
     response = client.post('/api/V1/notifications/see')
@@ -247,12 +276,59 @@ def test_mark_notifications_seen_invalid_auth(client, mongo_notes, mock_invalid_
     assert 'error' in data
     assert data['error']['http_code'] == 403
 
+@pytest.mark.parametrize("params,expected_error", [
+    ("foo", (400, "Expected a JSON object as an input.")),
+    ({"note_id": "wat"}, (422, "Missing parameter note_ids")),
+    ({"note_ids": "not_a_list"}, (400, "Expected a List object as note_ids."))
+])
+def test_mark_notifications_seen_errors(client, mock_valid_user_token, params, expected_error):
+    mock_valid_user_token("some_user", "Some User")
+    auth={"Authorization": "token-"+str(uuid4())}
+    response = client.post(
+        "/api/V1/notifications/see",
+        headers=auth,
+        json=params
+    )
+    data = json.loads(response.data)
+    assert "error" in data
+    assert data["error"]["http_code"] == expected_error[0]
+    assert data["error"]["message"] == expected_error[1]
+
 ###
 # POST /notifications/unsee
 ###
 
 def test_mark_notifications_unseen(client, mongo_notes, mock_valid_user_token):
-    pass
+    note_id = 'unsee-test'
+    mock_valid_user_token("test_unsee", "Test Unseer")
+    auth = {"Authorization": "token-"+str(uuid4())}
+    response = client.post(
+        "/api/V1/notifications/unsee",
+        json={"note_ids": [note_id]},
+        headers=auth
+    )
+    data = json.loads(response.data)
+    assert 'unseen_notes' in data
+    assert 'unauthorized_notes' in data
+    assert note_id in data['unseen_notes']
+    response = client.get('/api/V1/notification/' + note_id, headers=auth)
+    data = json.loads(response.data)
+    assert data['notification']['id'] == note_id
+    assert data['notification']['seen'] == False
+
+def test_mark_notes_unseen_not_allowed(client, mongo_notes, mock_valid_user_token):
+    note_id = "not-a-real-note"
+    mock_valid_user_token("test_unsee", "Test Unseer")
+    auth = {"Authorization": "token-"+str(uuid4())}
+    response = client.post(
+        "/api/V1/notifications/unsee",
+        json={"note_ids": [note_id]},
+        headers=auth
+    )
+    data = json.loads(response.data)
+    assert 'unseen_notes' in data
+    assert 'unauthorized_notes' in data
+    assert note_id in data['unauthorized_notes']
 
 def test_mark_notifications_unseen_no_auth(client, mongo_notes):
     response = client.post('/api/V1/notifications/unsee')

@@ -224,5 +224,46 @@
         "external_key": null,
         "users": ["_kbase_"],
         "unseen": ["_kbase_"]
+    },
+    {
+        "id": "see-test",
+        "actor" : "kbasetest",
+        "verb" : 4,
+        "object" : "123",
+        "source" : "groups",
+        "context" : null,
+        "target" : [
+            "test_user"
+        ],
+        "level" : 4,
+        "created" : 1540877033814,
+        "expires" : 1543469025814,
+        "external_key" : null,
+        "users" : [
+            "test_see"
+        ],
+        "unseen" : [
+            "test_see"
+        ]
+    },
+    {
+        "id": "unsee-test",
+        "actor" : "kbasetest",
+        "verb" : 4,
+        "object" : "123",
+        "source" : "groups",
+        "context" : null,
+        "target" : [
+            "test_user"
+        ],
+        "level" : 4,
+        "created" : 1540877033814,
+        "expires" : 1543469025814,
+        "external_key" : null,
+        "users" : [
+            "test_unsee"
+        ],
+        "unseen" : [
+        ]
     }
 ]
