@@ -9,7 +9,7 @@ from feeds.auth import (
     get_auth_token,
     is_feeds_admin
 )
-from .conftest import test_config
+from .util import test_config
 from feeds.exceptions import InvalidTokenError
 
 cfg = test_config()
@@ -38,7 +38,7 @@ def test_validate_service_token_fail(requests_mock):
 
     with pytest.raises(InvalidTokenError) as e:
         validate_service_token(token)
-    assert "Token is not a Service token!" in str(e.value)
+    assert "Authentication token must be a Service token." in str(e.value)
 
 
 def test_is_feeds_admin_ok(requests_mock):

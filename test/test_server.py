@@ -3,10 +3,12 @@ import tempfile
 import json
 import pytest
 from pprint import pprint
-from .conftest import test_config
+from .util import test_config
 from uuid import uuid4
-import mongomock
-import feeds.storage.mongodb.connection as mongo_connection
+import feeds.config
+from .mongo_controller import MongoController
+import test.util as test_util
+
 cfg = test_config()
 
 
@@ -19,8 +21,8 @@ def test_server_get_paths_noauth(client, path):
     response = client.get(path)
     data = json.loads(response.data)
     assert 'error' in data
-    assert data['error'].get('http_code') == 403
-    assert data['error'].get('http_status') == 'Forbidden'
+    assert data['error'].get('http_code') == 401
+    assert data['error'].get('http_status') == 'Unauthorized'
     assert 'Authentication token required' in data['error'].get('message')
 
 
@@ -34,8 +36,8 @@ def test_server_post_paths_noauth(client, path):
     response = client.post(path)
     data = json.loads(response.data)
     assert 'error' in data
-    assert data['error'].get('http_code') == 403
-    assert data['error'].get('http_status') == 'Forbidden'
+    assert data['error'].get('http_code') == 401
+    assert data['error'].get('http_status') == 'Unauthorized'
     assert 'Authentication token required' in data['error'].get('message')
 
 
@@ -110,17 +112,16 @@ def test_permissions_bad_token(client, mock_invalid_user_token):
     mock_invalid_user_token(user_id)
     response = client.get('/permissions', headers={'Authorization': 'bad_token-'+str(uuid4())})
     data = json.loads(response.data)
-    assert 'token' in data
-    assert data['token'] == {'service': None, 'user': None, 'admin': False}
-    assert 'permissions' in data
-    assert data['permissions'] == {'GET': ['/api/V1/notifications/global'], 'POST': []}
+    assert 'error' in data
+    assert data['error']['http_code'] == 403
+    assert data['error']['message'] == 'Invalid token'
 
 
 def test_server_illegal_param(client, mock_valid_service_token):
     mock_valid_service_token('serv_user', 'serv_pw', 'SomeService')
     response = client.post('/api/V1/notification', headers={'Authorization': 'token-'+str(uuid4())}, json=['bad', 'format'])
     data = json.loads(response.data)
-    _validate_error(data, {'http_code': 400, 'http_status': 'Bad Request', 'message': 'Incorrect data format'})
+    _validate_error(data, {'http_code': 400, 'http_status': 'Bad Request', 'message': 'Expected a JSON object as an input.'})
 
 
 def test_server_invalid_token(client, mock_invalid_user_token):
@@ -128,11 +129,10 @@ def test_server_invalid_token(client, mock_invalid_user_token):
     mock_invalid_user_token(user_id)
     response = client.get('/api/V1/notifications', headers={'Authorization': 'token-'+str(uuid4())})
     data = json.loads(response.data)
-    _validate_error(data, {'http_code': 401, 'http_status': 'Unauthorized', 'message': 'Invalid token'})
+    _validate_error(data, {'http_code': 403, 'http_status': 'Forbidden', 'message': 'Invalid token'})
 
 
-def test_server_note_not_found(client, mock_valid_user_token):
-    mongo_connection.MongoClient = mongomock.MongoClient
+def test_server_note_not_found(client, mongo, mock_valid_user_token):
     user_id = 'a_user'
     user_name = 'A User'
     mock_valid_user_token(user_id, user_name)

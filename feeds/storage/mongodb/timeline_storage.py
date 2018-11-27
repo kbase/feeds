@@ -1,6 +1,7 @@
 import pymongo
 from ..base import TimelineStorage
 from .connection import get_feeds_collection
+import logging
 
 
 class MongoTimelineStorage(TimelineStorage):
@@ -21,10 +22,10 @@ class MongoTimelineStorage(TimelineStorage):
         # TODO: input validation
         coll = get_feeds_collection()
         query = {
-            "users": {"$all": [self.user_id]}
+            "users": self.user_id #{"$all": [self.user_id]}
         }
         if not include_seen:
-            query['unseen'] = [self.user_id]
+            query['unseen'] = self.user_id
         if level is not None:
             query['level'] = level.id
         if verb is not None:
@@ -32,7 +33,7 @@ class MongoTimelineStorage(TimelineStorage):
         order = pymongo.DESCENDING
         if reverse:
             order = pymongo.ASCENDING
-        timeline = coll.find(query).sort("created", order)
+        timeline = coll.find(query).sort("created", order).limit(count)
         serial_notes = [note for note in timeline]
         return serial_notes
 
@@ -46,4 +47,10 @@ class MongoTimelineStorage(TimelineStorage):
             "users": {"$all": [self.user_id]}
         }
         note_serial = coll.find_one(query)
+        if note_serial is None:
+            return None
+        if self.user_id in note_serial['unseen']:
+            note_serial['seen'] = False
+        else:
+            note_serial['seen'] = True
         return note_serial

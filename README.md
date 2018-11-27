@@ -17,7 +17,10 @@ This starts a server on port 5000.
 See the Makefile to change the number of `gunicorn` workers. (Default=5).
 
 ## Run tests
-After installing dependencies in your environment, run
+1. Install Python dependencies (just run `make install` as above).
+2. Install MongoDB on your system. 
+3. In `test/test.cfg` set the `mongo-exe` key (in the `[test]` section) to the location of your `mongod` executable. On a Linux / MacOS system, you can find this with `which mongod`. You're on your own with Windows.
+4. Finally, run tests with:
 ```
 make test
 ```
@@ -144,11 +147,17 @@ curl -X GET
 ```
 
 ### Get a single notification
-If you have the id of a notification and want to get its structure, just add it to the path.
+If you have the id of a notification and want to get its structure, just add it to the path. This will search the user's feed for that notification. If present on the user's feed, it will be returned. If not present, or if this notification cannot be seen by the user, this will raise a "404 Not Found" error.
 * Path: `/api/V1/notification/<note_id>`
 * Method: `GET`
 * Required header: `Authorization`
 * Returns: a single Notification
+* Possible errors:
+    * 404 Not Found
+        * If the notification does not exist.
+        * If the notification is real but does not exist in the user's feed.
+    * 401 Not Authenticated - If an auth token is not provided.
+    * 403 Forbidden - If an invalid auth token is provided.
 
 ### Get global notifications
 To just return the list of global notifications, use the global path. It returns only a list of notifications in descending chronological order (newest first).

@@ -47,7 +47,6 @@ def root():
 @api_v1.route('/notifications', methods=['GET'])
 @cross_origin()
 def get_notifications():
-    # TODO: add filtering
     """
     General flow should be:
     1. validate/authenticate user
@@ -129,11 +128,11 @@ def add_notification():
         params.get('object'),
         params.get('source'),
         params.get('level'),
-        target=params.get('target'),
+        target=params.get('target', []),
         context=params.get('context'),
         expires=params.get('expires'),
         external_key=params.get('external_key'),
-        users=params.get('users')
+        users=params.get('users', [])
     )
     # pass it to the NotificationManager to dole out to its audience feeds.
     manager = NotificationManager()
@@ -147,7 +146,7 @@ def add_notification():
 def add_global_notification():
     token = get_auth_token(request)
     if not is_feeds_admin(token):
-        raise InvalidTokenError("{} does not have permission to create a global notification!")
+        raise InvalidTokenError("You do not have permission to create a global notification!")
 
     params = _get_notification_params(json.loads(request.get_data()), is_global=True)
     new_note = Notification(
@@ -183,7 +182,6 @@ def get_single_notification(note_id):
         note = feed.get_notification(note_id)
     except NotificationNotFoundError:
         note = NotificationFeed(cfg.global_feed).get_notification(note_id)
-
     return (flask.jsonify({'notification': note.user_view()}), 200)
 
 

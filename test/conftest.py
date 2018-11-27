@@ -3,6 +3,12 @@ import configparser
 import pytest
 import tempfile
 import json
+import feeds
+import test.util as test_util
+from .util import test_config
+from .mongo_controller import MongoController
+import shutil
+
 
 def pytest_sessionstart(session):
     os.environ['AUTH_TOKEN'] = 'foo'
@@ -11,17 +17,25 @@ def pytest_sessionstart(session):
 def pytest_sessionfinish(session, exitstatus):
     pass
 
-def test_config():
-    """
-    Returns a ConfigParser.
-    Because I'm lazy.
-    """
-    cfg = configparser.ConfigParser()
-    with open(os.environ['FEEDS_CONFIG'], 'r') as f:
-        cfg.read_file(f)
-    return cfg
+@pytest.fixture(scope="module")
+def mongo():
+    mongoexe = test_util.get_mongo_exe()
+    tempdir = test_util.get_temp_dir()
+    mongo = MongoController(mongoexe, tempdir)
+    print("running MongoDB {} on port {} in dir {}".format(
+        mongo.db_version, mongo.port, mongo.temp_dir
+    ))
+    feeds.config.__config.db_port = mongo.port
+    feeds.storage.mongodb.connection._connection = None
 
-@pytest.fixture
+    yield mongo
+    del_temp = test_util.get_delete_temp_files()
+    print("Shutting down MongoDB,{} deleting temp files".format(" not" if not del_temp else ""))
+    mongo.destroy(del_temp)
+    if del_temp:
+        shutil.rmtree(test_util.get_temp_dir())
+
+@pytest.fixture(scope="module")
 def app():
     from feeds.server import create_app
     db_fd, db_path = tempfile.mkstemp()
@@ -33,13 +47,9 @@ def app():
     os.close(db_fd)
     os.unlink(db_path)
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def client(app):
     return app.test_client()
-
-@pytest.fixture
-def runner(app):
-    return app.test_cli_runner()
 
 @pytest.fixture
 def mock_valid_user(requests_mock):
@@ -155,12 +165,12 @@ def mock_invalid_user_token(requests_mock):
         cfg = test_config()
         auth_url = cfg.get('feeds', 'auth-url')
         requests_mock.register_uri('GET', '{}/api/V2/token'.format(auth_url),
-            status_code=401,
+            status_code=403,
             json={
                 "error": {
                     "appcode": 10020,
                     "apperror": "Invalid token",
-                    "httpcode": 401,
+                    "httpcode": 403,
                     "httpstatus": "Unauthorized"
                 }
             }

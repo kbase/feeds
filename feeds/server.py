@@ -142,17 +142,23 @@ def create_app(test_config=None):
     @app.errorhandler(json.JSONDecodeError)
     def handle_illegal_parameter(err):
         _log_error(err)
-        return _make_error(err, "Incorrect data format", 400)
-
-    @app.errorhandler(InvalidTokenError)
-    def handle_invalid_token(err):
-        _log_error(err)
-        return _make_error(err, "Invalid token", 401)
+        msg = "Incorrect data format"
+        if str(err):
+            msg = str(err)
+        return _make_error(err, msg, 400)
 
     @app.errorhandler(MissingTokenError)
     def handle_missing_token(err):
         _log_error(err)
-        return _make_error(err, "Authentication token required", 403)
+        return _make_error(err, "Authentication token required", 401)
+
+    @app.errorhandler(InvalidTokenError)
+    def handle_invalid_token(err):
+        _log_error(err)
+        msg = "Invalid auth token"
+        if str(err):
+            msg = str(err)
+        return _make_error(err, msg, 403)
 
     @app.errorhandler(NotificationNotFoundError)
     def handle_missing_notification(err):
