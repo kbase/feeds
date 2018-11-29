@@ -14,7 +14,7 @@ docs:
 	mkdir -p docs
 	sphinx-apidoc --separate -o docsource/internal_apis feeds
 
-test:
+test: all
 	# flake8 feeds
 	pytest --verbose test --cov=feeds --cov-report html feeds -s
 
