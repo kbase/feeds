@@ -14,11 +14,11 @@ docs:
 	mkdir -p docs
 	sphinx-apidoc --separate -o docsource/internal_apis feeds
 
-test:
+test: all
 	# flake8 feeds
 	pytest --verbose test --cov=feeds --cov-report html feeds -s
 
-start:
+start: all
 	gunicorn --worker-class gevent --timeout 300 --workers 5 --bind :5000 feeds.server:app
 
 .PHONY: test docs
