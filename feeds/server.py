@@ -35,6 +35,13 @@ from feeds.logger import (
 
 VERSION = "0.0.2"
 
+try:
+    from feeds import gitcommit
+except ImportError:  # pragma: no cover
+    # tested manually
+    raise ValueError('Did not find git commit file at feeds/gitcommit.py '   # pragma: no cover
+                     'The build may not have completed correctly.')          # pragma: no cover
+
 
 def _initialize_logging():
     root = logging.getLogger()
@@ -92,6 +99,7 @@ def create_app(test_config=None):
     def root():
         return flask.jsonify({
             "service": "Notification Feeds Service",
+            "gitcommithash": gitcommit.commit,
             "version": VERSION,
             "servertime": epoch_ms()
         })
