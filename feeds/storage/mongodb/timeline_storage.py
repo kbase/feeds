@@ -39,9 +39,6 @@ class MongoTimelineStorage(TimelineStorage):
         serial_notes = [note for note in timeline]
         return serial_notes
 
-    def remove_from_timeline(self, activity_ids):
-        raise NotImplementedError()
-
     def get_single_activity_from_timeline(self, note_id):
         coll = get_feeds_collection()
         query = {

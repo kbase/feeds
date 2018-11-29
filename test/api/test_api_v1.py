@@ -344,6 +344,160 @@ def test_mark_notifications_unseen_invalid_auth(client, mongo_notes, mock_invali
     assert 'error' in data
     assert data['error']['http_code'] == 403
 
+###
+# POST /notifications/expire
+###
+
+def test_expire_notifications_admin(client, mongo_notes, mock_valid_admin_token):
+    # make a notification
+    mock_valid_admin_token("kbase_admin", "KBase Admin")
+    admin_cred = {"Authorization": "token-"+str(uuid4())}
+    note = {
+        "verb": 1,
+        "level": 1,
+        "object": "stuff",
+    }
+    response = client.post(
+        "/api/V1/notification/global",
+        headers=admin_cred,
+        json=note
+    )
+    post_return = json.loads(response.data)
+    assert 'id' in post_return
+    # get its id
+    note_id = post_return['id']
+    # verify it gets returned from the global stack
+    response2 = client.get(
+        "/api/V1/notifications/global"
+    )
+    global_notes = json.loads(response2.data)
+    global_ids = [n["id"] for n in global_notes]
+    assert note_id in global_ids
+    # expire it
+    response3 = client.post(
+        "/api/V1/notifications/expire",
+        headers=admin_cred,
+        json={"note_ids": [note_id, "fake_id"]}
+    )
+    expire_return = json.loads(response3.data)
+    assert expire_return == {
+        "expired": {"note_ids": [note_id], "external_keys": []},
+        "unauthorized": {"note_ids": ["fake_id"], "external_keys": []}
+    }
+    # make sure it doesn't show up any more
+    response4 = client.get(
+        "/api/V1/notifications/global"
+    )
+    global_notes = json.loads(response4.data)
+    global_ids = [n["id"] for n in global_notes]
+    assert note_id not in global_ids
+
+def test_expire_notifications_service(client, mongo_notes, mock_valid_service_token, mock_valid_user):
+    service = "my_service"
+    mock_valid_user("kbasetest", "KBase Test")
+    mock_valid_service_token("kbase_admin", "KBase Admin", service)
+    service_cred = {"Authorization": "token-"+str(uuid4())}
+    ext_key = "an_external_key"
+    # make a notification
+    note = {
+        "actor": "kbasetest",
+        "verb": 1,
+        "level": 1,
+        "object": "stuff",
+        "source": service,
+        "target": []
+    }
+    response = client.post(
+        "/api/V1/notification",
+        headers=service_cred,
+        json=note
+    )
+    post_return = json.loads(response.data)
+    assert 'id' in post_return
+    # get its id
+    note_id = post_return['id']
+
+    # make a notification with an external key
+    note2 = {
+        "actor": "kbasetest",
+        "verb": 1,
+        "level": 1,
+        "object": "stuff",
+        "source": service,
+        "external_key": ext_key,
+        "target": []
+    }
+    response = client.post(
+        "/api/V1/notification",
+        headers=service_cred,
+        json=note2
+    )
+    post_return = json.loads(response.data)
+    assert 'id' in post_return
+    # get its id
+    note_id2 = post_return['id']
+
+    expire_res = client.post(
+        "/api/V1/notifications/expire",
+        headers=service_cred,
+        json={"note_ids": [note_id, "fake_id"], "external_keys": [ext_key, "fake_key"]}
+    )
+    expire_data = json.loads(expire_res.data)
+    assert expire_data == {
+        "expired": {
+            "note_ids": [note_id],
+            "external_keys": [ext_key]
+        },
+        "unauthorized": {
+            "note_ids": ["fake_id"],
+            "external_keys": ["fake_key"]
+        }
+    }
+
+@pytest.mark.parametrize("inputs,code,msg", [
+    ({"note_ids":[],"external_keys":[]}, 200, None),
+    ({"note_ids":[None],"external_keys":[None]}, 400, "note_ids must be a list of strings"),
+    ({"note_ids":["foo"],"external_keys":[None]}, 400, "external_keys must be a list of strings"),
+    ({"note_ids": None, "external_keys":[]}, 400, "Expected note_ids to be a list."),
+    ({"note_ids":[], "external_keys":None}, 400, "Expected external_keys to be a list."),
+    ({"note_ids":[{}], "external_keys":[]}, 400, "note_ids must be a list of strings"),
+    ({"note_ids":[], "external_keys":[{}]}, 400, "external_keys must be a list of strings"),
+    ({}, 422, 'Missing parameter "note_ids" or "external_keys"'),
+    ("foo!", 400, 'Expected a JSON object as an input.')
+])
+def test_expire_notifications_bad_inputs(client, mock_valid_service_token, inputs, code, msg):
+    mock_valid_service_token('user', 'name', 'service')
+    header = {"Authorization": "token-"+str(uuid4())}
+    response = client.post('/api/V1/notifications/expire', headers=header, json=inputs)
+    assert response.status_code == code
+    if msg is None:
+        return
+    assert json.loads(response.data)['error']['message'] == msg
+
+
+def test_expire_notifications_no_auth(client):
+    response = client.post('/api/V1/notifications/expire')
+    data = json.loads(response.data)
+    assert 'error' in data
+    assert data['error']['http_code'] == 401
+    assert data['error']['message'] == 'Authentication token required'
+
+def test_expire_notifications_invalid_auth(client, mock_invalid_user_token):
+    mock_invalid_user_token('fake_user')
+    response = client.post('/api/V1/notifications/expire', headers={"Authorization": "bad_token-"+str(uuid4())})
+    data = json.loads(response.data)
+    assert 'error' in data
+    assert data['error']['http_code'] == 403
+
+def test_expire_notifications_user_auth(client, mock_valid_user_token):
+    mock_valid_user_token('fake_user', 'Fake User')
+    response = client.post('/api/V1/notifications/expire', headers={"Authorization": "token-"+str(uuid4())})
+    data = json.loads(response.data)
+    assert 'error' in data
+    assert data['error']['http_code'] == 403
+    assert data['error']['message'] == 'Auth token must be either a Service token or from a user with the FEEDS_ADMIN role!'
+
+
 
 def _validate_notification(note):
     """

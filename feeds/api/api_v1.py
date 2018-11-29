@@ -194,7 +194,6 @@ def mark_notifications_unseen():
     raise an error.
     Any of these ids that are global, do nothing... for now.
     """
-
     user_id = validate_user_token(get_auth_token(request))
 
     params = _get_mark_notification_params(json.loads(request.get_data()))
@@ -243,26 +242,74 @@ def mark_notifications_seen():
     return (flask.jsonify({'seen_notes': seen_notes,
                            'unauthorized_notes': unauthorized_notes}), 200)
 
-@api_v1.route('/notification/expire', methods=['POST'])
-@cross_origin
-def expire_notification():
+
+@api_v1.route('/notifications/expire', methods=['POST'])
+@cross_origin()
+def expire_notifications():
     """
     Notifications can be forced to expire (set their expiration time to now).
     This can be done by:
         * The service who created the notification
         * An admin
+    Expects JSON in the body formatted like this:
+    {
+        "note_ids": [notification ids],
+        "external_keys": [keys]
+    }
+    These keys are both optional, but at least one must be present. Any combination of external
+    keys or ids is acceptable, even if they're the same notification.
+    This returns the following:
+    {
+        "expired": {
+            "note_ids": [],
+            "external_keys": []
+        }
+        "unauthorized": {
+            "note_ids": [],
+            "external_keys": []
+        }
+    }
+    This should just return the same lists of values that were input, just shuffled to
+    their final status.
     """
     token = get_auth_token(request)
+    is_admin = is_feeds_admin(token)
+    service = None
     try:
         service = validate_service_token(token)
     except InvalidTokenError:
-        if cfg.debug:
-            if not is_feeds_admin(token):
-                raise InvalidTokenError('Auth token must be either a Service token '
-                                        'or from a user with the FEEDS_ADMIN role!')
-        else:
-            raise
+        if not is_admin:
+            raise InvalidTokenError('Auth token must be either a Service token '
+                                    'or from a user with the FEEDS_ADMIN role!')
+    data = _get_expire_notifications_params(json.loads(request.get_data()))
+    manager = NotificationManager()
+    result = manager.expire_notifications(data.get('note_ids', []), data.get('external_keys', []),
+                                          source=service, is_admin=is_admin)
+    return (flask.jsonify(result), 200)
 
+
+def _get_expire_notifications_params(params):
+    if not isinstance(params, dict):
+        raise IllegalParameterError('Expected a JSON object as an input.')
+
+    if 'note_ids' not in params and 'external_keys' not in params:
+        raise MissingParameterError('Missing parameter "note_ids" or "external_keys"')
+
+    if not isinstance(params.get('note_ids', []), list):
+        raise IllegalParameterError('Expected note_ids to be a list.')
+    else:
+        for i in params.get('note_ids', []):
+            if not isinstance(i, str):
+                raise IllegalParameterError('note_ids must be a list of strings')
+
+    if not isinstance(params.get('external_keys', []), list):
+        raise IllegalParameterError('Expected external_keys to be a list.')
+    else:
+        for i in params.get('external_keys', []):
+            if not isinstance(i, str):
+                raise IllegalParameterError('external_keys must be a list of strings')
+
+    return params
 
 
 def _get_mark_notification_params(params):
