@@ -275,11 +275,32 @@ Takes a list of notifications and marks them as unseen for the user who submitte
 
 ### Expire a notification right away
 This effectively deletes notifications by pushing their expiration time up to the time this request is made.
-* Path: `/api/V1/notification/expire`
+* Path: `/api/V1/notifications/expire`
 * Method: `POST`
-* Required header: `Authorization` - requires a service token.
-* URL Parameters: one of the following:
-    * `id` = the notification id
-    * `external_key` = the external key
-If both parameters are present, a 400 Bad Request error will be returned.
-Also note that services can only expire their own notifications.
+* Required header: `Authorization` - requires a service token or admin token.
+* Expected body:
+```
+{
+    "note_ids": [ list of notification ids ],
+    "external_keys": [ list of external keys ]
+}
+```
+At least one of the above keys must be present. If external keys are used, this must be called by a service
+with a valid service token that maps to the source key in the notification. That is, only services can expire
+their own notifications.
+
+(For now, admins can only expire global notifications)
+* Returns:
+```
+{
+    "expired": {
+        "note_ids": [ list of expired notification ids ],
+        "external_keys": [ list of expired notifications by external key ]
+    },
+    "unauthorized": {
+        "note_ids": [ list of not-expired note ids ],
+        "external_keys": [ list of not-expired external keys ]
+    }
+}
+```
+This will include all of the ids passed to the endpoint, put into one category or the other. Any that were "unauthorized" either don't exist, or came from a different service than the given auth token.
