@@ -2,7 +2,7 @@ import pymongo
 from ..base import TimelineStorage
 from .connection import get_feeds_collection
 import logging
-
+from feeds.util import epoch_ms
 
 class MongoTimelineStorage(TimelineStorage):
     """
@@ -21,8 +21,10 @@ class MongoTimelineStorage(TimelineStorage):
         """
         # TODO: input validation
         coll = get_feeds_collection()
+        now = epoch_ms()
         query = {
-            "users": self.user_id #{"$all": [self.user_id]}
+            "users": self.user_id,
+            "expires": {"$gt": now}
         }
         if not include_seen:
             query['unseen'] = self.user_id
@@ -36,9 +38,6 @@ class MongoTimelineStorage(TimelineStorage):
         timeline = coll.find(query).sort("created", order).limit(count)
         serial_notes = [note for note in timeline]
         return serial_notes
-
-    def remove_from_timeline(self, activity_ids):
-        raise NotImplementedError()
 
     def get_single_activity_from_timeline(self, note_id):
         coll = get_feeds_collection()

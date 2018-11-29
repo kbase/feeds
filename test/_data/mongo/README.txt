@@ -30,3 +30,5 @@ test_user
     * 8,9,10 have test_user3
 * external key:
     * 1,2,3 have external keys
+* expired (shouldn't be returned in a fetch ever):
+    * 11

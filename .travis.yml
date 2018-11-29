@@ -25,6 +25,7 @@ script:
   - export MONGOD=`pwd`/$MONGODB_VER/bin/mongod
   - sed -i "s#^mongo-exe.*#mongo-exe=$MONGOD#" test/test.cfg
   - cat test/test.cfg
+  - make
   - make test
 
 after_script:

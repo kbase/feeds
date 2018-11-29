@@ -11,7 +11,7 @@
         ],
         "level" : 1,
         "created" : 1540877025814,
-        "expires" : 1543469025814,
+        "expires" : 15434690258140,
         "external_key" : "key1",
         "users" : [
             "test_user"
@@ -32,7 +32,7 @@
         ],
         "level" : 1,
         "created" : 1540877025820,
-        "expires" : 1543469025814,
+        "expires" : 15434690258140,
         "external_key" : "key2",
         "users" : [
             "test_user"
@@ -53,7 +53,7 @@
         ],
         "level" : 1,
         "created" : 1540877026814,
-        "expires" : 1543469025814,
+        "expires" : 15434690258140,
         "external_key" : "key3",
         "users" : [
             "test_user"
@@ -74,7 +74,7 @@
         ],
         "level" : 2,
         "created" : 1540877027814,
-        "expires" : 1543469025814,
+        "expires" : 15434690258140,
         "external_key" : null,
         "users" : [
             "test_user"
@@ -95,7 +95,7 @@
         ],
         "level" : 2,
         "created" : 1540877028814,
-        "expires" : 1543469025814,
+        "expires" : 15434690258140,
         "external_key" : null,
         "users" : [
             "test_user"
@@ -116,7 +116,7 @@
         ],
         "level" : 2,
         "created" : 1540877029814,
-        "expires" : 1543469025814,
+        "expires" : 15434690258140,
         "external_key" : null,
         "users" : [
             "test_user", "test_user2"
@@ -137,7 +137,7 @@
         ],
         "level" : 3,
         "created" : 1540877030814,
-        "expires" : 1543469025814,
+        "expires" : 15434690258140,
         "external_key" : null,
         "users" : [
             "test_user", "test_user2"
@@ -158,7 +158,7 @@
         ],
         "level" : 3,
         "created" : 1540877031814,
-        "expires" : 1543469025814,
+        "expires" : 15434690258140,
         "external_key" : null,
         "users" : [
             "test_user", "test_user2", "test_user3"
@@ -179,7 +179,7 @@
         ],
         "level" : 3,
         "created" : 1540877032814,
-        "expires" : 1543469025814,
+        "expires" : 15434690258140,
         "external_key" : null,
         "users" : [
             "test_user", "test_user2", "test_user3"
@@ -200,13 +200,34 @@
         ],
         "level" : 4,
         "created" : 1540877033814,
-        "expires" : 1543469025814,
+        "expires" : 15434690258140,
         "external_key" : null,
         "users" : [
             "test_user", "test_user2", "test_user3"
         ],
         "unseen" : [
             "test_user2", "test_user3"
+        ]
+    },
+    {
+        "id": "11",
+        "actor": "kbasetest",
+        "verb": 1,
+        "object": "123",
+        "source": "groups",
+        "context": null,
+        "target": [
+            "test_user"
+        ],
+        "level": 4,
+        "created": 1543343647217,
+        "expires": 1543343647217,
+        "external_key": null,
+        "users": [
+            "test_user"
+        ],
+        "unseen": [
+            "test_user"
         ]
     },
     {
@@ -220,7 +241,7 @@
         },
         "level": 1,
         "created" : 1540877034814,
-        "expires" : 1543469025814,
+        "expires" : 15434690258140,
         "external_key": null,
         "users": ["_kbase_"],
         "unseen": ["_kbase_"]
@@ -237,7 +258,7 @@
         ],
         "level" : 4,
         "created" : 1540877033814,
-        "expires" : 1543469025814,
+        "expires" : 15434690258140,
         "external_key" : null,
         "users" : [
             "test_see"
@@ -258,7 +279,7 @@
         ],
         "level" : 4,
         "created" : 1540877033814,
-        "expires" : 1543469025814,
+        "expires" : 15434690258140,
         "external_key" : null,
         "users" : [
             "test_unsee"

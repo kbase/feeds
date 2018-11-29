@@ -5,6 +5,7 @@ from feeds.exceptions import (
     ActivityStorageError
 )
 from pymongo.errors import PyMongoError
+from feeds.util import epoch_ms
 
 
 class MongoActivityStorage(ActivityStorage):
@@ -22,12 +23,6 @@ class MongoActivityStorage(ActivityStorage):
             coll.insert_one(act_doc)
         except PyMongoError as e:
             raise ActivityStorageError("Failed to store activity: " + str(e))
-
-    def get_from_storage(self, activity_ids, user):
-        pass
-
-    def remove_from_storage(self, activity_ids):
-        raise NotImplementedError()
 
     def set_unseen(self, act_ids: List[str], user: str):
         """
@@ -57,4 +52,54 @@ class MongoActivityStorage(ActivityStorage):
             'unseen': {'$all': [user]}
         }, {
             '$pull': {'unseen': user}
+        })
+
+    def get_by_id(self, act_ids: List[str], source: str=None):
+        """
+        If source is not None, return only those that match the source.
+        Returns a dict mapping from note id to note
+        """
+        if len(act_ids) == 0:
+            return {}
+        coll = get_feeds_collection()
+        query = {
+            'id': {'$in': act_ids}
+        }
+        if source is not None:
+            query['source'] = source
+        notes = {k:None for k in act_ids}
+        curs = coll.find(query)
+        for d in curs:
+            notes[d["id"]] = d
+        return notes
+
+    def get_by_external_key(self, external_keys: List[str], source):
+        """
+        Source HAS to exist here, it's part of the index.
+        Returns a dict mapping from external_key to note
+        """
+        assert source is not None
+        if len(external_keys) == 0:
+            return {}
+        coll = get_feeds_collection()
+        query = {
+            'external_key': {'$in': external_keys},
+            'source': source
+        }
+        notes = {k:None for k in external_keys}
+        curs = coll.find(query)
+        for d in curs:
+            notes[d["external_key"]] = d
+        return notes
+
+    def expire_notifications(self, act_ids: List[str]):
+        """
+        Expires notifications by changing their expiration time to now.
+        """
+        now = epoch_ms()
+        coll = get_feeds_collection()
+        coll.update_many({
+            'id': {'$in': act_ids}
+        }, {
+            '$set': {'expires': now}
         })

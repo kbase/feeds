@@ -58,3 +58,43 @@ class NotificationManager(BaseManager):
             user_list = list(set(note.users + note.target))
 
         return user_list
+
+    def expire_notifications(self, note_ids: list, external_keys: list, source: str=None, is_admin: bool=False):
+        """
+        Expires notifications.
+        All notifications identified by either their id, or external key, must come from the same
+        source as in the source parameter (i.e. the 'source' key in the database must == the source).
+        Or, an admin can expire any notification.
+        """
+        # Get the notifications from the note_ids and external_keys.
+        # -- mark as unauthorized the ones that don't exist.
+        # If is_admin, cool, expire them all.
+        # If source is not None and not is_admin, make a list of the ones that can be expired (from that source)
+        # expire the ones that we should.
+        # return the results.
+
+        storage = MongoActivityStorage()
+
+        notes_from_id = storage.get_by_id(note_ids, source=source)
+        notes_from_ext_key = {}
+        if source is not None and len(external_keys):
+            notes_from_ext_key = storage.get_by_external_key(external_keys, source)
+        unauthorized = {
+            "note_ids": [k for k in notes_from_id if notes_from_id[k] is None],
+            "external_keys": [k for k in notes_from_ext_key if notes_from_ext_key[k] is None]
+        }
+        ids_to_expire = list()
+        expired = {"note_ids": [], "external_keys": []}
+        for k,v in notes_from_id.items():
+            if v is not None:
+                ids_to_expire.append(k)
+                expired["note_ids"].append(k)
+        for k,v in notes_from_ext_key.items():
+            if v is not None:
+                ids_to_expire.append(v['id'])
+                expired["external_keys"].append(v['external_key'])
+        storage.expire_notifications(ids_to_expire)
+        return {
+            "unauthorized": unauthorized,
+            "expired": expired
+        }

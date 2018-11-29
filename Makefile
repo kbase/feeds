@@ -1,3 +1,9 @@
+GITCOMMIT = $(shell git rev-parse HEAD)
+
+all:
+	echo "# Don't check this file into git please" > feeds/gitcommit.py
+	echo 'commit = "$(GITCOMMIT)"' >> feeds/gitcommit.py
+
 install:
 	pip install -r requirements.txt
 	pip install -r dev-requirements.txt
