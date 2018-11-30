@@ -7,6 +7,7 @@ from test.mongo_controller import MongoController
 import shutil
 import os
 import feeds.config
+from feeds.util import epoch_ms
 
 
 @pytest.fixture(scope="module")
@@ -140,6 +141,57 @@ def test_post_notification_invalid_auth(client, mock_invalid_user_token):
 ###
 
 def test_add_global_notification(client, mock_valid_admin_token):
+    note = {
+        "verb": 1,
+        "object": "2",
+        "level": 1
+    }
+    mock_valid_admin_token("kbase_admin", "KBase Admin")
+    response = client.post(
+        "/api/V1/notification/global",
+        headers={"Authorization": "token-"+str(uuid4())},
+        json=note
+    )
+    data = json.loads(response.data)
+    assert "id" in data
+
+    response = client.get(
+        "/api/V1/notification/" + data["id"],
+        headers={"Authorization": "token-"+str(uuid4())}
+    )
+    data = json.loads(response.data)["notification"]
+    assert "expires" in data
+    assert "created" in data
+    assert data["created"] + (feeds.config.get_config().lifespan * 24 * 60 * 60 * 1000) == data["expires"]
+
+def test_add_global_notification_custom_expiration(client, mock_valid_admin_token):
+    expiration = epoch_ms() + 20000
+    note = {
+        "verb": 1,
+        "object": "2",
+        "level": 1,
+        "expires": expiration
+    }
+    mock_valid_admin_token("kbase_admin", "KBase Admin")
+    response = client.post(
+        "/api/V1/notification/global",
+        headers={"Authorization": "token-"+str(uuid4())},
+        json=note
+    )
+    data = json.loads(response.data)
+    assert "id" in data
+
+    response = client.get(
+        "/api/V1/notification/" + data["id"],
+        headers={"Authorization": "token-"+str(uuid4())}
+    )
+    data = json.loads(response.data)["notification"]
+    assert "expires" in data
+    assert "created" in data
+    assert data["expires"] == expiration
+
+
+def test_add_global_notification_expiration(client, mock_valid_admin_token):
     note = {
         "verb": 1,
         "object": "2",
