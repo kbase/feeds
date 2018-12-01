@@ -6,7 +6,10 @@ user feeds, based on the content and context of the Notification.
 See also the docs in NotificationFeed.
 """
 
-from typing import List
+from typing import (
+    List,
+    Dict
+)
 from .base import BaseManager
 from ..activity.notification import Notification
 from ..storage.mongodb.activity_storage import MongoActivityStorage
@@ -98,3 +101,14 @@ class NotificationManager(BaseManager):
             "unauthorized": unauthorized,
             "expired": expired
         }
+
+    def get_notifications_by_ext_keys(self, external_keys: List[str], source: str) -> Dict:
+        """
+        Fetches notifications by their external key and source.
+        These are returned as a dictionary where the keys are the
+        external_keys and values are notifications. Any notifications
+        that don't match the criteria are just returned as None.
+        """
+        assert source is not None
+        storage = MongoActivityStorage()
+        return storage.get_by_external_key(external_keys, source)

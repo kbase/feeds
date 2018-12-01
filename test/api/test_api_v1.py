@@ -278,6 +278,54 @@ def test_get_single_notification_wrong_user(client, mongo_notes, mock_valid_user
     assert data['error']['message'] == 'Cannot find notification with id 1.'
 
 ###
+# GET /notification/external_key/<ext_key>
+###
+def test_get_note_ext_key(client, mongo_notes, mock_valid_service_token):
+    # plugged into the test db is a note where:
+    # external_key = "key1"
+    # source = "ws"
+    # go fetch that.
+    mock_valid_service_token("ws_admin", "WS Admin", "ws")
+    response = client.get('/api/V1/notification/external_key/key1', headers={"Authorization": "token-"+str(uuid4())})
+    data = json.loads(response.data)
+    assert 'notification' in data
+    note = data['notification']
+    assert note['id'] == '1'
+    assert note['external_key'] == 'key1'
+    _validate_notification(note)
+
+def test_get_note_ext_key_404(client, mongo_notes, mock_valid_service_token):
+    mock_valid_service_token("ws_admin", "WS Admin", "ws")
+    response = client.get('/api/V1/notification/external_key/nope', headers={"Authorization": "token-"+str(uuid4())})
+    data = json.loads(response.data)
+    assert 'error' in data
+    assert data['error']['http_code'] == 404
+    assert data['error']['message'] == 'Cannot find notification with external_key nope and source ws.'
+
+def test_get_note_ext_key_noauth(client):
+    response = client.get('/api/V1/notification/external_key/foo')
+    data = json.loads(response.data)
+    assert 'error' in data
+    assert data['error']['http_code'] == 401
+    assert data['error']['message'] == 'Authentication token required'
+
+def test_get_note_ext_key_invalid_auth(client, mock_invalid_user_token):
+    mock_invalid_user_token("test_user")
+    response = client.get('/api/V1/notification/external_key/foo', headers={"Authorization": "token-"+str(uuid4())})
+    data = json.loads(response.data)
+    assert 'error' in data
+    assert data['error']['http_code'] == 403
+    assert data['error']['message'] == 'Invalid token'
+
+def test_get_note_ext_key_user_auth(client, mock_valid_user_token):
+    mock_valid_user_token("user", "Some User")
+    response = client.get('/api/V1/notification/external_key/foo', headers={"Authorization": "token-"+str(uuid4())})
+    data = json.loads(response.data)
+    assert 'error' in data
+    assert data['error']['http_code'] == 403
+    assert data['error']['message'] == 'Authentication token must be a Service token.'
+
+###
 # POST /notifications/see
 ###
 
