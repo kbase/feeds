@@ -85,9 +85,18 @@ def test_permissions_service(client, requests_mock, mock_valid_service_token):
     assert data['token'] == {'service': service_name, 'user': user_id, 'admin': False}
     assert 'permissions' in data
     assert 'GET' in data['permissions']
-    valid_gets = set(['/api/V1/notifications/global', '/api/V1/notifications', '/api/V1/notification/<note_id>'])
+    valid_gets = set([
+        '/api/V1/notifications/global',
+        '/api/V1/notifications',
+        '/api/V1/notification/<note_id>'
+    ])
     assert valid_gets == set(data['permissions']['GET'])
-    valid_posts = set(['/api/V1/notifications/see', '/api/V1/notifications/unsee', '/api/V1/notification'])
+    valid_posts = set([
+        '/api/V1/notifications/see',
+        '/api/V1/notifications/unsee',
+        '/api/V1/notification',
+        '/api/V1/notifications/expire'
+    ])
     assert valid_posts == set(data['permissions']['POST'])
 
 
@@ -101,9 +110,18 @@ def test_permissions_admin(client, requests_mock, mock_valid_admin_token):
     assert data['token'] == {'service': None, 'user': user_id, 'admin': True}
     assert 'permissions' in data
     assert 'GET' in data['permissions']
-    valid_gets = set(['/api/V1/notifications/global', '/api/V1/notifications', '/api/V1/notification/<note_id>'])
+    valid_gets = set([
+        '/api/V1/notifications/global',
+        '/api/V1/notifications',
+        '/api/V1/notification/<note_id>'
+    ])
     assert valid_gets == set(data['permissions']['GET'])
-    valid_posts = set(['/api/V1/notifications/see', '/api/V1/notifications/unsee', '/api/V1/notification/global'])
+    valid_posts = set([
+        '/api/V1/notifications/see',
+        '/api/V1/notifications/unsee',
+        '/api/V1/notification/global',
+        '/api/V1/notifications/expire'
+    ])
     assert valid_posts == set(data['permissions']['POST'])
 
 
