@@ -151,7 +151,7 @@ If you have the id of a notification and want to get its structure, just add it 
 * Path: `/api/V1/notification/<note_id>`
 * Method: `GET`
 * Required header: `Authorization`
-* Returns: a single Notification
+* Returns: a JSON object with a "notification" key where the value is the requested Notification.
 * Possible errors:
     * 404 Not Found
         * If the notification does not exist.
@@ -165,6 +165,18 @@ To just return the list of global notifications, use the global path. It returns
 * Method: `GET`
 * Required header: none
 * Returns: a list of Notifications
+
+### Get a single notification from an external key
+**(debug method)**  
+This is meant for services to debug their use of external keys. A service that created a notification with an external key can fetch that notification using that key and the auth token that created it (i.e. the proof it came from that service). As in getting a notification above, this returns a JSON object with a "notification" key and a single notification attached to it. Also, in contrast to the method above, this returns the entire Notification document as stored in the database (including the list of users it is intended for and whether they've marked it as seen).
+* Path: `/api/V1/notification/external_key/<key>`
+* Method: `GET`
+* Required header: `Authorization`
+* Returns: a JSON object with a "notification" key where the value is the requested Notification. This includes extra data that's stored in the database as well, but not usually available to users.
+* Possible errors:
+    * 404 Not Found - If the notification does not exist with that combination of external key and source.
+    * 401 Not Authenticated - if no auth token is provided.
+    * 403 Forbidden - If the token is invalid, or not a Service token.
 
 ### Create a new notification
 Only services (i.e. those Authorization tokens with type=Service, as told by the Auth service) can use this endpoint to create a new notification. This requires the body to be a JSON structure with the following available keys (pretty similar to the Notification structure above):

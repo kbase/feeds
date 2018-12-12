@@ -138,6 +138,7 @@ def create_app(test_config=None):
                 service = validate_service_token(token)
                 # TODO - add filter so only specific services can see these
                 perms['token']['service'] = service
+                perms['permissions']['GET'].append('/api/V1/notification/external_key/<key>')
                 perms['permissions']['POST'] = perms['permissions']['POST'] + \
                     ['/api/V1/notification', '/api/V1/notifications/expire']
             except InvalidTokenError:
