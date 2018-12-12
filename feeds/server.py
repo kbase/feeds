@@ -139,12 +139,14 @@ def create_app(test_config=None):
                 # TODO - add filter so only specific services can see these
                 perms['token']['service'] = service
                 perms['permissions']['GET'].append('/api/V1/notification/external_key/<key>')
-                perms['permissions']['POST'].append('/api/V1/notification')
+                perms['permissions']['POST'] = perms['permissions']['POST'] + \
+                    ['/api/V1/notification', '/api/V1/notifications/expire']
             except InvalidTokenError:
                 pass
             if is_feeds_admin(token):
                 perms['token']['admin'] = True
-                perms['permissions']['POST'].append('/api/V1/notification/global')
+                perms['permissions']['POST'] = perms['permissions']['POST'] + \
+                    ['/api/V1/notification/global', '/api/V1/notifications/expire']
         return (flask.jsonify(perms), 200)
 
     @app.errorhandler(IllegalParameterError)
