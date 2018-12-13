@@ -43,7 +43,7 @@ class MongoTimelineStorage(TimelineStorage):
         coll = get_feeds_collection()
         query = {
             "id": note_id,
-            "users": {"$all": [self.user_id]}
+            "users": self.user_id
         }
         note_serial = coll.find_one(query)
         if note_serial is None:
@@ -53,3 +53,9 @@ class MongoTimelineStorage(TimelineStorage):
         else:
             note_serial['seen'] = True
         return note_serial
+
+    # def get_unread_timeline(self):
+    #     coll = get_feeds_collection()
+    #     query = {
+    #         "users": self.user_id
+    #     }
