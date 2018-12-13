@@ -1,8 +1,8 @@
 import pymongo
 from ..base import TimelineStorage
 from .connection import get_feeds_collection
-import logging
 from feeds.util import epoch_ms
+
 
 class MongoTimelineStorage(TimelineStorage):
     """

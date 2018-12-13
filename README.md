@@ -109,11 +109,18 @@ Options are included to filter by level, source, whether a notification has been
     * `l` - filter by the level. Allowed values are `alert`, `warning`, `error`, and `request`
     * `v` - filter by the verb used. Allowed values are listed below under "Create a new notification", and include `invite`, `request`, `shared`, etc.
     * `seen` - return all notifications that have also been seen by the user if this is set to `1`.
+
 * Returns structure with 2 feeds:
 ```
 {
-    "global": [ array of global notifications ],
-    "user": [ array of user's notifications ]
+    "global": {
+        "unread": <number unread>,
+        "feed": [ array of global notifications ]
+    },
+    "user": {
+        "unread": <number unread>,
+        "feed": [ array of user's notifications ]
+    }
 }
 ```
 #### Examples

@@ -67,7 +67,7 @@ class MongoActivityStorage(ActivityStorage):
         }
         if source is not None:
             query['source'] = source
-        notes = {k:None for k in act_ids}
+        notes = {k: None for k in act_ids}
         curs = coll.find(query)
         for d in curs:
             notes[d["id"]] = d
@@ -86,7 +86,7 @@ class MongoActivityStorage(ActivityStorage):
             'external_key': {'$in': external_keys},
             'source': source
         }
-        notes = {k:None for k in external_keys}
+        notes = {k: None for k in external_keys}
         curs = coll.find(query)
         for d in curs:
             notes[d["external_key"]] = d
