@@ -26,6 +26,7 @@
     * Modeled on LinkedIn, Facebook, Twitter
 * Date/time input area instead of timestamp for global notes
 
+
 Kafka input data structure
 ~/kafka/2.1.0/kafka_2.11-2.1.0$ bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic feeds --from-beginning
 {
