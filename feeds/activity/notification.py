@@ -45,8 +45,8 @@ class Notification(BaseActivity):
         :param expires: if not None, set a new expiration date - should be an int, ms since epoch
         :param external_key: an optional special key given by the service that created the
             notification
-        :param seen: if True, then this Notification has been seen before. This will be context-dependent,
-            based on who is requesting this Notification.
+        :param seen: if True, then this Notification has been seen before. This will be
+            context-dependent, based on who is requesting this Notification.
 
         TODO:
             * decide on global ids for admin use

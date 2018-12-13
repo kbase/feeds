@@ -112,7 +112,7 @@ def add_notification():
     """
     token = get_auth_token(request)
     try:
-        service = validate_service_token(token)
+        validate_service_token(token)
     except InvalidTokenError:
         if cfg.debug:
             if not is_feeds_admin(token):

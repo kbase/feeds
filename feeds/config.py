@@ -23,6 +23,7 @@ KEY_NJS_URL = "njs-url"
 KEY_GROUPS_URL = "groups-url"
 KEY_WS_URL = "workspace-url"
 
+
 class FeedsConfig(object):
     """
     Loads a config set from the root deploy.cfg file. This should be in ini format.

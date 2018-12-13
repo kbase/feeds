@@ -15,7 +15,7 @@ docs:
 	sphinx-apidoc --separate -o docsource/internal_apis feeds
 
 test: all
-	# flake8 feeds
+	flake8 feeds
 	pytest --verbose test --cov=feeds --cov-report html feeds -s
 
 start: all

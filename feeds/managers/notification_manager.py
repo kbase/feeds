@@ -13,7 +13,6 @@ from typing import (
 from .base import BaseManager
 from ..activity.notification import Notification
 from ..storage.mongodb.activity_storage import MongoActivityStorage
-from feeds.config import get_config
 from .fanout_modules.groups import GroupsFanout
 from .fanout_modules.workspace import WorkspaceFanout
 from .fanout_modules.jobs import JobsFanout
@@ -62,17 +61,20 @@ class NotificationManager(BaseManager):
 
         return user_list
 
-    def expire_notifications(self, note_ids: list, external_keys: list, source: str=None, is_admin: bool=False):
+    def expire_notifications(self, note_ids: list, external_keys: list, source: str=None,
+                             is_admin: bool=False):
         """
         Expires notifications.
         All notifications identified by either their id, or external key, must come from the same
-        source as in the source parameter (i.e. the 'source' key in the database must == the source).
+        source as in the source parameter (i.e. the 'source' key in the database must == the
+        source).
         Or, an admin can expire any notification.
         """
         # Get the notifications from the note_ids and external_keys.
         # -- mark as unauthorized the ones that don't exist.
         # If is_admin, cool, expire them all.
-        # If source is not None and not is_admin, make a list of the ones that can be expired (from that source)
+        # If source is not None and not is_admin, make a list of the ones that can be expired
+        # (from that source)
         # expire the ones that we should.
         # return the results.
 
@@ -88,11 +90,11 @@ class NotificationManager(BaseManager):
         }
         ids_to_expire = list()
         expired = {"note_ids": [], "external_keys": []}
-        for k,v in notes_from_id.items():
+        for k, v in notes_from_id.items():
             if v is not None:
                 ids_to_expire.append(k)
                 expired["note_ids"].append(k)
-        for k,v in notes_from_ext_key.items():
+        for k, v in notes_from_ext_key.items():
             if v is not None:
                 ids_to_expire.append(v['id'])
                 expired["external_keys"].append(v['external_key'])

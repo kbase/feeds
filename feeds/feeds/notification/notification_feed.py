@@ -41,6 +41,11 @@ class NotificationFeed(BaseFeed):
             return activities
 
     def get_notification(self, note_id):
+        """
+        Returns a single notification.
+        If it doesn't exist (either the user can't see it, or it's really not there), raises
+        a NotificationNotFoundError.
+        """
         note = self.timeline_storage.get_single_activity_from_timeline(note_id)
         if note is None:
             raise NotificationNotFoundError("Cannot find notification with id {}.".format(note_id))
