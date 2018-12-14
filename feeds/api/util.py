@@ -25,7 +25,7 @@ def parse_notification_params(params: dict, is_global: bool=False) -> dict:
     required_list = ['verb', 'object', 'level']
     if not is_global:
         required_list = required_list + ['actor', 'target', 'source']
-    missing = [r for r in required_list if r not in params]
+    missing = [r for r in required_list if r not in params or params.get(r) is None]
     if missing:
         raise MissingParameterError("Missing parameter{} - {}".format(
             "s" if len(missing) > 1 else '',

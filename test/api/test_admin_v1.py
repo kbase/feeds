@@ -5,12 +5,14 @@ from uuid import uuid4
 from feeds.util import epoch_ms
 import feeds.config
 
+
 @pytest.fixture(scope="module")
 def mongo_notes(mongo):
     test_db_path = os.path.join(os.path.dirname(__file__), "..", "_data", "mongo", "notifications.json")
     with open(test_db_path, "r") as db_file:
         objects = json.loads(db_file.read())
     mongo.client['feeds']['notifications'].insert_many(objects)
+
 
 def test_api_root(client):
     response = client.get('/admin/api/V1')
@@ -45,6 +47,7 @@ def test_add_global_notification(client, mock_valid_admin_token, mongo):
     assert "expires" in data
     assert "created" in data
     assert data["created"] + (feeds.config.get_config().lifespan * 24 * 60 * 60 * 1000) == data["expires"]
+
 
 def test_add_global_notification_custom_expiration(client, mock_valid_admin_token, mongo):
     expiration = epoch_ms() + 20000
@@ -88,6 +91,7 @@ def test_add_global_notification_expiration(client, mock_valid_admin_token, mong
     data = json.loads(response.data)
     assert "id" in data
 
+
 def test_add_global_notification_user_auth(client, mock_valid_user_token):
     mock_valid_user_token("not_admin", "Not Admin")
     response = client.post(
@@ -99,6 +103,7 @@ def test_add_global_notification_user_auth(client, mock_valid_user_token):
     assert data["error"]["http_code"] == 403
     assert data["error"]["message"] == \
         "You do not have permission to create a global notification!"
+
 
 def test_add_global_notification_invalid_auth(client, mock_invalid_user_token):
     mock_invalid_user_token("test_user")
@@ -147,6 +152,41 @@ def test_expire_notifications_admin_inputs(client, mongo_notes, mock_valid_admin
         return
     assert json.loads(response.data)['error']['message'] == msg
 
+
+def test_admin_expire_no_auth(client):
+    response = client.post('/admin/api/V1/notifications/expire')
+    data = json.loads(response.data)
+    assert 'error' in data
+    assert data['error']['http_code'] == 401
+    assert data['error']['message'] == 'Authentication token required'
+
+
+def test_admin_expire_user_auth(client, mock_valid_user_token):
+    mock_valid_user_token("not_admin", "Not Admin")
+    response = client.post(
+        '/admin/api/V1/notifications/expire',
+        headers={"Authorization": "token-"+str(uuid4())}
+    )
+    data = json.loads(response.data)
+    assert "error" in data
+    assert data["error"]["http_code"] == 403
+    assert data["error"]["message"] == \
+        "Only admins can use this path to expire tokens."
+
+
+def test_admin_expire_service_auth(client, mock_valid_service_token):
+    mock_valid_service_token("service_user", "Service User", "aservice")
+    response = client.post(
+        '/admin/api/V1/notifications/expire',
+        headers={"Authorization": "token-"+str(uuid4())}
+    )
+    data = json.loads(response.data)
+    assert "error" in data
+    assert data["error"]["http_code"] == 403
+    assert data["error"]["message"] == \
+        "Only admins can use this path to expire tokens."
+
+
 def test_expire_notifications_admin(client, mongo_notes, mock_valid_admin_token):
     # make a notification
     mock_valid_admin_token("kbase_admin", "KBase Admin")
@@ -191,7 +231,59 @@ def test_expire_notifications_admin(client, mongo_notes, mock_valid_admin_token)
     global_ids = [n["id"] for n in global_notes["feed"]]
     assert note_id not in global_ids
 
+
 def test_expire_notification_admin_from_service(client, mongo_notes, mock_valid_admin_token, mock_valid_service_token, mock_valid_user):
     source = "a_service"
+    external_key = "foobarkey"
     mock_valid_user("kbasetest", "KBase Test")
     mock_valid_service_token("user", "Name", source)
+    # service creates two notifications - one with external key
+    service_cred = {"Authorization": "token-"+str(uuid4())}
+    note = {
+        "actor": "kbasetest",
+        "verb": 1,
+        "level": 1,
+        "object": "stuff",
+        "users": ["kbasetest"],
+        "source": source,
+        "target": ["kbasetest"]
+    }
+    response = client.post(
+        "/api/V1/notification",
+        headers = service_cred,
+        json=note
+    )
+    post_return = json.loads(response.data)
+    assert "id" in post_return
+    note_id = post_return["id"]
+    note["external_key"] = external_key
+    response2 = client.post(
+        "/api/V1/notification",
+        headers=service_cred,
+        json=note
+    )
+    post_return2 = json.loads(response2.data)
+    assert "id" in post_return2
+    # now invoke the admin to delete both of those. Should succeed.
+    mock_valid_admin_token("some_admin", "Some Admin")
+    admin_cred = {"Authorization": "token-"+str(uuid4())}
+    exp_response = client.post(
+        "/admin/api/V1/notifications/expire",
+        headers=admin_cred,
+        json={
+            "note_ids": [note_id],
+            "external_keys": [external_key],
+            "source": source
+        }
+    )
+    exp_data = json.loads(exp_response.data)
+    assert exp_data == {
+        "expired": {
+            "note_ids": [note_id],
+            "external_keys": [external_key]
+        },
+        "unauthorized": {
+            "note_ids": [],
+            "external_keys": []
+        }
+    }
