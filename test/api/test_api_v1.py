@@ -35,8 +35,9 @@ def test_get_notifications(client, mock_valid_user_token, mongo_notes):
     response = client.get('/api/V1/notifications', headers={"Authorization": "token-"+str(uuid4())})
     # Got the fake db in _data/mongo/notifications.json
     data = json.loads(response.data)
-    assert len(data['user']) == 7
-    for note in data['global'] + data['user']:
+    pprint(data)
+    assert len(data['user']['feed']) == data['user']['unseen'] == 7
+    for note in data['global']['feed'] + data['user']['feed']:
         _validate_notification(note)
 
 @pytest.mark.parametrize("filters,expected", [
@@ -58,8 +59,9 @@ def test_get_notifications_filtered(client, mock_valid_user_token, filters, expe
     route = '/api/V1/notifications?' + filters
     response = client.get(route, headers={"Authorization": "token-"+str(uuid4())})
     data = json.loads(response.data)
-    assert len(data['user']) == len(expected)
-    note_order = [n['id'] for n in data['user']]
+    assert len(data['user']['feed']) == len(expected)
+    assert data['user']['unseen'] == 7
+    note_order = [n['id'] for n in data['user']['feed']]
     assert note_order == expected
 
 def test_get_notifications_no_auth(client):
@@ -108,8 +110,8 @@ def test_post_notification_ok(client, mock_valid_service_token, mock_valid_user_
     mock_valid_user_token(test_user, "Some Name")
     response = client.get("/api/V1/notifications", headers={"Authorization": "token-"+str(uuid4())})
     data_return = json.loads(response.data)
-    assert len(data_return['user']) == 1
-    assert data_return['user'][0]['id'] == note_id
+    assert len(data_return['user']['feed']) == 1
+    assert data_return['user']['feed'][0]['id'] == note_id
 
 
 def test_post_notification_no_auth(client):
@@ -237,7 +239,7 @@ def test_add_global_notification_no_auth(client):
 def test_get_global_notifications(client):
     response = client.get('/api/V1/notifications/global')
     data = json.loads(response.data)
-    assert len(data) >= 1 and data[-1]["id"] == "global-1"
+    assert len(data["feed"]) >= 1 and data["feed"][-1]["id"] == "global-1"
 
 ###
 # GET /notification/<note_id>
@@ -471,7 +473,7 @@ def test_expire_notifications_admin(client, mongo_notes, mock_valid_admin_token)
         "/api/V1/notifications/global"
     )
     global_notes = json.loads(response2.data)
-    global_ids = [n["id"] for n in global_notes]
+    global_ids = [n["id"] for n in global_notes["feed"]]
     assert note_id in global_ids
     # expire it
     response3 = client.post(
@@ -489,7 +491,7 @@ def test_expire_notifications_admin(client, mongo_notes, mock_valid_admin_token)
         "/api/V1/notifications/global"
     )
     global_notes = json.loads(response4.data)
-    global_ids = [n["id"] for n in global_notes]
+    global_ids = [n["id"] for n in global_notes["feed"]]
     assert note_id not in global_ids
 
 def test_expire_notifications_service(client, mongo_notes, mock_valid_service_token, mock_valid_user):

@@ -54,8 +54,12 @@ class MongoTimelineStorage(TimelineStorage):
             note_serial['seen'] = True
         return note_serial
 
-    # def get_unread_timeline(self):
-    #     coll = get_feeds_collection()
-    #     query = {
-    #         "users": self.user_id
-    #     }
+    def get_unseen_count(self):
+        coll = get_feeds_collection()
+        now = epoch_ms()
+        query = {
+            "users": self.user_id,
+            "unseen": self.user_id,
+            "expires": {"$gt": now}
+        }
+        return coll.find(query).count()

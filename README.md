@@ -114,11 +114,11 @@ Options are included to filter by level, source, whether a notification has been
 ```
 {
     "global": {
-        "unread": <number unread>,
+        "unseen": <number unseen>,
         "feed": [ array of global notifications ]
     },
     "user": {
-        "unread": <number unread>,
+        "unseen": <number unseen>,
         "feed": [ array of user's notifications ]
     }
 }
