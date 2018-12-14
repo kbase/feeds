@@ -21,7 +21,7 @@ def test_api_root(client):
     response = client.get('/api/V1')
     data = json.loads(response.data)
     assert 'routes' in data
-    assert len(data['routes']) == 8
+    assert len(data['routes']) == 7
 
 ###
 # GET /notifications
@@ -52,7 +52,7 @@ def test_get_notifications(client, mock_valid_user_token, mongo_notes):
     ("l=alert", ['3', '2', '1']),
     ("l=1", ['3', '2', '1'])
 ])
-def test_get_notifications_filtered(client, mock_valid_user_token, filters, expected):
+def test_get_notifications_filtered(client, mock_valid_user_token, filters, expected, mongo_notes):
     user_id="test_user"
     user_name="Test User"
     mock_valid_user_token(user_id, user_name)
@@ -84,7 +84,7 @@ def test_get_notifications_invalid_auth(client, mock_invalid_user_token):
 # POST /notification
 ###
 
-def test_post_notification_ok(client, mock_valid_service_token, mock_valid_user_token, mock_valid_user):
+def test_post_notification_ok(client, mock_valid_service_token, mock_valid_user_token, mock_valid_user, mongo_notes):
     service = "a_service"
     test_user = "test_note"
     test_actor = "test_actor"
@@ -137,100 +137,6 @@ def test_post_notification_invalid_auth(client, mock_invalid_user_token):
     assert data['error']['http_code'] == 403
     assert data['error']['message'] == 'Invalid token'
 
-
-###
-# POST /notification/global
-###
-
-def test_add_global_notification(client, mock_valid_admin_token):
-    note = {
-        "verb": 1,
-        "object": "2",
-        "level": 1
-    }
-    mock_valid_admin_token("kbase_admin", "KBase Admin")
-    response = client.post(
-        "/api/V1/notification/global",
-        headers={"Authorization": "token-"+str(uuid4())},
-        json=note
-    )
-    data = json.loads(response.data)
-    assert "id" in data
-
-    response = client.get(
-        "/api/V1/notification/" + data["id"],
-        headers={"Authorization": "token-"+str(uuid4())}
-    )
-    data = json.loads(response.data)["notification"]
-    assert "expires" in data
-    assert "created" in data
-    assert data["created"] + (feeds.config.get_config().lifespan * 24 * 60 * 60 * 1000) == data["expires"]
-
-def test_add_global_notification_custom_expiration(client, mock_valid_admin_token):
-    expiration = epoch_ms() + 20000
-    note = {
-        "verb": 1,
-        "object": "2",
-        "level": 1,
-        "expires": expiration
-    }
-    mock_valid_admin_token("kbase_admin", "KBase Admin")
-    response = client.post(
-        "/api/V1/notification/global",
-        headers={"Authorization": "token-"+str(uuid4())},
-        json=note
-    )
-    data = json.loads(response.data)
-    assert "id" in data
-
-    response = client.get(
-        "/api/V1/notification/" + data["id"],
-        headers={"Authorization": "token-"+str(uuid4())}
-    )
-    data = json.loads(response.data)["notification"]
-    assert "expires" in data
-    assert "created" in data
-    assert data["expires"] == expiration
-
-
-def test_add_global_notification_expiration(client, mock_valid_admin_token):
-    note = {
-        "verb": 1,
-        "object": "2",
-        "level": 1
-    }
-    mock_valid_admin_token("kbase_admin", "KBase Admin")
-    response = client.post(
-        "/api/V1/notification/global",
-        headers={"Authorization": "token-"+str(uuid4())},
-        json=note
-    )
-    data = json.loads(response.data)
-    assert "id" in data
-
-def test_add_global_notification_user_auth(client, mock_valid_user_token):
-    mock_valid_user_token("not_admin", "Not Admin")
-    response = client.post('/api/V1/notification/global', headers={"Authorization": "token-"+str(uuid4())})
-    data = json.loads(response.data)
-    assert "error" in data
-    assert data["error"]["http_code"] == 403
-    assert data["error"]["message"] == "You do not have permission to create a global notification!"
-
-def test_add_global_notification_invalid_auth(client, mock_invalid_user_token):
-    mock_invalid_user_token("test_user")
-    response = client.post('/api/V1/notification/global', headers={"Authorization": "token-"+str(uuid4())})
-    data = json.loads(response.data)
-    assert 'error' in data
-    assert data['error']['http_code'] == 403
-    assert data['error']['message'] == 'Invalid token'
-
-
-def test_add_global_notification_no_auth(client):
-    response = client.post('/api/V1/notification/global')
-    data = json.loads(response.data)
-    assert 'error' in data
-    assert data['error']['http_code'] == 401
-    assert data['error']['message'] == 'Authentication token required'
 
 ###
 # GET /notifications/global
@@ -450,50 +356,6 @@ def test_mark_notifications_unseen_invalid_auth(client, mongo_notes, mock_invali
 # POST /notifications/expire
 ###
 
-def test_expire_notifications_admin(client, mongo_notes, mock_valid_admin_token):
-    # make a notification
-    mock_valid_admin_token("kbase_admin", "KBase Admin")
-    admin_cred = {"Authorization": "token-"+str(uuid4())}
-    note = {
-        "verb": 1,
-        "level": 1,
-        "object": "stuff",
-    }
-    response = client.post(
-        "/api/V1/notification/global",
-        headers=admin_cred,
-        json=note
-    )
-    post_return = json.loads(response.data)
-    assert 'id' in post_return
-    # get its id
-    note_id = post_return['id']
-    # verify it gets returned from the global stack
-    response2 = client.get(
-        "/api/V1/notifications/global"
-    )
-    global_notes = json.loads(response2.data)
-    global_ids = [n["id"] for n in global_notes["feed"]]
-    assert note_id in global_ids
-    # expire it
-    response3 = client.post(
-        "/api/V1/notifications/expire",
-        headers=admin_cred,
-        json={"note_ids": [note_id, "fake_id"]}
-    )
-    expire_return = json.loads(response3.data)
-    assert expire_return == {
-        "expired": {"note_ids": [note_id], "external_keys": []},
-        "unauthorized": {"note_ids": ["fake_id"], "external_keys": []}
-    }
-    # make sure it doesn't show up any more
-    response4 = client.get(
-        "/api/V1/notifications/global"
-    )
-    global_notes = json.loads(response4.data)
-    global_ids = [n["id"] for n in global_notes["feed"]]
-    assert note_id not in global_ids
-
 def test_expire_notifications_service(client, mongo_notes, mock_valid_service_token, mock_valid_user):
     service = "my_service"
     mock_valid_user("kbasetest", "KBase Test")
@@ -542,7 +404,7 @@ def test_expire_notifications_service(client, mongo_notes, mock_valid_service_to
     expire_res = client.post(
         "/api/V1/notifications/expire",
         headers=service_cred,
-        json={"note_ids": [note_id, "fake_id"], "external_keys": [ext_key, "fake_key"]}
+        json={"note_ids": [note_id, "fake_id"], "external_keys": [ext_key, "fake_key"], "source": service}
     )
     expire_data = json.loads(expire_res.data)
     assert expire_data == {
@@ -557,14 +419,15 @@ def test_expire_notifications_service(client, mongo_notes, mock_valid_service_to
     }
 
 @pytest.mark.parametrize("inputs,code,msg", [
-    ({"note_ids":[],"external_keys":[]}, 200, None),
-    ({"note_ids":[None],"external_keys":[None]}, 400, "note_ids must be a list of strings"),
-    ({"note_ids":["foo"],"external_keys":[None]}, 400, "external_keys must be a list of strings"),
-    ({"note_ids": None, "external_keys":[]}, 400, "Expected note_ids to be a list."),
-    ({"note_ids":[], "external_keys":None}, 400, "Expected external_keys to be a list."),
-    ({"note_ids":[{}], "external_keys":[]}, 400, "note_ids must be a list of strings"),
-    ({"note_ids":[], "external_keys":[{}]}, 400, "external_keys must be a list of strings"),
-    ({}, 422, 'Missing parameter "note_ids" or "external_keys"'),
+    ({"note_ids":[],"external_keys":[], "source": "foo"}, 200, None),
+    ({"note_ids":[None],"external_keys":[None], "source": "foo"}, 400, "note_ids must be a list of strings"),
+    ({"note_ids":["foo"],"external_keys":[None], "source": "foo"}, 400, "external_keys must be a list of strings"),
+    ({"note_ids": None, "external_keys":[], "source": "foo"}, 400, "Expected note_ids to be a list."),
+    ({"note_ids":[], "external_keys":None, "source": "foo"}, 400, "Expected external_keys to be a list."),
+    ({"note_ids":[{}], "external_keys":[], "source": "foo"}, 400, "note_ids must be a list of strings"),
+    ({"note_ids":[], "external_keys":[{}], "source": "foo"}, 400, "external_keys must be a list of strings"),
+    ({"note_ids":[], "external_keys":[]}, 422, 'Missing parameter "source"'),
+    ({"source": "foo"}, 422, 'Missing parameter "note_ids" or "external_keys"'),
     ("foo!", 400, 'Expected a JSON object as an input.')
 ])
 def test_expire_notifications_bad_inputs(client, mock_valid_service_token, inputs, code, msg):
@@ -584,6 +447,7 @@ def test_expire_notifications_no_auth(client):
     assert data['error']['http_code'] == 401
     assert data['error']['message'] == 'Authentication token required'
 
+
 def test_expire_notifications_invalid_auth(client, mock_invalid_user_token):
     mock_invalid_user_token('fake_user')
     response = client.post('/api/V1/notifications/expire', headers={"Authorization": "bad_token-"+str(uuid4())})
@@ -591,14 +455,14 @@ def test_expire_notifications_invalid_auth(client, mock_invalid_user_token):
     assert 'error' in data
     assert data['error']['http_code'] == 403
 
+
 def test_expire_notifications_user_auth(client, mock_valid_user_token):
     mock_valid_user_token('fake_user', 'Fake User')
     response = client.post('/api/V1/notifications/expire', headers={"Authorization": "token-"+str(uuid4())})
     data = json.loads(response.data)
     assert 'error' in data
     assert data['error']['http_code'] == 403
-    assert data['error']['message'] == 'Auth token must be either a Service token or from a user with the FEEDS_ADMIN role!'
-
+    assert data['error']['message'] == 'Authentication token must be a Service token.'
 
 
 def _validate_notification(note):

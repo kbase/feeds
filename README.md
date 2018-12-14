@@ -187,6 +187,7 @@ This is meant for services to debug their use of external keys. A service that c
 
 ### Create a new notification
 Only services (i.e. those Authorization tokens with type=Service, as told by the Auth service) can use this endpoint to create a new notification. This requires the body to be a JSON structure with the following available keys (pretty similar to the Notification structure above):
+* `source` - required, this is the source service of the request.
 * `actor` - required, should be a kbase username
 * `object` - required, the object of the notice (the workspace being shared, the group being invited to, etc.)
 * `verb` - required, the action implied by this notice. Currently allowed verbs are:
@@ -205,7 +206,6 @@ Only services (i.e. those Authorization tokens with type=Service, as told by the
     * error
     * request
 * `target` - (*TODO: update this field*) - currently required, this is a list of user ids that are affected by this notification; and it is also the list of users who see the notification.
-* `source` - (*TODO: update this field*) - currently required, this is the source service of the request.
 * `expires` - optional, an expiration date for the notification in number of milliseconds since the epoch. Default is 30 days after creation.
 * `external_key` - optional, a string that can be used to look up notifications from a service.
 * `context` - optional, a key-value pair structure that can have some semantic meaning for the notification. "Special" keys are `text` - which is used to generate the viewed text in the browser (omitting this will autogenerate the text from the other attributes), and `link` - a URL used to craft a hyperlink in the browser.
@@ -301,7 +301,8 @@ This effectively deletes notifications by pushing their expiration time up to th
 ```
 {
     "note_ids": [ list of notification ids ],
-    "external_keys": [ list of external keys ]
+    "external_keys": [ list of external keys ],
+    "source": source string for the notification
 }
 ```
 At least one of the above keys must be present. If external keys are used, this must be called by a service

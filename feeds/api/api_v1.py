@@ -22,6 +22,10 @@ from feeds.config import get_config
 from feeds.logger import log
 from feeds.notification_level import translate_level
 from feeds.verbs import translate_verb
+from .util import (
+    parse_notification_params,
+    parse_expire_notifications_params
+)
 
 cfg = get_config()
 api_v1 = flask.Blueprint('api_v1', __name__)
@@ -33,7 +37,6 @@ def root():
         'routes': {
             'root': 'GET /',
             'add_notification': 'POST /notification',
-            'add_global_notification': 'POST /notification/global',
             'get_notifications': 'GET /notifications',
             'get_global_notifications': 'GET /notifications/global',
             'get_specific_notification': 'GET /notification/<note_id>',
@@ -105,10 +108,10 @@ def add_notification():
     * `global` - true or false. If true, gets added to the global notification
         feed and everyone gets a copy.
     * `expires` - int, optional time to expire a notifications.
+    * `source` - string, the source service behind the notification. Used in some logic
+        to determine which feeds receive the notification
 
     This also requires a service token as an Authorization header.
-    Once validated, will be used as the Source of the notification,
-    and used in logic to determine which feeds get notified.
     """
     token = get_auth_token(request)
     try:
@@ -121,7 +124,7 @@ def add_notification():
         else:
             raise
     log(__name__, request.get_data())
-    params = _get_notification_params(json.loads(request.get_data()))
+    params = parse_notification_params(json.loads(request.get_data()))
     # create a Notification from params.
     new_note = Notification(
         params.get('actor'),
@@ -139,28 +142,6 @@ def add_notification():
     manager = NotificationManager()
     manager.add_notification(new_note)
     # on success, return the notification id and info.
-    return (flask.jsonify({'id': new_note.id}), 200)
-
-
-@api_v1.route('/notification/global', methods=['POST'])
-@cross_origin()
-def add_global_notification():
-    token = get_auth_token(request)
-    if not is_feeds_admin(token):
-        raise InvalidTokenError("You do not have permission to create a global notification!")
-
-    params = _get_notification_params(json.loads(request.get_data()), is_global=True)
-    new_note = Notification(
-        'kbase',
-        params.get('verb'),
-        params.get('object'),
-        'kbase',
-        params.get('level'),
-        context=params.get('context'),
-        expires=params.get('expires')
-    )
-    global_feed = NotificationFeed(cfg.global_feed)
-    global_feed.add_notification(new_note)
     return (flask.jsonify({'id': new_note.id}), 200)
 
 
@@ -272,16 +253,17 @@ def mark_notifications_seen():
 def expire_notifications():
     """
     Notifications can be forced to expire (set their expiration time to now).
-    This can be done by:
-        * The service who created the notification
-        * An admin
+    This route (/api/V1/notifications/expire) can only be used by services. There's
+    a separate route for admins (see admin_v1.expire_notifications)
     Expects JSON in the body formatted like this:
     {
         "note_ids": [notification ids],
-        "external_keys": [keys]
+        "external_keys": [keys],
+        "source": source_service
     }
-    These keys are both optional, but at least one must be present. Any combination of external
+    The id keys are both optional, but at least one must be present. Any combination of external
     keys or ids is acceptable, even if they're the same notification.
+
     This returns the following:
     {
         "expired": {
@@ -296,44 +278,16 @@ def expire_notifications():
     This should just return the same lists of values that were input, just shuffled to
     their final status.
     """
-    token = get_auth_token(request)
-    is_admin = is_feeds_admin(token)
-    service = None
-    try:
-        service = validate_service_token(token)
-    except InvalidTokenError:
-        if not is_admin:
-            raise InvalidTokenError('Auth token must be either a Service token '
-                                    'or from a user with the FEEDS_ADMIN role!')
-    data = _get_expire_notifications_params(json.loads(request.get_data()))
+    validate_service_token(get_auth_token(request))
+    data = parse_expire_notifications_params(json.loads(request.get_data()))
     manager = NotificationManager()
-    result = manager.expire_notifications(data.get('note_ids', []), data.get('external_keys', []),
-                                          source=service, is_admin=is_admin)
+    result = manager.expire_notifications(
+        data.get('note_ids', []),
+        data.get('external_keys', []),
+        source=data.get('source'),
+        is_admin=False
+    )
     return (flask.jsonify(result), 200)
-
-
-def _get_expire_notifications_params(params):
-    if not isinstance(params, dict):
-        raise IllegalParameterError('Expected a JSON object as an input.')
-
-    if 'note_ids' not in params and 'external_keys' not in params:
-        raise MissingParameterError('Missing parameter "note_ids" or "external_keys"')
-
-    if not isinstance(params.get('note_ids', []), list):
-        raise IllegalParameterError('Expected note_ids to be a list.')
-    else:
-        for i in params.get('note_ids', []):
-            if not isinstance(i, str):
-                raise IllegalParameterError('note_ids must be a list of strings')
-
-    if not isinstance(params.get('external_keys', []), list):
-        raise IllegalParameterError('Expected external_keys to be a list.')
-    else:
-        for i in params.get('external_keys', []):
-            if not isinstance(i, str):
-                raise IllegalParameterError('external_keys must be a list of strings')
-
-    return params
 
 
 def _get_mark_notification_params(params):
@@ -346,33 +300,4 @@ def _get_mark_notification_params(params):
     if not isinstance(params.get('note_ids'), list):
         raise IllegalParameterError('Expected a List object as note_ids.')
 
-    return params
-
-
-def _get_notification_params(params, is_global=False):
-    """
-    Parses and verifies all the notification params are present.
-    Raises a MissingParameter error otherwise.
-    """
-    # * `actor` - a user or org id.
-    # * `type` - one of the type keywords (see below, TBD (as of 10/8))
-    # * `target` - optional, a user or org id. - always receives this notification
-    # * `object` - object of the notice. For invitations, the group to be invited to.
-    #   For narratives, the narrative UPA.
-    # * `level` - alert, error, warning, or request.
-    # * `context` - optional, context of the notification, otherwise it'll be
-    #   autogenerated from the info above.
-
-    if not isinstance(params, dict):
-        raise IllegalParameterError('Expected a JSON object as an input.')
-    required_list = ['verb', 'object', 'level']
-    if not is_global:
-        required_list = required_list + ['actor', 'target', 'source']
-    missing = [r for r in required_list if r not in params]
-    if missing:
-        raise MissingParameterError("Missing parameter{} - {}".format(
-            "s" if len(missing) > 1 else '',
-            ", ".join(missing)
-        ))
-    # TODO - add more checks
     return params

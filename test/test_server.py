@@ -28,9 +28,9 @@ def test_server_get_paths_noauth(client, path):
 
 @pytest.mark.parametrize('path', (
     '/api/V1/notification',
-    '/api/V1/notification/global',
     '/api/V1/notifications/see',
-    '/api/V1/notifications/unsee'
+    '/api/V1/notifications/unsee',
+    '/admin/api/V1/notification/global'
 ))
 def test_server_post_paths_noauth(client, path):
     response = client.post(path)

@@ -27,6 +27,7 @@ from .exceptions import (
     NotificationNotFoundError
 )
 from feeds.api.api_v1 import api_v1
+from feeds.api.admin_v1 import admin_v1
 from feeds.logger import (
     log,
     log_error
@@ -76,6 +77,7 @@ def create_app(test_config=None):
     app.config['CORS_HEADERS'] = 'Content-Type'
     app.url_map.strict_slashes = False
     app.register_blueprint(api_v1, url_prefix='/api/V1')
+    app.register_blueprint(admin_v1, url_prefix='/admin/api/V1')
 
     if test_config is None:
         app.config.from_pyfile('config.py', silent=True)
