@@ -32,7 +32,7 @@ class MongoActivityStorage(ActivityStorage):
         coll = get_feeds_collection()
         coll.update_many({
             'id': {'$in': act_ids},
-            'users': {'$all': [user]},
+            'users': user,
             'unseen': {'$nin': [user]}
         }, {
             '$addToSet': {'unseen': user}
@@ -48,7 +48,7 @@ class MongoActivityStorage(ActivityStorage):
         coll = get_feeds_collection()
         coll.update_many({
             'id': {'$in': act_ids},
-            'users': {'$all': [user]},
+            'users': user,
             'unseen': {'$all': [user]}
         }, {
             '$pull': {'unseen': user}

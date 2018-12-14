@@ -32,13 +32,16 @@ class NotificationFeed(BaseFeed):
             count=count, include_seen=include_seen, verb=verb,
             level=level, reverse=reverse, user_view=user_view
         )
+        ret_struct = {
+            "unseen": self.get_unseen_count()
+        }
         if user_view:
-            ret_list = list()
+            ret_struct["feed"] = list()
             for act in activities:
-                ret_list.append(act.user_view())
-            return ret_list
+                ret_struct["feed"].append(act.user_view())
         else:
-            return activities
+            ret_struct["feed"] = activities
+        return ret_struct
 
     def get_notification(self, note_id):
         """
@@ -98,3 +101,9 @@ class NotificationFeed(BaseFeed):
         Adds an activity to this user's feed
         """
         self.activity_storage.add_to_storage(note, [self.user_id])
+
+    def get_unseen_count(self):
+        """
+        Returns the number of unread / unexpired notifications in this feed.
+        """
+        return self.timeline_storage.get_unseen_count()
