@@ -28,9 +28,9 @@ def test_server_get_paths_noauth(client, path):
 
 @pytest.mark.parametrize('path', (
     '/api/V1/notification',
-    '/api/V1/notification/global',
     '/api/V1/notifications/see',
-    '/api/V1/notifications/unsee'
+    '/api/V1/notifications/unsee',
+    '/admin/api/V1/notification/global'
 ))
 def test_server_post_paths_noauth(client, path):
     response = client.post(path)
@@ -120,8 +120,8 @@ def test_permissions_admin(client, requests_mock, mock_valid_admin_token):
     valid_posts = set([
         '/api/V1/notifications/see',
         '/api/V1/notifications/unsee',
-        '/api/V1/notification/global',
-        '/api/V1/notifications/expire'
+        '/admin/api/V1/notification/global',
+        '/admin/api/V1/notifications/expire'
     ])
     assert valid_posts == set(data['permissions']['POST'])
 

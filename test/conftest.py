@@ -8,6 +8,7 @@ import test.util as test_util
 from .util import test_config
 from .mongo_controller import MongoController
 import shutil
+import time
 
 
 def pytest_sessionstart(session):
@@ -34,6 +35,7 @@ def mongo():
     mongo.destroy(del_temp)
     if del_temp:
         shutil.rmtree(test_util.get_temp_dir())
+    # time.sleep(5) # wait for Mongo to go away
 
 @pytest.fixture(scope="module")
 def app():

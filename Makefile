@@ -16,6 +16,7 @@ docs:
 
 test: all
 	flake8 feeds
+	# flake8 test
 	pytest --verbose test --cov=feeds --cov-report html feeds -s
 
 start: all
