@@ -238,22 +238,6 @@ would return:
 {"id": "some-uuid-for-the-notification"}
 ```
 
-### Post a global notification
-Functions just as a service would create a new notification, but specialized. This is intended for admins to create a notice that all users should see, whether it's for maintenance, or an upcoming webinar, or something else. As such, there's no target user group, as everyone should be targeted. Also, it requires that whoever posts this must have the custom auth role of "FEEDS_ADMIN" (see the [auth docs](https://github.com/kbase/auth2) for details). As above, it requires a JSON document as the body of the request, with the following fields:
-* verb - required
-* object - required
-* level - required (default alert)
-* context - optional, but `text` is STRONGLY recommended.
-
-**Usage:**
-* Path: `/api/V1/notification/global`
-* Method: `POST`
-* Required header: `Authorization` - must have the `FEEDS_ADMIN` role
-* Returns: 
-```
-{"id": <the new notification id>}
-```
-
 ### Mark notifications as seen
 Takes a list of notifications and marks them as seen for the user who submitted the request (does not currently affect global notifications). If the user doesn't have access to a notification in the list, it is marked as unauthorized in the return structure, and nothing is done to it.
 * Path: `/api/V1/notifications/see`
@@ -296,7 +280,7 @@ Takes a list of notifications and marks them as unseen for the user who submitte
 This effectively deletes notifications by pushing their expiration time up to the time this request is made.
 * Path: `/api/V1/notifications/expire`
 * Method: `POST`
-* Required header: `Authorization` - requires a service token or admin token.
+* Required header: `Authorization` - requires a service token.
 * Expected body:
 ```
 {
@@ -305,11 +289,57 @@ This effectively deletes notifications by pushing their expiration time up to th
     "source": source string for the notification
 }
 ```
-At least one of the above keys must be present. If external keys are used, this must be called by a service
-with a valid service token that maps to the source key in the notification. That is, only services can expire
-their own notifications.
+At least one of the "note_ids" or "external_keys" keys must be present. Source must always be present.
+* Returns:
+```
+{
+    "expired": {
+        "note_ids": [ list of expired notification ids ],
+        "external_keys": [ list of expired notifications by external key ]
+    },
+    "unauthorized": {
+        "note_ids": [ list of not-expired note ids ],
+        "external_keys": [ list of not-expired external keys ]
+    }
+}
+```
+This will include all of the ids passed to the endpoint, put into one category or the other. Any that were "unauthorized" either don't exist, or came from a different service than the given auth token.
 
-(For now, admins can only expire global notifications)
+
+## Admin API
+These methods are intended for Administrator use only. Any auth token that posts this must come from a user with the "FEEDS_ADMIN" custom auth role (see the [auth docs](https://github.com/kbase/auth2) for details)
+
+### Post a global notification
+Functions just as a service would create a new notification, but specialized. This is intended for admins to create a notice that all users should see, whether it's for maintenance, or an upcoming webinar, or something else. As such, there's no target user group, as everyone should be targeted. As in the notification posting method above, it requires a JSON document as the body of the request, with the following fields:
+* verb - required
+* object - required
+* level - required (default alert)
+* context - optional, but `text` is STRONGLY recommended.
+
+**Usage:**
+* Path: `/admin/api/V1/notification/global`
+* Method: `POST`
+* Required header: `Authorization` - must have the `FEEDS_ADMIN` role
+* Returns: 
+```
+{"id": <the new notification id>}
+```
+
+### Expire any notification
+This effectively deletes notifications by pushing their expiration time up to the time this request is made.
+* Path: `/admin/api/V1/notifications/expire`
+* Method: `POST`
+* Required header: `Authorization` - must have the `FEEDS_ADMIN` role
+* Expected body:
+```
+{
+    "note_ids": [ list of notification ids ],
+    "external_keys": [ list of external keys ],
+    "source": source string for the notification
+}
+```
+At least one of the "note_ids" or "external_keys" keys must be present. If external_keys is present here, then
+source must be present - both the external key and the source of that key are used to find the notification to expire.
 * Returns:
 ```
 {

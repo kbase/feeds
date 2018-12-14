@@ -147,7 +147,7 @@ def create_app(test_config=None):
             if is_feeds_admin(token):
                 perms['token']['admin'] = True
                 perms['permissions']['POST'] = perms['permissions']['POST'] + \
-                    ['/api/V1/notification/global', '/api/V1/notifications/expire']
+                    ['/admin/api/V1/notification/global', '/admin/api/V1/notifications/expire']
         return (flask.jsonify(perms), 200)
 
     @app.errorhandler(IllegalParameterError)
