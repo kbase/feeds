@@ -186,15 +186,39 @@ def test_get_single_notification_wrong_user(client, mongo_notes, mock_valid_user
     assert data['error']['message'] == 'Cannot find notification with id 1.'
 
 ###
-# GET /notification/external_key/<ext_key>
+# GET /notification/external_key/<ext_key>/source/<source>
 ###
 def test_get_note_ext_key(client, mongo_notes, mock_valid_service_token):
     # plugged into the test db is a note where:
     # external_key = "key1"
     # source = "ws"
     # go fetch that.
+    key = "key1"
+    source = "ws"
     mock_valid_service_token("ws_admin", "WS Admin", "ws")
-    response = client.get('/api/V1/notification/external_key/key1', headers={"Authorization": "token-"+str(uuid4())})
+    response = client.get(
+        '/api/V1/notification/external_key/{}/source/{}'.format(key, source),
+        headers={"Authorization": "token-"+str(uuid4())}
+    )
+    data = json.loads(response.data)
+    assert 'notification' in data
+    note = data['notification']
+    assert note['id'] == '1'
+    assert note['external_key'] == 'key1'
+    _validate_notification(note)
+
+def test_get_note_ext_key(client, mongo_notes, mock_valid_admin_token):
+    # plugged into the test db is a note where:
+    # external_key = "key1"
+    # source = "ws"
+    # go fetch that.
+    key = "key1"
+    source = "ws"
+    mock_valid_admin_token("ws_admin", "WS Admin")
+    response = client.get(
+        '/api/V1/notification/external_key/{}/source/{}'.format(key, source),
+        headers={"Authorization": "token-"+str(uuid4())}
+    )
     data = json.loads(response.data)
     assert 'notification' in data
     note = data['notification']
@@ -204,14 +228,17 @@ def test_get_note_ext_key(client, mongo_notes, mock_valid_service_token):
 
 def test_get_note_ext_key_404(client, mongo_notes, mock_valid_service_token):
     mock_valid_service_token("ws_admin", "WS Admin", "ws")
-    response = client.get('/api/V1/notification/external_key/nope', headers={"Authorization": "token-"+str(uuid4())})
+    response = client.get(
+        '/api/V1/notification/external_key/nope/source/more_nope',
+        headers={"Authorization": "token-"+str(uuid4())}
+    )
     data = json.loads(response.data)
     assert 'error' in data
     assert data['error']['http_code'] == 404
-    assert data['error']['message'] == 'Cannot find notification with external_key nope and source ws.'
+    assert data['error']['message'] == 'Cannot find notification with external_key nope and source more_nope.'
 
 def test_get_note_ext_key_noauth(client):
-    response = client.get('/api/V1/notification/external_key/foo')
+    response = client.get('/api/V1/notification/external_key/foo/source/bar')
     data = json.loads(response.data)
     assert 'error' in data
     assert data['error']['http_code'] == 401
@@ -219,7 +246,10 @@ def test_get_note_ext_key_noauth(client):
 
 def test_get_note_ext_key_invalid_auth(client, mock_invalid_user_token):
     mock_invalid_user_token("test_user")
-    response = client.get('/api/V1/notification/external_key/foo', headers={"Authorization": "token-"+str(uuid4())})
+    response = client.get(
+        '/api/V1/notification/external_key/foo/source/bar',
+        headers={"Authorization": "token-"+str(uuid4())}
+    )
     data = json.loads(response.data)
     assert 'error' in data
     assert data['error']['http_code'] == 403
@@ -227,11 +257,14 @@ def test_get_note_ext_key_invalid_auth(client, mock_invalid_user_token):
 
 def test_get_note_ext_key_user_auth(client, mock_valid_user_token):
     mock_valid_user_token("user", "Some User")
-    response = client.get('/api/V1/notification/external_key/foo', headers={"Authorization": "token-"+str(uuid4())})
+    response = client.get(
+        '/api/V1/notification/external_key/foo/source/bar',
+        headers={"Authorization": "token-"+str(uuid4())}
+    )
     data = json.loads(response.data)
     assert 'error' in data
     assert data['error']['http_code'] == 403
-    assert data['error']['message'] == 'Authentication token must be a Service token.'
+    assert data['error']['message'] == 'Auth token must be either a Service token or from a user with the FEEDS_ADMIN role!'
 
 ###
 # POST /notifications/see

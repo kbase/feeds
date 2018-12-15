@@ -153,22 +153,28 @@ def get_global_notifications():
     return flask.jsonify(global_notes)
 
 
-@api_v1.route('/notification/external_key/<ext_key>', methods=['GET'])
+@api_v1.route('/notification/external_key/<ext_key>/source/<source>', methods=['GET'])
 @cross_origin()
-def get_notification_by_ext_key(ext_key):
+def get_notification_by_ext_key(ext_key, source):
     """
     Intended for debugging, this returns the notification by
     external key for a service token. The service must match the
     source of the notification.
     """
-    service = validate_service_token(get_auth_token(request))
+    token = get_auth_token(request)
+    try:
+        validate_service_token(token)
+    except InvalidTokenError:
+        if not is_feeds_admin(token):
+            raise InvalidTokenError('Auth token must be either a Service token '
+                                    'or from a user with the FEEDS_ADMIN role!')
     manager = NotificationManager()
-    notes = manager.get_notifications_by_ext_keys([ext_key], service)
+    notes = manager.get_notifications_by_ext_keys([ext_key], source)
     note = notes.get(ext_key)
     if note is None:
         raise NotificationNotFoundError(
             "Cannot find notification with external_key {} and "
-            "source {}.".format(ext_key, service)
+            "source {}.".format(ext_key, source)
         )
     if "_id" in note:    # Don't need the internal Mongo record id here.
         del note["_id"]
