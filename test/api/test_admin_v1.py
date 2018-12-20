@@ -187,9 +187,10 @@ def test_admin_expire_service_auth(client, mock_valid_service_token):
         "Only admins can use this path to expire tokens."
 
 
-def test_expire_notifications_admin(client, mongo_notes, mock_valid_admin_token):
-    # make a notification
+def test_expire_notifications_admin(client, mongo_notes, mock_valid_admin_token, mock_valid_users):
     mock_valid_admin_token("kbase_admin", "KBase Admin")
+    mock_valid_users({"kbasetest": "KBase Test Account", "kbase": "KBase"})
+    # make a notification
     admin_cred = {"Authorization": "token-"+str(uuid4())}
     note = {
         "verb": 1,

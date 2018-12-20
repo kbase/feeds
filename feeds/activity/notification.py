@@ -14,13 +14,12 @@ from feeds.config import get_config
 
 
 class Notification(BaseActivity):
-    def __init__(self, actor: str, verb, note_object: str, source: str, level='alert',
-                 target: list=None, context: dict=None, expires: int=None, external_key: str=None,
-                 seen: bool=False, users: list=None):
+    def __init__(self, actor: str, verb, note_object: str, source: str, actor_name: str=None,
+                 level='alert', target: list=None, context: dict=None, expires: int=None,
+                 external_key: str=None, seen: bool=False, users: list=None):
         """
         A notification is roughly of this form:
-            actor, verb, object, (target)
-        (with target optional)
+            actor, verb, object, target
         for example, If I share a narrative (workspace) with another user, that
         would be the overall activity:
             wjriehl shared narrative XYZ with you.
@@ -39,6 +38,9 @@ class Notification(BaseActivity):
             a workspace id
             a group name
         :param source: source service for the note. String.
+        :param actor_name: Real name of the actor (or None)
+        :param level: The level of the notification. Allowed values are alert, warning, request,
+            error (default "alert")
         :param target: target of the note. Optional. Should be a user id or group id if present.
         :param context: freeform context of the note. key-value pairs.
         :param validate: if True, runs _validate immediately
@@ -64,8 +66,12 @@ class Notification(BaseActivity):
         assert target is None or isinstance(target, list), "target must be either a list or None"
         assert users is None or isinstance(users, list), "users must be either a list or None"
         assert context is None or isinstance(context, dict), "context must be either a dict or None"
+        assert actor_name is None or isinstance(actor_name, str), \
+            "actor_name must be either a str or None"
+
         self.id = str(uuid.uuid4())
         self.actor = actor
+        self.actor_name = actor_name
         self.verb = verbs.translate_verb(verb)
         self.object = note_object
         self.source = source
@@ -144,6 +150,7 @@ class Notification(BaseActivity):
         view = {
             "id": self.id,
             "actor": self.actor,
+            "actor_name": self.actor_name,
             "verb": self.verb.past_tense,
             "object": self.object,
             "source": self.source,
@@ -166,6 +173,7 @@ class Notification(BaseActivity):
         serial = {
             "i": self.id,
             "a": self.actor,
+            "an": self.actor_name,
             "v": self.verb.id,
             "o": self.object,
             "s": self.source,
@@ -210,6 +218,7 @@ class Notification(BaseActivity):
         deserial.created = struct['c']
         deserial.id = struct['i']
         deserial.expires = struct['e']
+        deserial.actor_name = struct['an']
         return deserial
 
     @classmethod
@@ -237,7 +246,8 @@ class Notification(BaseActivity):
             context=serial.get('context'),
             external_key=serial.get('external_key'),
             seen=serial.get('seen', False),
-            users=serial.get('users')
+            users=serial.get('users'),
+            actor_name=serial.get('actor_name')
         )
         deserial.created = serial['created']
         deserial.expires = serial['expires']

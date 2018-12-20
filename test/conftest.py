@@ -9,6 +9,7 @@ from .util import test_config
 from .mongo_controller import MongoController
 import shutil
 import time
+import re
 
 
 def pytest_sessionstart(session):
@@ -68,6 +69,23 @@ def mock_valid_user(requests_mock):
         requests_mock.get('{}/api/V2/users?list={}'.format(auth_url, user_id),
             text=json.dumps({user_id: user_name}))
     return auth_valid_user
+
+@pytest.fixture
+def mock_valid_users(requests_mock):
+    """
+    Use this to mock several valid users. like this:
+    def test_something(mock_valid_users):
+        mock_valid_users({"fake_user": "Fake User", "fake2": "Fake User2", ...etc})
+        ... continue with test
+    TODO: refactor tests to just this throughout and retire mock_valid_user above
+    """
+    def auth_valid_users(users):
+        cfg = test_config()
+        auth_url = cfg.get('feeds', 'auth-url')
+        matcher = re.compile('api/V2/users\?list=')
+        requests_mock.register_uri('GET', matcher, text=json.dumps(users))
+    return auth_valid_users
+
 
 @pytest.fixture
 def mock_invalid_user(requests_mock):

@@ -131,7 +131,7 @@ def add_notification():
         params.get('verb'),
         params.get('object'),
         params.get('source'),
-        params.get('level'),
+        level=params.get('level'),
         target=params.get('target', []),
         context=params.get('context'),
         expires=params.get('expires'),

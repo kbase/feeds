@@ -5,6 +5,7 @@ from feeds.storage.mongodb.timeline_storage import MongoTimelineStorage
 from cachetools import TTLCache
 import logging
 from feeds.exceptions import NotificationNotFoundError
+from feeds.actor import actor_ids_to_names
 
 
 class NotificationFeed(BaseFeed):
@@ -26,8 +27,25 @@ class NotificationFeed(BaseFeed):
         logging.getLogger(__name__).info('Fetching timeline for ' + self.user_id)
         self.timeline = self.timeline_storage.get_timeline()
 
-    def get_notifications(self, count=10, include_seen=False, level=None, verb=None,
-                          reverse=False, user_view=False):
+    def get_notifications(self, count: int=10, include_seen: bool=False, level=None, verb=None,
+                          reverse: bool=False, user_view: bool=False) -> dict:
+        """
+        Fetches all activities matching the requested inputs.
+        :param count: max number of most recent notifications to return. default=10
+        :param include_seen: include notifications that have been seen in the response.
+            default = False
+        :param level: if not None, will only return notifications of the given level.
+            default = None
+        :param verb: if not None, will only return notifications made with the given verb.
+            default = None
+        :param reverse: if True, will reverse the order of the result (default False)
+        :param user_view: if True, will return the user_view dict version of each Notification
+            object. If False, will return a list of Notification objects instead. default False
+        :return: a dict with the requested notifications, and a key with the total number in the
+            feed that are marked unseen
+        :rtype: dict
+        :raises ValueError: if count <= 0
+        """
         activities = self.get_activities(
             count=count, include_seen=include_seen, verb=verb,
             level=level, reverse=reverse, user_view=user_view
@@ -68,18 +86,23 @@ class NotificationFeed(BaseFeed):
         # 3. Cache them here.
         # 4. Return them.
         if count < 1 or not isinstance(count, int):
-            raise ValueError('Count must be an integer > 0')
+            raise ValueError("Count must be an integer > 0")
         serial_notes = self.timeline_storage.get_timeline(
             count=count, include_seen=include_seen,
             level=level, verb=verb, reverse=reverse
         )
         note_list = list()
+        actor_ids = set()
         for note in serial_notes:
+            actor_ids.add(note["actor"])
             if self.user_id not in note["unseen"]:
-                note['seen'] = True
+                note["seen"] = True
             else:
-                note['seen'] = False
+                note["seen"] = False
             note_list.append(Notification.from_dict(note))
+        actor_names = actor_ids_to_names(list(actor_ids))
+        for note in serial_notes:
+            note["actor_name"] = actor_names[note["actor"]].get("name")
         return note_list
 
     def mark_activities(self, activity_ids, seen=False):

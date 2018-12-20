@@ -34,7 +34,8 @@ make test
 ```
 {
     "id": string - a unique id for the notification,
-    "actor": string - the actor who triggered the notification,
+    "actor": string - the id of the actor who triggered the notification,
+    "actor_name": string - the real name (whether group or user) of the actor,
     "verb": string - the action represented by this notification (see list of verbs below),
     "object": string - the object of the notification,
     "target": list - the target(s) of the notification,

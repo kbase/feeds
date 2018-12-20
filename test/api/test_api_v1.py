@@ -161,6 +161,7 @@ def test_get_single_notification(client, mock_valid_user_token):
         assert "notification" in result
         note = result["notification"]
         assert "id" in note and note["id"] == id_
+        _validate_notification(note)
 
 def test_get_single_notification_no_auth(client, mongo_notes):
     response = client.get('/api/V1/notification/12345')
@@ -205,9 +206,8 @@ def test_get_note_ext_key(client, mongo_notes, mock_valid_service_token):
     note = data['notification']
     assert note['id'] == '1'
     assert note['external_key'] == 'key1'
-    _validate_notification(note)
 
-def test_get_note_ext_key(client, mongo_notes, mock_valid_admin_token):
+def test_get_note_ext_key_admin(client, mongo_notes, mock_valid_admin_token):
     # plugged into the test db is a note where:
     # external_key = "key1"
     # source = "ws"
@@ -224,7 +224,6 @@ def test_get_note_ext_key(client, mongo_notes, mock_valid_admin_token):
     note = data['notification']
     assert note['id'] == '1'
     assert note['external_key'] == 'key1'
-    _validate_notification(note)
 
 def test_get_note_ext_key_404(client, mongo_notes, mock_valid_service_token):
     mock_valid_service_token("ws_admin", "WS Admin", "ws")
@@ -503,6 +502,6 @@ def _validate_notification(note):
     Validates the structure of a user's notification.
     Expects a dict.
     """
-    required_keys = ["id", "actor", "verb", "object", "target", "created", "expires", "source"]
+    required_keys = ["id", "actor", "verb", "object", "target", "created", "expires", "source", "actor_name"]
     for k in required_keys:
         assert k in note

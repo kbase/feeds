@@ -1,5 +1,4 @@
 ### Service
-* Add options for admin usage
 * Option to translate from feed document -> understandable text on server side
 * include groups as an actor, target, object
 * annotate config examples
@@ -13,13 +12,7 @@
     * first, and total to return
 
 ### UI
-* Convert blocks for global/user to tabs
-* Add badges to tab headers with count of unreads
-* Automatically mark messages read after some time on screen
 * Create tabs for each group a user belongs to
-* Loading spinner
-* Remove source service from ui
-* Remove filters/sorting/etc (temporarily)
 * Keep ability to toggle seen/unseen
     * Other sites just always show things in order, with some decoration if they're unseen. That decoration fades.
     * Gonna try having a solid border, with pale fill. After some time fill should fade to white.

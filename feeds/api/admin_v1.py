@@ -49,7 +49,7 @@ def add_global_notification():
         params.get('verb'),
         params.get('object'),
         'kbase',
-        params.get('level'),
+        level=params.get('level'),
         context=params.get('context'),
         expires=params.get('expires')
     )
