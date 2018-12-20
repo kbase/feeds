@@ -102,7 +102,7 @@ class NotificationFeed(BaseFeed):
             note_list.append(Notification.from_dict(note))
         actor_names = actor_ids_to_names(list(actor_ids))
         for note in serial_notes:
-            note["actor_name"] = actor_names[note["actor"]].get("name")
+            note["actor_name"] = actor_names.get(note["actor"], {}).get("name")
         return note_list
 
     def mark_activities(self, activity_ids, seen=False):
