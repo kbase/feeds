@@ -20,6 +20,13 @@ def pytest_sessionfinish(session, exitstatus):
     pass
 
 @pytest.fixture(scope="module")
+def mongo_notes(mongo):
+    test_db_path = os.path.join(os.path.dirname(__file__), "_data", "mongo", "notifications.json")
+    with open(test_db_path, "r") as db_file:
+        objects = json.loads(db_file.read())
+    mongo.client['feeds']['notifications'].insert_many(objects)
+
+@pytest.fixture(scope="module")
 def mongo():
     mongoexe = test_util.get_mongo_exe()
     tempdir = test_util.get_temp_dir()

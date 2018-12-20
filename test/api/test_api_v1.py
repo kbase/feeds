@@ -10,13 +10,6 @@ import feeds.config
 from feeds.util import epoch_ms
 
 
-@pytest.fixture(scope="module")
-def mongo_notes(mongo):
-    test_db_path = os.path.join(os.path.dirname(__file__), "..", "_data", "mongo", "notifications.json")
-    with open(test_db_path, "r") as db_file:
-        objects = json.loads(db_file.read())
-    mongo.client['feeds']['notifications'].insert_many(objects)
-
 def test_api_root(client):
     response = client.get('/api/V1')
     data = json.loads(response.data)
