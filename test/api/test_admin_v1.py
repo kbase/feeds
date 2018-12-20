@@ -6,14 +6,6 @@ from feeds.util import epoch_ms
 import feeds.config
 
 
-@pytest.fixture(scope="module")
-def mongo_notes(mongo):
-    test_db_path = os.path.join(os.path.dirname(__file__), "..", "_data", "mongo", "notifications.json")
-    with open(test_db_path, "r") as db_file:
-        objects = json.loads(db_file.read())
-    mongo.client['feeds']['notifications'].insert_many(objects)
-
-
 def test_api_root(client):
     response = client.get('/admin/api/V1')
     data = json.loads(response.data)
@@ -187,9 +179,10 @@ def test_admin_expire_service_auth(client, mock_valid_service_token):
         "Only admins can use this path to expire tokens."
 
 
-def test_expire_notifications_admin(client, mongo_notes, mock_valid_admin_token):
-    # make a notification
+def test_expire_notifications_admin(client, mongo_notes, mock_valid_admin_token, mock_valid_users):
     mock_valid_admin_token("kbase_admin", "KBase Admin")
+    mock_valid_users({"kbasetest": "KBase Test Account", "kbase": "KBase"})
+    # make a notification
     admin_cred = {"Authorization": "token-"+str(uuid4())}
     note = {
         "verb": 1,
