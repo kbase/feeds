@@ -495,6 +495,7 @@ def _validate_notification(note):
     Validates the structure of a user's notification.
     Expects a dict.
     """
+    pprint(note)
     required_keys = ["id", "actor", "verb", "object", "target", "created", "expires", "source", "actor_name"]
     for k in required_keys:
         assert k in note
