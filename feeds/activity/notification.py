@@ -15,8 +15,8 @@ from feeds.config import get_config
 
 class Notification(BaseActivity):
     def __init__(self, actor: str, verb, note_object: str, source: str, actor_name: str=None,
-                 level='alert', target: list=None, context: dict=None, expires: int=None,
-                 external_key: str=None, seen: bool=False, users: list=None):
+                 actor_type: str='user', level='alert', target: list=None, context: dict=None,
+                 expires: int=None, external_key: str=None, seen: bool=False, users: list=None):
         """
         A notification is roughly of this form:
             actor, verb, object, target
@@ -39,6 +39,7 @@ class Notification(BaseActivity):
             a group name
         :param source: source service for the note. String.
         :param actor_name: Real name of the actor (or None)
+        :param actor_type: Type of actor. Allowed = 'user', 'group'
         :param level: The level of the notification. Allowed values are alert, warning, request,
             error (default "alert")
         :param target: target of the note. Optional. Should be a user id or group id if present.
@@ -59,6 +60,7 @@ class Notification(BaseActivity):
             * validate context fits
         """
         assert actor is not None, "actor must not be None"
+        assert actor_type in ['user', 'group'], "actor_type must be either 'user' or 'group'"
         assert verb is not None, "verb must not be None"
         assert note_object is not None, "note_object must not be None"
         assert source is not None, "source must not be None"
@@ -72,6 +74,7 @@ class Notification(BaseActivity):
         self.id = str(uuid.uuid4())
         self.actor = actor
         self.actor_name = actor_name
+        self.actor_type = actor_type
         self.verb = verbs.translate_verb(verb)
         self.object = note_object
         self.source = source
@@ -124,7 +127,9 @@ class Notification(BaseActivity):
         Returns a dict form of the Notification.
         Useful for storing in a document store, returns the id of each verb and level.
         Less useful, but not terrible, for returning to a user.
-        Seen is a transient state and isn't included.
+        exceptions:
+        * seen is a transient state and isn't included.
+        * actor_name is managed by the auth service, and might change, so isn't included
         """
         dict_form = {
             "id": self.id,
@@ -138,7 +143,8 @@ class Notification(BaseActivity):
             "created": self.created,
             "expires": self.expires,
             "external_key": self.external_key,
-            "users": self.users
+            "users": self.users,
+            "actor_type": self.actor_type
         }
         return dict_form
 
@@ -151,6 +157,7 @@ class Notification(BaseActivity):
             "id": self.id,
             "actor": self.actor,
             "actor_name": self.actor_name,
+            "actor_type": self.actor_type,
             "verb": self.verb.past_tense,
             "object": self.object,
             "source": self.source,
@@ -174,6 +181,7 @@ class Notification(BaseActivity):
             "i": self.id,
             "a": self.actor,
             "an": self.actor_name,
+            "at": self.actor_type,
             "v": self.verb.id,
             "o": self.object,
             "s": self.source,
@@ -209,6 +217,7 @@ class Notification(BaseActivity):
             str(struct['v']),
             struct['o'],
             struct['s'],
+            actor_type=struct.get('at', 'user'),
             level=str(struct['l']),
             target=struct.get('t'),
             context=struct.get('n'),
@@ -247,7 +256,8 @@ class Notification(BaseActivity):
             external_key=serial.get('external_key'),
             seen=serial.get('seen', False),
             users=serial.get('users'),
-            actor_name=serial.get('actor_name')
+            actor_name=serial.get('actor_name'),
+            actor_type=serial.get('actor_type', 'user')
         )
         deserial.created = serial['created']
         deserial.expires = serial['expires']

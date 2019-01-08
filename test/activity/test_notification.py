@@ -34,7 +34,7 @@ users = ["user_actor"]
 
 def assert_note_ok(note, **kwargs):
     keys = [
-        'actor', 'object', 'source', 'target', 'context', 'expires', 'external_key', 'users'
+        'actor', 'actor_type', 'object', 'source', 'target', 'context', 'expires', 'external_key', 'users'
     ]
     for k in keys:
         if k in kwargs:
@@ -129,6 +129,7 @@ def test_note_new_bad_object():
         Notification(actor, verb_inf, None, source)
     assert 'note_object must not be None' in str(e.value)
 
+
 def test_note_new_bad_source():
     # TODO: Validate sources as being real.
     with pytest.raises(AssertionError) as e:
@@ -183,6 +184,14 @@ def test_note_new_bad_expires():
         assert "Notifications should expire sometime after they are created" in str(e.value)
 
 
+def test_note_new_bad_actor_type():
+    bad_actor_types = [None, "foo", 123, -5000]
+    for bad in bad_actor_types:
+        with pytest.raises(AssertionError) as e:
+            Notification(actor, verb_inf, note_object, source, actor_type=bad)
+        assert "actor_type must be either 'user' or 'group'"
+
+
 def test_validate_ok(requests_mock):
     user_id = "foo"
     user_display = "Foo Bar"
@@ -220,6 +229,7 @@ def test_to_dict():
     assert d["level"] == level_id
     assert d["external_key"] is None
     assert d["users"] is None
+    assert d["actor_type"] == "user"
 
 
 def test_user_view():
@@ -236,6 +246,7 @@ def test_user_view():
     assert v["level"] == level_name
     assert "external_key" in v
     assert v["external_key"] is None
+    assert v["actor_type"] == "user"
 
 
 def test_from_dict():
@@ -252,7 +263,8 @@ def test_from_dict():
         "context": context,
         "external_key": external_key,
         "id": act_id,
-        "users": users
+        "users": users,
+        "actor_type": "group"
     }
     for v in verb:
         for l in level:

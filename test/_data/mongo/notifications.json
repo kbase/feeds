@@ -2,6 +2,7 @@
     {
         "id": "1",
         "actor" : "kbasetest",
+        "actor_type": "user",
         "verb" : 1,
         "object" : "123",
         "source" : "ws",
@@ -23,6 +24,7 @@
     {
         "id": "2",
         "actor" : "kbasetest",
+        "actor_type": "user",
         "verb" : 1,
         "object" : "123",
         "source" : "ws",
@@ -44,6 +46,7 @@
     {
         "id": "3",
         "actor" : "kbasetest",
+        "actor_type": "user",
         "verb" : 2,
         "object" : "123",
         "source" : "ws",
@@ -65,6 +68,7 @@
     {
         "id": "4",
         "actor" : "kbasetest",
+        "actor_type": "user",
         "verb" : 2,
         "object" : "123",
         "source" : "ws",
@@ -86,6 +90,7 @@
     {
         "id": "5",
         "actor" : "kbasetest",
+        "actor_type": "user",
         "verb" : 2,
         "object" : "123",
         "source" : "ws",
@@ -107,6 +112,7 @@
     {
         "id": "6",
         "actor" : "kbasetest",
+        "actor_type": "user",
         "verb" : 3,
         "object" : "123",
         "source" : "groups",
@@ -128,6 +134,7 @@
     {
         "id": "7",
         "actor" : "kbasetest",
+        "actor_type": "user",
         "verb" : 3,
         "object" : "123",
         "source" : "groups",
@@ -149,6 +156,7 @@
     {
         "id": "8",
         "actor" : "kbasetest",
+        "actor_type": "user",
         "verb" : 3,
         "object" : "123",
         "source" : "groups",
@@ -170,6 +178,7 @@
     {
         "id": "9",
         "actor" : "kbasetest",
+        "actor_type": "user",
         "verb" : 4,
         "object" : "123",
         "source" : "groups",
@@ -191,6 +200,7 @@
     {
         "id": "10",
         "actor" : "kbasetest",
+        "actor_type": "user",
         "verb" : 4,
         "object" : "123",
         "source" : "groups",
@@ -212,6 +222,7 @@
     {
         "id": "11",
         "actor": "kbasetest",
+        "actor_type": "user",
         "verb": 1,
         "object": "123",
         "source": "groups",
@@ -233,6 +244,7 @@
     {
         "id": "global-1",
         "actor": "kbasetest",
+        "actor_type": "user",
         "verb": 4,
         "object": "123",
         "source": "kbase",
@@ -249,6 +261,7 @@
     {
         "id": "see-test",
         "actor" : "kbasetest",
+        "actor_type": "user",
         "verb" : 4,
         "object" : "123",
         "source" : "groups",
@@ -270,6 +283,7 @@
     {
         "id": "unsee-test",
         "actor" : "kbasetest",
+        "actor_type": "user",
         "verb" : 4,
         "object" : "123",
         "source" : "groups",
