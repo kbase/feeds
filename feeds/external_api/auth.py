@@ -108,7 +108,7 @@ def validate_user_ids(user_ids):
     if not filtered_users:
         return users
     r = __auth_request('users?list={}'.format(','.join(filtered_users)), config.auth_token)
-    found_users = json.loads(r.content)
+    found_users = r.json()
     __user_cache.update(found_users)
     users.update(found_users)
     return users
@@ -136,10 +136,10 @@ def __fetch_token(token):
     else:
         try:
             r = __auth_request('token', token)
-            token_info = json.loads(r.content)
+            token_info = r.json()
             # includes customroles info
             r_me = __auth_request('me', token)
-            token_me_info = json.loads(r_me.content)
+            token_me_info = r_me.json()
             token_info['customroles'] = token_me_info.get('customroles')
             __token_cache[token] = token_info
             return token_info
