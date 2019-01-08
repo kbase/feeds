@@ -2,21 +2,22 @@
 A module for defining actors.
 TODO: decide whether to use a class, or just a validated string. I'm leaning toward string.
 """
-from .auth import (
+from .external_api.auth import (
     validate_user_id,
     validate_user_ids
 )
 from .exceptions import InvalidActorError
 
 
-def validate_actor(actor):
-    """
-    TODO: groups can be actors, too, when that's ready.
-    """
-    if validate_user_id(actor):
+def validate_actor(actor, actor_type="user"):
+    if actor_type == "user":
+        if validate_user_id(actor):
+            return True
+        else:
+            raise InvalidActorError("Actor '{}' is not a real user.".format(actor))
+    elif actor_type == "group":
+        # pending api
         return True
-    else:
-        raise InvalidActorError("Actor '{}' is not a real user.".format(actor))
 
 
 def actor_ids_to_names(id_list: list):

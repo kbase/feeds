@@ -10,7 +10,7 @@ from flask import (
 import logging
 from http.client import responses
 from flask.logging import default_handler
-from .auth import (
+from .external_api.auth import (
     get_auth_token,
     validate_service_token,
     validate_user_token,

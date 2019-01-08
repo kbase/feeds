@@ -114,6 +114,7 @@ def test_post_notification_no_auth(client):
     assert data['error']['http_code'] == 401
     assert data['error']['message'] == 'Authentication token required'
 
+
 def test_post_notification_user_auth(client, mock_valid_user_token):
     mock_valid_user_token("test_user", "Test User")
     response = client.post('/api/V1/notification', headers={"Authorization": "token-"+str(uuid4())})
@@ -121,6 +122,7 @@ def test_post_notification_user_auth(client, mock_valid_user_token):
     assert 'error' in data
     assert data['error']['http_code'] == 403
     assert data['error']['message'] == 'Authentication token must be a Service token.'
+
 
 def test_post_notification_invalid_auth(client, mock_invalid_user_token):
     mock_invalid_user_token("test_user")
@@ -496,6 +498,6 @@ def _validate_notification(note):
     Expects a dict.
     """
     pprint(note)
-    required_keys = ["id", "actor", "verb", "object", "target", "created", "expires", "source", "actor_name"]
+    required_keys = ["id", "actor", "actor_type", "verb", "object", "target", "created", "expires", "source", "actor_name"]
     for k in required_keys:
         assert k in note

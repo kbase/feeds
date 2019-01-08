@@ -6,7 +6,7 @@ import json
 from feeds.activity.notification import Notification
 from feeds.managers.notification_manager import NotificationManager
 from feeds.feeds.notification.notification_feed import NotificationFeed
-from feeds.auth import (
+from feeds.external_api.auth import (
     get_auth_token,
     is_feeds_admin
 )

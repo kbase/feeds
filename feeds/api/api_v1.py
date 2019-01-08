@@ -6,7 +6,7 @@ import json
 from feeds.activity.notification import Notification
 from feeds.managers.notification_manager import NotificationManager
 from feeds.feeds.notification.notification_feed import NotificationFeed
-from feeds.auth import (
+from feeds.external_api.auth import (
     validate_user_token,
     validate_service_token,
     get_auth_token,
@@ -98,6 +98,7 @@ def add_notification():
     Adds a new notification for other users to see.
     Form data requires the following:
     * `actor` - a user or org id.
+    * `actor_type` - either 'user' or 'group'
     * `type` - one of the type keywords (see below, TBD (as of 10/8))
     * `target` - optional, a user or org id. - always receives this notification
     * `object` - object of the notice. For invitations, the group to be invited to.
@@ -131,6 +132,7 @@ def add_notification():
         params.get('verb'),
         params.get('object'),
         params.get('source'),
+        actor_type=params.get('actor_type', 'user'),
         level=params.get('level'),
         target=params.get('target', []),
         context=params.get('context'),

@@ -4,15 +4,15 @@ This module handles authentication management. This mainly means:
 * validating user ids
 """
 
-from .config import get_config
+from ..config import get_config
 import requests
 import json
-from .exceptions import (
+from ..exceptions import (
     InvalidTokenError,
     TokenLookupError,
     MissingTokenError
 )
-from .util import epoch_ms
+from ..util import epoch_ms
 from cachetools import (
     Cache,
     TTLCache
