@@ -387,8 +387,14 @@
         "created" : 1540877034814,
         "expires" : 15434690258140,
         "external_key": null,
-        "users": ["_kbase_"],
-        "unseen": ["_kbase_"]
+        "users": [{
+            "id": "_kbase_",
+            "type": "user"
+        }],
+        "unseen": [{
+            "id": "_kbase_",
+            "type": "user"
+        }]
     },
     {
         "id": "see-test",

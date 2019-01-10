@@ -10,14 +10,14 @@ from feeds.entity import Entity
 
 
 class NotificationFeed(BaseFeed):
-    def __init__(self, user_id, user_type):
+    def __init__(self, user_id: str, user_type: str):
         self.user = Entity(user_id, user_type)
         self.timeline_storage = MongoTimelineStorage(user_id, user_type)
         self.activity_storage = MongoActivityStorage()
         self.timeline = None
         self.cache = TTLCache(1000, 600)
 
-    def _update_timeline(self):
+    def _update_timeline(self) -> None:
         """
         Updates a local user timeline cache. This is a list of activity ids
         that are used for fetching from activity storage (for now). Sorted

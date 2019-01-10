@@ -85,11 +85,11 @@ def test_post_notification_ok(client, mock_valid_service_token, mock_valid_user_
     mock_valid_user(test_user, "Test User")
     mock_valid_service_token("user", "pw", service)
     note = {
-        "actor": test_actor,
-        "target": [test_user],
+        "actor": {"id": test_actor, "type": "user"},
+        "target": [{"id": test_user, "type": "user"}],
         "verb": 1,
         "level": 1,
-        "object": "stuff",
+        "object": {"id": "stuff", "type": "workspace"},
         "source": service
     }
     response = client.post(
@@ -391,10 +391,10 @@ def test_expire_notifications_service(client, mongo_notes, mock_valid_service_to
     ext_key = "an_external_key"
     # make a notification
     note = {
-        "actor": "kbasetest",
+        "actor": {"id": "kbasetest", "type": "user"},
         "verb": 1,
         "level": 1,
-        "object": "stuff",
+        "object": {"id": "stuff", "type": "workspace"},
         "source": service,
         "target": []
     }
@@ -410,10 +410,10 @@ def test_expire_notifications_service(client, mongo_notes, mock_valid_service_to
 
     # make a notification with an external key
     note2 = {
-        "actor": "kbasetest",
+        "actor": {"id": "kbasetest", "type": "user"},
         "verb": 1,
         "level": 1,
-        "object": "stuff",
+        "object": {"id": "stuff", "type": "workspace"},
         "source": service,
         "external_key": ext_key,
         "target": []
@@ -498,6 +498,6 @@ def _validate_notification(note):
     Expects a dict.
     """
     pprint(note)
-    required_keys = ["id", "actor", "actor_type", "verb", "object", "target", "created", "expires", "source", "actor_name"]
+    required_keys = ["id", "actor", "verb", "object", "target", "created", "expires", "source"]
     for k in required_keys:
         assert k in note

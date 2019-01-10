@@ -180,6 +180,9 @@ class Entity(object):
     def __eq__(self, other):
         return other.id == self.id and other.type == self.type
 
+    def __hash__(self):
+        return hash((self.id, self.type))
+
     @classmethod
     def from_str(cls, s: str) -> E:
         """

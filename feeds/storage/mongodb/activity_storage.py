@@ -33,13 +33,14 @@ class MongoActivityStorage(ActivityStorage):
         Setting unseen means adding the user to the list of unseens. But we should only do that for
         docs that the user can't see anyway, so put that in the query.
         """
+        u = user.to_dict()
         coll = get_feeds_collection()
         coll.update_many({
             'id': {'$in': act_ids},
-            'users': user.to_dict(),
-            'unseen': {'$nin': [user]}
+            'users': u,
+            'unseen': {'$nin': [u]}
         }, {
-            '$addToSet': {'unseen': user}
+            '$addToSet': {'unseen': u}
         })
 
     def set_seen(self, act_ids: List[str], user: Entity) -> None:
@@ -49,13 +50,14 @@ class MongoActivityStorage(ActivityStorage):
         is in the list of users, AND the list of unseens.
         The update should remove the user from the list of unseens.
         """
+        u = user.to_dict()
         coll = get_feeds_collection()
         coll.update_many({
             'id': {'$in': act_ids},
-            'users': user.to_dict(),
-            'unseen': {'$all': [user]}
+            'users': u,
+            'unseen': u
         }, {
-            '$pull': {'unseen': user}
+            '$pull': {'unseen': u}
         })
 
     def get_by_id(self, act_ids: List[str], source: str=None) -> Dict[str, dict]:
