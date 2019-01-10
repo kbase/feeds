@@ -20,9 +20,9 @@ N = TypeVar('N', bound='Notification')
 
 class Notification(BaseActivity):
     def __init__(self, actor: Entity, verb: str, note_object: Entity, source: str,
-                 level='alert', target: List[Entity]=None, context: dict=None,
+                 level='alert', target: List[Entity]=[], context: dict=None,
                  expires: int=None, external_key: str=None, seen: bool=False,
-                 users: List[Entity]=None):
+                 users: List[Entity]=[]):
         """
         A notification is roughly of this form:
             actor, verb, object, target
@@ -179,11 +179,6 @@ class Notification(BaseActivity):
         if self.target is not None:
             target_dict = [t.to_dict(with_name=True) for t in self.target]
             view["target"] = target_dict
-        user_dict = []
-        if self.users is not None:
-            user_dict = [u.to_dict(with_name=True) for u in self.users]
-            view["users"] = user_dict
-
         return view
 
     def serialize(self) -> str:
@@ -258,6 +253,7 @@ class Notification(BaseActivity):
         missing_keys = required_keys.difference(set(serial.keys()))
         if missing_keys:
             raise InvalidNotificationError('Missing keys: {}'.format(missing_keys))
+        print(serial)
         deserial = cls(
             Entity.from_dict(serial['actor']),
             str(serial['verb']),

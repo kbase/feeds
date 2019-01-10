@@ -18,19 +18,23 @@ from feeds.entity import Entity
 cfg = test_config()
 
 # some dummy "good" inputs for testing
-actor = Entity("test_actor", "user")
+actor_d = {"id": "test_actor", "type": "user"}
+actor = Entity.from_dict(actor_d)
 verb_inf = "invite"
 verb_past = "invited"
 verb_id = 1
-note_object = Entity("foo", "workspace")
+object_d = {"id": "foo", "type": "workspace"}
+note_object = Entity.from_dict(object_d)
 source = "groups"
 level_name = "warning"
 level_id = 2
-target = [Entity("target_actor", "user")]
+target_d = {"id": "target_actor", "type": "user"}
+target = [Entity.from_dict(target_d)]
 context = {"some": "context"}
 expires = epoch_ms() + (10 * 24 * 60 * 60 * 1000) # 10 days
 external_key = "an_external_key"
-users = [Entity("user_actor", "user")]
+user_d = {"id": "user_actor", "type": "user"}
+users = [Entity.from_dict(user_d)]
 
 
 def assert_note_ok(note, **kwargs):
@@ -185,14 +189,6 @@ def test_note_new_bad_expires():
         assert "Notifications should expire sometime after they are created" in str(e.value)
 
 
-def test_note_new_bad_actor_type():
-    bad_actor_types = [None, "foo", 123, -5000]
-    for bad in bad_actor_types:
-        with pytest.raises(AssertionError) as e:
-            Notification(actor, verb_inf, note_object, source, actor_type=bad)
-        assert "actor_type must be either 'user' or 'group'"
-
-
 def test_validate_ok(requests_mock):
     user_id = "foo"
     user_display = "Foo Bar"
@@ -219,35 +215,33 @@ def test_default_lifespan():
 def test_to_dict():
     note = Notification(actor, verb_inf, note_object, source, level=level_name)
     d = note.to_dict()
-    assert d["actor"] == actor
+    assert d["actor"] == actor_d
     assert d["verb"] == verb_id
-    assert d["object"] == note_object
+    assert d["object"] == object_d
     assert d["source"] == source
     assert isinstance(d["expires"], int) and d["expires"] == note.expires
     assert isinstance(d["created"], int) and d["created"] == note.created
-    assert d["target"] is None
+    assert d["target"] == []
     assert d["context"] is None
     assert d["level"] == level_id
     assert d["external_key"] is None
-    assert d["users"] is None
-    assert d["actor_type"] == "user"
+    assert d["users"] == []
 
 
 def test_user_view():
     note = Notification(actor, verb_inf, note_object, source, level=level_id)
     v = note.user_view()
-    assert v["actor"] == actor
+    assert v["actor"] == actor_d
     assert v["verb"] == verb_past
-    assert v["object"] == note_object
+    assert v["object"] == object_d
     assert v["source"] == source
     assert isinstance(v["expires"], int) and v["expires"] == note.expires
     assert isinstance(v["created"], int) and v["created"] == note.created
-    assert v["target"] is None
+    assert v["target"] == []
     assert v["context"] is None
     assert v["level"] == level_name
-    assert "external_key" in v
-    assert v["external_key"] is None
-    assert v["actor_type"] == "user"
+    assert "external_key" not in v
+    assert "users" not in v
 
 
 def test_from_dict():
@@ -255,6 +249,19 @@ def test_from_dict():
     verb = [verb_id, str(verb_id), verb_inf, verb_past]
     level = [level_id, level_name, str(level_id)]
     d = {
+        "actor": actor_d,
+        "object": object_d,
+        "source": source,
+        "expires": 1234567890111,
+        "created": 1234567890000,
+        "target": [target_d],
+        "context": context,
+        "external_key": external_key,
+        "id": act_id,
+        "users": [user_d]
+    }
+    # just being lazy and putting in the real Entity objects
+    d_cmp = {
         "actor": actor,
         "object": note_object,
         "source": source,
@@ -264,15 +271,16 @@ def test_from_dict():
         "context": context,
         "external_key": external_key,
         "id": act_id,
-        "users": users,
-        "actor_type": "group"
+        "users": users
     }
     for v in verb:
         for l in level:
             note_d = d.copy()
+            note_d_cmp = d_cmp.copy()
             note_d.update({'level': l, 'verb': v})
+            note_d_cmp.update({'level': l, 'verb': v})
             note = Notification.from_dict(note_d)
-            assert_note_ok(note, **note_d)
+            assert_note_ok(note, **note_d_cmp)
 
 
 def test_from_dict_missing_keys():
@@ -294,17 +302,17 @@ def test_serialization():
     json_serial = json.loads(serial)
     assert "i" in json_serial
     assert_is_uuid(json_serial['i'])
-    assert "a" in json_serial and json_serial['a'] == actor
+    assert "a" in json_serial and json_serial['a'] == str(actor)
     assert "v" in json_serial and json_serial['v'] == verb_id
-    assert "o" in json_serial and json_serial['o'] == note_object
+    assert "o" in json_serial and json_serial['o'] == str(note_object)
     assert "s" in json_serial and json_serial['s'] == source
     assert "l" in json_serial and json_serial['l'] == level_id
     assert "c" in json_serial and json_serial['c'] == note.created
     assert "e" in json_serial and json_serial['e'] == note.expires
     assert "n" in json_serial and json_serial['n'] == None
     assert "x" in json_serial and json_serial['x'] == None
-    assert "t" in json_serial and json_serial['t'] == None
-    assert "u" in json_serial and json_serial['u'] == None
+    assert "t" in json_serial and json_serial['t'] == []
+    assert "u" in json_serial and json_serial['u'] == []
 
 
 def test_serialization_all_kwargs():
@@ -314,17 +322,17 @@ def test_serialization_all_kwargs():
     json_serial = json.loads(serial)
     assert "i" in json_serial
     assert_is_uuid(json_serial['i'])
-    assert "a" in json_serial and json_serial['a'] == actor
+    assert "a" in json_serial and json_serial['a'] == str(actor)
     assert "v" in json_serial and json_serial['v'] == verb_id
-    assert "o" in json_serial and json_serial['o'] == note_object
+    assert "o" in json_serial and json_serial['o'] == str(note_object)
     assert "s" in json_serial and json_serial['s'] == source
     assert "l" in json_serial and json_serial['l'] == level_id
     assert "c" in json_serial and json_serial['c'] == note.created
     assert "e" in json_serial and json_serial['e'] == note.expires
     assert "n" in json_serial and json_serial['n'] == context
     assert "x" in json_serial and json_serial['x'] == external_key
-    assert "t" in json_serial and json_serial['t'] == target
-    assert "u" in json_serial and json_serial['u'] == users
+    assert "t" in json_serial and json_serial['t'] == [str(target[0])]
+    assert "u" in json_serial and json_serial['u'] == [str(users[0])]
 
 
 def test_deserialization():
@@ -351,7 +359,7 @@ def test_deserialize_bad():
     assert "Can't deserialize an input of 'None'" in str(e.value)
 
     with pytest.raises(InvalidNotificationError) as e:
-        Notification.deserialize(json.dumps({'a': actor}))
+        Notification.deserialize(json.dumps({'a': actor.to_dict()}))
     assert "Missing keys" in str(e.value)
 
     with pytest.raises(InvalidNotificationError) as e:
