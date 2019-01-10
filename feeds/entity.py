@@ -43,6 +43,14 @@ E = TypeVar('E', bound='Entity')
 
 class Entity(object):
     def __init__(self, e_id: str, e_type: str, name: str=None, auto_validate: str=False):
+        """
+        Instantiate a new Entity.
+        If the type is bad, raises en EntityValidationError.
+        If auto_validate is on, and the id is not found by the appropriate service, also
+        raises an EntityValidationError.
+        """
+        assert e_id, "An Entity must have an id!"
+        assert e_type and isinstance(e_type, str), "entity type must be a string"
         e_type = e_type.lower()
         if not self.validate_type(e_type):
             raise EntityValidationError(
@@ -59,9 +67,24 @@ class Entity(object):
                 )
 
     def validate_type(self, e_type: str) -> bool:
+        """
+        Simply validates the type by comparing it to a list of allowed types.
+        If invalid, returns False. If fine, returns True.
+        """
         return e_type in ['user', 'admin', 'group', 'narrative', 'workspace', 'job']
 
-    def validate(self):
+    def validate(self) -> bool:
+        """
+        Validates the Entity by looking at its id and type.
+        If the type is invalid, returns False.
+        If the type is valid, then tries to validate the entity id against the service that
+        maintains it. The workspace service for workspaces and narratives, for example.
+
+        Each of the id validation calls return a boolean. But they can also raise
+        an exception if their particular call fails. This is dire enough that the Entity
+        being validated probably shouldn't be put in the notification DB, so we just let
+        those percolate up.
+        """
         if self.type == "user":
             return validate_user_id(self.id)
         elif self.type == "group":
@@ -80,12 +103,13 @@ class Entity(object):
             "id": self.id,
             "type": self.type
         }
-        if self.name is not None:
+        if with_name and self.name is not None:
             d["name"] = self.name
         return d
 
     @classmethod
     def from_dict(cls, d: dict) -> E:
+        assert isinstance(d, dict), "from_dict requires a dictionary input!"
         if "id" not in d:
             raise EntityValidationError("An Entity requires an id!")
         if "type" not in d:
@@ -190,6 +214,7 @@ class Entity(object):
         Doesn't do the validation, as it's expected to come from the database.
         Will raise an EntityValidationError
         """
+        assert s and isinstance(s, str), "input must be a string."
         try:
             (t, i) = s.split(STR_SEPARATOR)
         except ValueError:
