@@ -13,23 +13,24 @@ from feeds.exceptions import (
     InvalidExpirationError,
     InvalidNotificationError
 )
+from feeds.entity import Entity
 
 cfg = test_config()
 
 # some dummy "good" inputs for testing
-actor = "test_actor"
+actor = Entity("test_actor", "user")
 verb_inf = "invite"
 verb_past = "invited"
 verb_id = 1
-note_object = "foo"
+note_object = Entity("foo", "workspace")
 source = "groups"
 level_name = "warning"
 level_id = 2
-target = ["target_actor"]
+target = [Entity("target_actor", "user")]
 context = {"some": "context"}
 expires = epoch_ms() + (10 * 24 * 60 * 60 * 1000) # 10 days
 external_key = "an_external_key"
-users = ["user_actor"]
+users = [Entity("user_actor", "user")]
 
 
 def assert_note_ok(note, **kwargs):

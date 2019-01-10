@@ -177,6 +177,9 @@ class Entity(object):
     def __str__(self):
         return "{}{}{}".format(self.type, STR_SEPARATOR, self.id)
 
+    def __eq__(self, other):
+        return other.id == self.id and other.type == self.type
+
     @classmethod
     def from_str(cls, s: str) -> E:
         """
