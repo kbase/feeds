@@ -48,6 +48,7 @@ The types currently supported are:
 * narrative - id should be a workspace id (maybe an UPA if needed)
 * job - id should be a job id string
 
+**Entity**
 ```
 {
     "id": string - an id for this notification, defined by context,
