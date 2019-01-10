@@ -1,5 +1,7 @@
 from abc import abstractmethod
 from feeds.activity.notification import Notification
+from feeds.entity import Entity
+from typing import List
 
 
 class FanoutModule(object):
@@ -12,9 +14,9 @@ class FanoutModule(object):
         self.note = note
 
     @abstractmethod
-    def get_target_users(self):
+    def get_target_users(self) -> List[Entity]:
         """
-        This should always return a list, even an empty one.
+        This should always return a list of Entities, even an empty one.
         Ideally, it'll be a list of users that should see the notification.
         """
         pass

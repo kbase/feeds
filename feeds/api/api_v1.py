@@ -55,6 +55,7 @@ def get_notifications():
     1. validate/authenticate user
     2. make user feed object
     3. query user feed for most recent, based on params
+    #TODO: support group "feeds"
     """
     max_notes = request.args.get('n', default=10, type=int)
 
@@ -75,14 +76,14 @@ def get_notifications():
     include_seen = False if include_seen == 0 else True
     user_id = validate_user_token(get_auth_token(request))
     log(__name__, 'Getting feed for {}'.format(user_id))
-    feed = NotificationFeed(user_id)
+    feed = NotificationFeed(user_id, "user")
     user_notes = feed.get_notifications(
         count=max_notes, include_seen=include_seen, level=level_filter,
         verb=verb_filter, reverse=rev_sort, user_view=True
     )
 
     # fetch the globals
-    global_feed = NotificationFeed(cfg.global_feed)
+    global_feed = NotificationFeed(cfg.global_feed, cfg.global_feed_type)
     global_notes = global_feed.get_notifications(count=max_notes, user_view=True)
     return_vals = {
         "user": user_notes,
@@ -132,7 +133,6 @@ def add_notification():
         params.get('verb'),
         params.get('object'),
         params.get('source'),
-        actor_type=params.get('actor_type', 'user'),
         level=params.get('level'),
         target=params.get('target', []),
         context=params.get('context'),
@@ -150,7 +150,7 @@ def add_notification():
 @api_v1.route('/notifications/global', methods=['GET'])
 @cross_origin()
 def get_global_notifications():
-    global_feed = NotificationFeed(cfg.global_feed)
+    global_feed = NotificationFeed(cfg.global_feed, cfg.global_feed_type)
     global_notes = global_feed.get_notifications(user_view=True)
     return flask.jsonify(global_notes)
 
@@ -190,11 +190,11 @@ def get_single_notification(note_id):
     Should only return the note with that id if it's in the user's feed.
     """
     user_id = validate_user_token(get_auth_token(request))
-    feed = NotificationFeed(user_id)
+    feed = NotificationFeed(user_id, "user")
     try:
         note = feed.get_notification(note_id)
     except NotificationNotFoundError:
-        note = NotificationFeed(cfg.global_feed).get_notification(note_id)
+        note = NotificationFeed(cfg.global_feed, cfg.global_feed_type).get_notification(note_id)
     return (flask.jsonify({'notification': note.user_view()}), 200)
 
 
@@ -212,7 +212,7 @@ def mark_notifications_unseen():
     params = _get_mark_notification_params(json.loads(request.get_data()))
     note_ids = params.get('note_ids')
 
-    feed = NotificationFeed(user_id)
+    feed = NotificationFeed(user_id, "user")
     unauthorized_notes = list()
     for note_id in note_ids:
         try:
@@ -241,7 +241,7 @@ def mark_notifications_seen():
     params = _get_mark_notification_params(json.loads(request.get_data()))
     note_ids = params.get('note_ids')
 
-    feed = NotificationFeed(user_id)
+    feed = NotificationFeed(user_id, "user")
     unauthorized_notes = list()
     for note_id in note_ids:
         try:

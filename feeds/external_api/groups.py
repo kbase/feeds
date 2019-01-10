@@ -1,10 +1,11 @@
 from ..config import get_config
-# import json
 import requests
 from typing import (
     List,
     Dict
 )
+from feeds.exceptions import GroupsError
+
 config = get_config()
 GROUPS_URL = config.groups_url
 
@@ -31,7 +32,13 @@ def validate_group_id(group_id: str) -> bool:
     """
     r = __groups_request("/group/{}/exists".format(group_id))
     res = r.json()
-    return res.get('exists', False)
+    if 'exists' in res:
+        return res['exists']
+    elif 'error' in res:
+        raise GroupsError(
+            "Error while looking up group id: " +
+            res['error'].get('message', 'no message available')
+        )
 
 
 def __groups_request(path: str, token: str=None) -> Response:

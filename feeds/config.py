@@ -53,6 +53,7 @@ class FeedsConfig(object):
         self.db_pw = self._get_line(cfg, KEY_DB_PW, required=False)
         self.db_name = self._get_line(cfg, KEY_DB_NAME, required=False)
         self.global_feed = self._get_line(cfg, KEY_GLOBAL_FEED)
+        self.global_feed_type = "user"  # doesn't matter, need a valid Entity type...
         self.lifespan = self._get_line(cfg, KEY_LIFESPAN)
         try:
             self.lifespan = int(self._get_line(cfg, KEY_LIFESPAN))

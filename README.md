@@ -30,16 +30,38 @@ make test
 (see [the API design doc](design/api.md) for details, also see below.)
 ### Data Structures
 
+**Entity**
+An Entity structure defines, loosely, an entity related to a notification. This will make more sense below in the Notification object, but Entities are all of the actors in the notifications, the objects of each notification, users who receive the notification, and targets of the notification. For example, in the notification defined by the phrase:  
+```
+User "wjriehl" invited user "some_other_user" to join the group "Bill's Fancy Group".
+```
+There are 3 entities:  
+1. wjriehl is an entity of type user
+2. some_other_user is an entity of type user
+3. Bill's Fancy Group is an entity of type group
+These are used as a vocabulary to strictly control what's meant in the notification structure.
+
+The types currently supported are:
+* user - id should be a user id
+* group - id should be a group id
+* workspace - id should be a workspace id
+* narrative - id should be a workspace id (maybe an UPA if needed)
+* job - id should be a job id string
+{
+    "id": string - an id for this notification, defined by context,
+    "type": string - what type of entity this is. Allowed values below.
+    "name": string (optional) - the full name of this entity (not stored, as its possible it could change)
+}
+```
+
 **Notification**
 ```
 {
     "id": string - a unique id for the notification,
-    "actor": string - the id of the actor who triggered the notification,
-    "actor_name": string - the real name (whether group or user) of the actor,
-    "actor_type": string - (one of group, user) - type of the actor,
+    "actor": Entity - the Entity who triggered the notification (mostly a user),
     "verb": string - the action represented by this notification (see list of verbs below),
-    "object": string - the object of the notification,
-    "target": list - the target(s) of the notification,
+    "object": Entity - the object of the notification,
+    "target": list(Entity) - the target(s) of the notification,
     "source": string - the source service that created the notification,
     "level": string, one of alert, error, warning, request,
     "seen": boolean, if true, then this has been seen before,
@@ -190,7 +212,7 @@ This is meant for services to debug their use of external keys. A service that c
 ### Create a new notification
 Only services (i.e. those Authorization tokens with type=Service, as told by the Auth service) can use this endpoint to create a new notification. This requires the body to be a JSON structure with the following available keys (pretty similar to the Notification structure above):
 * `source` - required, this is the source service of the request.
-* `actor` - required, should be a kbase username
+* `actor` - required, should be a valid Entity
 * `object` - required, the object of the notice (the workspace being shared, the group being invited to, etc.)
 * `verb` - required, the action implied by this notice. Currently allowed verbs are:
     * invite / invited
@@ -207,10 +229,11 @@ Only services (i.e. those Authorization tokens with type=Service, as told by the
     * warning
     * error
     * request
-* `target` - (*TODO: update this field*) - currently required, this is a list of user ids that are affected by this notification; and it is also the list of users who see the notification.
+* `target` - optional, but if present should be a list of Entities - the targets of the notification
 * `expires` - optional, an expiration date for the notification in number of milliseconds since the epoch. Default is 30 days after creation.
 * `external_key` - optional, a string that can be used to look up notifications from a service.
 * `context` - optional, a key-value pair structure that can have some semantic meaning for the notification. "Special" keys are `text` - which is used to generate the viewed text in the browser (omitting this will autogenerate the text from the other attributes), and `link` - a URL used to craft a hyperlink in the browser.
+* `users` - optional, a list of Entities that should receive the notification (limited to users and groups). This list will be automatically augmented by the service if necessary. E.g. if a workspace is the object of the notification, then the workspace admins will be notified.
 
 **Usage:**
 * Path: `/api/V1/notification`
@@ -224,20 +247,29 @@ Only services (i.e. those Authorization tokens with type=Service, as told by the
 ```python
 import requests
 note = {
-    "actor": "wjriehl",
+    "actor": {
+        "id": "wjriehl",
+        "type": "user"
+    },
     "source": "workspace",
     "verb": "shared",
-    "object": "30000",
-    "target": ["gaprice"],
+    "object": {
+        "id": "30000",
+        "type": "workspace"
+    },
+    "target": [{
+        "id": "gaprice",
+        "type": "user"
+    }],
     "context": {
-        "text": "User wjriehl shared workspace 30000 with user gaprice."  # this can also be auto-generated
+        "text": "User wjriehl shared workspace 30000 with user gaprice."  # this can also be auto-generated by the UI.
     }
 }
 r = requests.post("https://<service_url>/api/V1/notification", json=note, headers={"Authorization": auth_token})
 ```
 would return:
 ```python
-{"id": "some-uuid-for-the-notification"}
+{"id": "some-unique-id-for-the-notification"}
 ```
 
 ### Mark notifications as seen

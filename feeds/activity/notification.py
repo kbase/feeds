@@ -3,7 +3,6 @@ import uuid
 import json
 from ..util import epoch_ms
 from .. import verbs
-from ..actor import validate_actor
 from .. import notification_level
 from feeds.exceptions import (
     InvalidExpirationError,
@@ -11,12 +10,19 @@ from feeds.exceptions import (
 )
 import datetime
 from feeds.config import get_config
+from feeds.entity import Entity
+from typing import (
+    List,
+    TypeVar
+)
+N = TypeVar('N', bound='Notification')
 
 
 class Notification(BaseActivity):
-    def __init__(self, actor: str, verb, note_object: str, source: str, actor_name: str=None,
-                 actor_type: str='user', level='alert', target: list=None, context: dict=None,
-                 expires: int=None, external_key: str=None, seen: bool=False, users: list=None):
+    def __init__(self, actor: Entity, verb: str, note_object: Entity, source: str,
+                 level='alert', target: List[Entity]=None, context: dict=None,
+                 expires: int=None, external_key: str=None, seen: bool=False,
+                 users: List[Entity]=None):
         """
         A notification is roughly of this form:
             actor, verb, object, target
@@ -39,7 +45,6 @@ class Notification(BaseActivity):
             a group name
         :param source: source service for the note. String.
         :param actor_name: Real name of the actor (or None)
-        :param actor_type: Type of actor. Allowed = 'user', 'group'
         :param level: The level of the notification. Allowed values are alert, warning, request,
             error (default "alert")
         :param target: target of the note. Optional. Should be a user id or group id if present.
@@ -60,7 +65,6 @@ class Notification(BaseActivity):
             * validate context fits
         """
         assert actor is not None, "actor must not be None"
-        assert actor_type in ['user', 'group'], "actor_type must be either 'user' or 'group'"
         assert verb is not None, "verb must not be None"
         assert note_object is not None, "note_object must not be None"
         assert source is not None, "source must not be None"
@@ -68,13 +72,9 @@ class Notification(BaseActivity):
         assert target is None or isinstance(target, list), "target must be either a list or None"
         assert users is None or isinstance(users, list), "users must be either a list or None"
         assert context is None or isinstance(context, dict), "context must be either a dict or None"
-        assert actor_name is None or isinstance(actor_name, str), \
-            "actor_name must be either a str or None"
 
         self.id = str(uuid.uuid4())
         self.actor = actor
-        self.actor_name = actor_name
-        self.actor_type = actor_type
         self.verb = verbs.translate_verb(verb)
         self.object = note_object
         self.source = source
@@ -90,13 +90,16 @@ class Notification(BaseActivity):
         self.seen = seen
         self.users = users
 
-    def validate(self):
+    def validate(self) -> None:
         """
         Validates whether the notification fields are accurate. Should be called before
         sending a new notification to storage.
+        Raises exceptions if invalid. Currently just raises an InvalidExpirationError, as
+        that's all it checks...
         """
         self.validate_expiration(self.expires, self.created)
-        validate_actor(self.actor)
+        # TODO: do this later if we need to
+        # validate_actor(self.actor)
 
     def validate_expiration(self, expires: int, created: int):
         """
@@ -133,70 +136,80 @@ class Notification(BaseActivity):
         """
         dict_form = {
             "id": self.id,
-            "actor": self.actor,
+            "actor": self.actor.to_dict(),
             "verb": self.verb.id,
-            "object": self.object,
+            "object": self.object.to_dict(),
             "source": self.source,
             "context": self.context,
-            "target": self.target,
             "level": self.level.id,
             "created": self.created,
             "expires": self.expires,
             "external_key": self.external_key,
-            "users": self.users,
-            "actor_type": self.actor_type
         }
+        target_dict = []
+        if self.target is not None:
+            target_dict = [t.to_dict() for t in self.target]
+            dict_form["target"] = target_dict
+        user_dict = []
+        if self.users is not None:
+            user_dict = [u.to_dict() for u in self.users]
+            dict_form["users"] = user_dict
+
         return dict_form
 
     def user_view(self) -> dict:
         """
         Returns a view of the Notification that's intended for the user.
-        That means we leave out the target and external keys.
+        That means we leave out the users and external keys.
         """
         view = {
             "id": self.id,
-            "actor": self.actor,
-            "actor_name": self.actor_name,
-            "actor_type": self.actor_type,
+            "actor": self.actor.to_dict(with_name=True),
             "verb": self.verb.past_tense,
-            "object": self.object,
+            "object": self.object.to_dict(with_name=True),
             "source": self.source,
             "context": self.context,
             "target": self.target,
             "level": self.level.name,
             "created": self.created,
             "expires": self.expires,
-            "seen": self.seen,
-            "external_key": self.external_key
+            "seen": self.seen
         }
+        target_dict = []
+        if self.target is not None:
+            target_dict = [t.to_dict(with_name=True) for t in self.target]
+            view["target"] = target_dict
+        user_dict = []
+        if self.users is not None:
+            user_dict = [u.to_dict(with_name=True) for u in self.users]
+            view["users"] = user_dict
+
         return view
 
     def serialize(self) -> str:
         """
-        Serializes this notification to a string for caching / simple storage.
+        Serializes this notification to a string for caching / simple storage (e.g. Redis).
         Assumes it's been validated.
         Just dumps it all to a json string.
         """
         serial = {
             "i": self.id,
-            "a": self.actor,
-            "an": self.actor_name,
-            "at": self.actor_type,
+            "a": str(self.actor),
             "v": self.verb.id,
-            "o": self.object,
+            "o": str(self.object),
             "s": self.source,
-            "t": self.target,
+            "t": [str(t) for t in self.target],
             "l": self.level.id,
             "c": self.created,
             "e": self.expires,
             "x": self.external_key,
             "n": self.context,
-            "u": self.users
+            "u": [str(u) for u in self.users]
         }
         return json.dumps(serial, separators=(',', ':'))
 
     @classmethod
-    def deserialize(cls, serial: str):
+    def deserialize(cls, serial: str) -> N:
         """
         Deserializes and returns a new Notification instance.
         """
@@ -212,26 +225,26 @@ class Notification(BaseActivity):
         missing_keys = required_keys.difference(struct.keys())
         if missing_keys:
             raise InvalidNotificationError('Missing keys: {}'.format(missing_keys))
+        users = [Entity.from_str(u) for u in struct.get('u', [])]
+        target = [Entity.from_str(t) for t in struct.get('t', [])]
         deserial = cls(
-            struct['a'],
+            Entity.from_str(struct['a']),
             str(struct['v']),
-            struct['o'],
+            Entity.from_str(struct['o']),
             struct['s'],
-            actor_type=struct.get('at', 'user'),
             level=str(struct['l']),
-            target=struct.get('t'),
+            target=target,
             context=struct.get('n'),
             external_key=struct.get('x'),
-            users=struct.get('u')
+            users=users
         )
         deserial.created = struct['c']
         deserial.id = struct['i']
         deserial.expires = struct['e']
-        deserial.actor_name = struct['an']
         return deserial
 
     @classmethod
-    def from_dict(cls, serial: dict):
+    def from_dict(cls, serial: dict) -> N:
         """
         Returns a new Notification from a serialized dictionary (e.g. used in Mongo)
         """
@@ -246,18 +259,16 @@ class Notification(BaseActivity):
         if missing_keys:
             raise InvalidNotificationError('Missing keys: {}'.format(missing_keys))
         deserial = cls(
-            serial['actor'],
+            Entity.from_dict(serial['actor']),
             str(serial['verb']),
-            serial['object'],
+            Entity.from_dict(serial['object']),
             serial['source'],
             level=str(serial['level']),
-            target=serial.get('target'),
+            target=[Entity.from_dict(t) for t in serial.get('target', [])],
             context=serial.get('context'),
             external_key=serial.get('external_key'),
             seen=serial.get('seen', False),
-            users=serial.get('users'),
-            actor_name=serial.get('actor_name'),
-            actor_type=serial.get('actor_type', 'user')
+            users=[Entity.from_dict(u) for u in serial.get('users', [])]
         )
         deserial.created = serial['created']
         deserial.expires = serial['expires']

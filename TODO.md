@@ -2,6 +2,11 @@
 * Integrate with Groups
     * Make Groups service API
     * Include groups as an actor, target, object
+        * Needs full name lookup
+        * Needs separation between user/group for each type
+        * Probably need to separate target/object from just a list of strings into a list of objects
+            * each object = id, type
+        
     * Return groups in the feeds lookup
         * new "group" key
 * Include total number of unexpired notifications for a user

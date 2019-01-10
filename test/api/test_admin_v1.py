@@ -233,13 +233,25 @@ def test_expire_notification_admin_from_service(client, mongo_notes, mock_valid_
     # service creates two notifications - one with external key
     service_cred = {"Authorization": "token-"+str(uuid4())}
     note = {
-        "actor": "kbasetest",
+        "actor": {
+            "id": "kbasetest",
+            "type": "user"
+        },
         "verb": 1,
         "level": 1,
-        "object": "stuff",
-        "users": ["kbasetest"],
+        "object": {
+            "id": "stuff",
+            "type": "workspace"
+        },
+        "users": [{
+            "id": "kbasetest",
+            "type": "user"
+        }],
         "source": source,
-        "target": ["kbasetest"]
+        "target": [{
+            "id": "kbasetest",
+            "type": "user"
+        }]
     }
     response = client.post(
         "/api/V1/notification",

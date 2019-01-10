@@ -5,13 +5,14 @@ from feeds.storage.mongodb.timeline_storage import MongoTimelineStorage
 from cachetools import TTLCache
 import logging
 from feeds.exceptions import NotificationNotFoundError
-from feeds.actor import actor_ids_to_names
+# from feeds.actor import actor_ids_to_names
+from feeds.entity import Entity
 
 
 class NotificationFeed(BaseFeed):
-    def __init__(self, user_id):
-        self.user_id = user_id
-        self.timeline_storage = MongoTimelineStorage(self.user_id)
+    def __init__(self, user_id, user_type):
+        self.user = Entity(user_id, user_type)
+        self.timeline_storage = MongoTimelineStorage(user_id, user_type)
         self.activity_storage = MongoActivityStorage()
         self.timeline = None
         self.cache = TTLCache(1000, 600)
@@ -24,7 +25,9 @@ class NotificationFeed(BaseFeed):
 
         TODO: add metadata to timeline storage - type and verb, first.
         """
-        logging.getLogger(__name__).info('Fetching timeline for ' + self.user_id)
+        logging.getLogger(__name__).info(
+            'Fetching timeline for '.format(self.user)
+        )
         self.timeline = self.timeline_storage.get_timeline()
 
     def get_notifications(self, count: int=10, include_seen: bool=False, level=None, verb=None,
@@ -92,17 +95,17 @@ class NotificationFeed(BaseFeed):
             level=level, verb=verb, reverse=reverse
         )
         note_list = list()
-        actor_ids = set()
+        # actor_ids = set()
         for note in serial_notes:
-            actor_ids.add(note["actor"])
-            if self.user_id not in note["unseen"]:
-                note["seen"] = True
-            else:
-                note["seen"] = False
+            # actor_ids.add(note["actor"].id)
+            # if self.user_id not in note["unseen"]:
+            #     note["seen"] = True
+            # else:
+            #     note["seen"] = False
             note_list.append(Notification.from_dict(note))
-        actor_names = actor_ids_to_names(list(actor_ids))
-        for note in note_list:
-            note.actor_name = actor_names.get(note.actor, {}).get("name")
+        # actor_names = actor_ids_to_names(list(actor_ids))
+        # for note in note_list:
+        #     note.actor_name = actor_names.get(note.actor, {}).get("name")
         return note_list
 
     def mark_activities(self, activity_ids, seen=False):
@@ -112,9 +115,9 @@ class NotificationFeed(BaseFeed):
         changed for that activity.
         """
         if seen:
-            self.activity_storage.set_seen(activity_ids, self.user_id)
+            self.activity_storage.set_seen(activity_ids, self.user)
         else:
-            self.activity_storage.set_unseen(activity_ids, self.user_id)
+            self.activity_storage.set_unseen(activity_ids, self.user)
 
     def add_notification(self, note):
         return self.add_activity(note)
@@ -123,7 +126,7 @@ class NotificationFeed(BaseFeed):
         """
         Adds an activity to this user's feed
         """
-        self.activity_storage.add_to_storage(note, [self.user_id])
+        self.activity_storage.add_to_storage(note, [self.user])
 
     def get_unseen_count(self):
         """

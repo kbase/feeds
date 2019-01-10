@@ -105,3 +105,38 @@ class NotificationNotFoundError(Exception):
     or isn't in the user's feed.
     """
     pass
+
+
+class GroupsError(Exception):
+    """
+    Generic exception wrapped around any response from the Groups server.
+    """
+    pass
+
+
+class EntityNameError(Exception):
+    """
+    Exception thrown when a failure to find an entity name happens
+    """
+    pass
+
+
+class EntityValidationError(Exception):
+    """
+    Thrown when an entity is unable to be validated
+    """
+    pass
+
+
+class WorkspaceError(Exception):
+    """
+    Generic exception wrapper for Workspace calls.
+    """
+    pass
+
+
+class JobError(Exception):
+    """
+    Generic wrapper around exceptions from Job Service calls.
+    """
+    pass
