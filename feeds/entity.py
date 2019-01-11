@@ -19,6 +19,7 @@ from .external_api.groups import (
 )
 from .external_api.workspace import (
     validate_workspace_id,
+    validate_narrative_id,
     get_workspace_name,
     get_narrative_name
 )
@@ -58,7 +59,7 @@ class Entity(object):
             )
         self.type = e_type
         self.id = e_id
-        self.name = name
+        self._name = name
         if auto_validate:
             v = self.validate()
             if not v:
@@ -89,8 +90,10 @@ class Entity(object):
             return validate_user_id(self.id)
         elif self.type == "group":
             return validate_group_id(self.id)
-        elif self.type == "workspace" or self.type == "narrative":
+        elif self.type == "workspace":
             return validate_workspace_id(self.id)
+        elif self.type == "narrative":
+            return validate_narrative_id(self.id)
         elif self.type == "job":
             return validate_job_id(self.id)
         elif self.type == "admin":
@@ -103,8 +106,8 @@ class Entity(object):
             "id": self.id,
             "type": self.type
         }
-        if with_name and self.name is not None:
-            d["name"] = self.name
+        if with_name and self._name is not None:
+            d["name"] = self._name
         return d
 
     @classmethod
@@ -116,19 +119,15 @@ class Entity(object):
             raise EntityValidationError("An Entity requires a type!")
         return cls(d["id"], d["type"], name=d.get("name"))
 
-    # @property
-    # def name(self):
-    #     return self.name
+    @property
+    def name(self) -> str:
+        if self._name is None:
+            self._fetch_name()
+        return self._name
 
-    # @name.setter
-    # def name(self, name: str):
-    #     self.name = name
-
-    # @name.getter
-    # def name(self) -> str:
-    #     if self.name is None:
-    #         self._fetch_name()
-    #     return self.name
+    @name.setter
+    def name(self, value: str) -> None:
+        self._name = value
 
     def _fetch_name(self) -> None:
         """
@@ -143,7 +142,7 @@ class Entity(object):
                         "Unable to find name for user id: {}".format(self.id)
                     )
                 else:
-                    self.name = users[self.id]
+                    self._name = users[self.id]
             except HTTPError:
                 raise EntityNameError(
                     "Unable to find name for user id: {}".format(self.id)
@@ -156,14 +155,14 @@ class Entity(object):
                         "Unable to find name for group id: {}".format(self.id)
                     )
                 else:
-                    self.name = groups[self.id]
+                    self._name = groups[self.id]
             except HTTPError:
                 raise EntityNameError("Unable to find name for group id: {}".format(self.id))
         elif self.type == "workspace":
             try:
                 name = get_workspace_name(self.id)
                 if name is not None:
-                    self.name = name
+                    self._name = name
                 else:
                     raise EntityNameError(
                         "Unable to find name for workspace id: {}".format(self.id)
@@ -174,7 +173,7 @@ class Entity(object):
             try:
                 name = get_narrative_name(self.id)
                 if name is not None:
-                    self.name = name
+                    self._name = name
                 else:
                     raise EntityNameError(
                         "Unable to find name for narrative id: {}".format(self.id)
@@ -185,13 +184,13 @@ class Entity(object):
             try:
                 name = get_job_name(self.id)
                 if name is not None:
-                    self.name = name
+                    self._name = name
                 else:
                     raise EntityNameError("Unable to find name for job id: {}".format(self.id))
             except JobError as e:
                 raise EntityNameError(e)
         elif self.type == "admin":
-            self.name = "KBase"
+            self._name = "KBase"
         else:
             return
 

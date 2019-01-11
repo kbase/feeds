@@ -10,6 +10,7 @@ from .mongo_controller import MongoController
 import shutil
 import time
 import re
+from requests_mock import ANY as r_mock_ANY
 
 
 def pytest_sessionstart(session):
@@ -60,6 +61,10 @@ def app():
 @pytest.fixture(scope="module")
 def client(app):
     return app.test_client()
+
+###########################
+### USER / AUTH MOCKING
+###########################
 
 @pytest.fixture
 def mock_valid_user(requests_mock):
@@ -217,3 +222,108 @@ def mock_auth_error(requests_mock):
                 "apperror": "Something very bad happened, mm'kay?"
             }
         })
+
+
+##################################
+### GENERIC NETWORK ERROR MOCKING
+##################################
+
+@pytest.fixture
+def mock_network_error(requests_mock):
+    """
+    Any network call just zonks out with a 500. Simulate big fails when talking to services.
+    """
+    requests_mock.register_uri(r_mock_ANY, r_mock_ANY,
+        status_code=500,
+        json={
+            "error": {
+                "httpcode": 500,
+                "httpstatus": "FAIL",
+                "apperror": "Your network asplode."
+            }
+        })
+
+
+###############################
+### GROUPS SERVICE API MOCKING
+###############################
+
+@pytest.fixture
+def mock_valid_group(requests_mock):
+    def valid_group_id(g_id):
+        cfg = test_config()
+        groups_url = cfg.get('feeds', 'groups-url')
+        requests_mock.get("{}/group/{}/exists".format(groups_url, g_id), json={
+            "exists": True
+        })
+    return valid_group_id
+
+
+@pytest.fixture
+def mock_invalid_group(requests_mock):
+    def invalid_group_id(g_id):
+        cfg = test_config()
+        groups_url = cfg.get('feeds', 'groups-url')
+        requests_mock.get("{}/group/{}/exists".format(groups_url, g_id), json={
+            "exists": False
+        })
+    return invalid_group_id
+
+
+###################################
+### WORKSPACE SERVICE API MOCKING
+###################################
+
+def workspace_info_matcher(req):
+    body = json.loads(req.text)
+    print("MATCHING AGAINST: {}".format(body))
+    return body.get("method") == "Workspace.get_workspace_info"
+
+@pytest.fixture
+def mock_workspace_info(requests_mock):
+    def valid_workspace_info(info):
+        cfg = test_config()
+        ws_url = cfg.get('feeds', 'workspace-url')
+        requests_mock.register_uri("POST", ws_url, additional_matcher=workspace_info_matcher, json={
+            "version": "1.1",
+            "result": [info]
+        })
+    return valid_workspace_info
+
+@pytest.fixture
+def mock_workspace_info_error(requests_mock):
+    def error_workspace_info(ws_id):
+        cfg = test_config()
+        ws_url = cfg.get('feeds', 'workspace-url')
+        requests_mock.register_uri("POST", ws_url,
+            additional_matcher=workspace_info_matcher,
+            status_code=500,
+            json={
+                "version": "1.1",
+                "error": {
+                    "name": "JSONRPCError",
+                    "code": "-32500",
+                    "message": "Workspace {} is deleted".format(ws_id),
+                    "error": "Long winded exception..."
+            }
+        })
+    return error_workspace_info
+
+@pytest.fixture
+def mock_workspace_info_invalid(requests_mock):
+    def invalid_workspace_info(ws_id):
+        cfg = test_config()
+        ws_url = cfg.get('feeds', 'workspace-url')
+        requests_mock.register_uri("POST", ws_url,
+            additional_matcher=workspace_info_matcher,
+            status_code=500,
+            json={
+                "version": "1.1",
+                "error": {
+                    "name": "JSONRPCError",
+                    "code": "-32500",
+                    "message": "No workspace with id {} exists".format(ws_id),
+                    "error": "Long winded exception..."
+            }
+        })
+    return invalid_workspace_info

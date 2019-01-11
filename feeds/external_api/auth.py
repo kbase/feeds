@@ -16,16 +16,17 @@ from cachetools import (
     Cache,
     TTLCache
 )
-config = get_config()
-AUTH_URL = config.auth_url
-AUTH_API_PATH = '/api/V2/'
-CACHE_EXPIRE_TIME = 300  # seconds
 from typing import (
     Any,
     Dict,
     List
 )
 from requests.models import Response
+
+config = get_config()
+AUTH_URL = config.auth_url
+AUTH_API_PATH = '/api/V2/'
+CACHE_EXPIRE_TIME = 300  # seconds
 
 
 class TokenCache(TTLCache):
@@ -92,7 +93,7 @@ def validate_user_id(user_id: str) -> bool:
     return user_id in validate_user_ids([user_id])
 
 
-def validate_user_ids(user_ids: List[str]) -> Dict[str,str]:
+def validate_user_ids(user_ids: List[str]) -> Dict[str, str]:
     """
     Validates whether users are real or not.
     Returns the parsed response from the server, as a dict. Each

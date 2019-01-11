@@ -33,16 +33,85 @@ def test_entity_init_bad_type(bad_type, expect_except, msg):
     assert msg in str(e)
 
 
-def test_entity_init_auto_validate():
-    raise NotImplementedError()
+def test_entity_init_autovalidate(mock_valid_users):
+    user_id = "fake"
+    user_name = "Fake User"
+    mock_valid_users({user_id: user_name})
+    e = Entity(user_id, "user", auto_validate=True)
+    assert e.id == user_id
+    assert e.type == "user"
 
 
-def test_entity_validate_ok():
-    raise NotImplementedError()
+def test_entity_init_autovalidate_fail(mock_invalid_user):
+    user_id = "bad_user"
+    mock_invalid_user(user_id)
+    with pytest.raises(EntityValidationError) as e:
+        Entity(user_id, "user", auto_validate=True)
+    assert "Entity of type user with id {} is not valid".format(user_id)
 
 
-def test_entity_validate_fail():
-    raise NotImplementedError()
+def test_entity_validate_user_ok(mock_valid_users):
+    mock_valid_users({"fake": "Fake User"})
+    e = Entity("fake", "user")
+    assert e.validate() is True
+
+    e = Entity("some_admin", "admin")
+    assert e.validate() is True
+
+
+def test_entity_validate_group_ok(mock_valid_group):
+    g_id = "mygroup"
+    mock_valid_group(g_id)
+    e = Entity(g_id, "group")
+    assert e.validate() is True
+
+
+def test_entity_validate_workspace_ok(mock_workspace_info):
+    ws_id = 5
+    info = [5, "A_Workspace", "owner", "Timestamp", 18, "a", "n", "unlocked", {}]
+    mock_workspace_info(info)
+    e = Entity(ws_id, "workspace")
+    assert e.validate() is True
+
+
+def test_entity_validate_workspace_false(mock_workspace_info_invalid):
+    ws_id = 5
+    mock_workspace_info_invalid(ws_id)
+    e = Entity(ws_id, "workspace")
+    assert e.validate() is False
+
+
+def test_entity_validate_workspace_fail(mock_workspace_info_error):
+    ws_id = 5
+    mock_workspace_info_error(ws_id)
+    e = Entity(ws_id, "workspace")
+    assert e.validate() is False
+
+
+def test_entity_validate_narrative_ok(mock_workspace_info):
+    ws_id = 5
+    info = [5, "A_Workspace", "owner", "Timestamp", 18, "a", "n", "unlocked", {"narrative": "1", "narrative_nice_name": "My Narrative"}]
+    mock_workspace_info(info)
+    e = Entity(ws_id, "narrative")
+    assert e.validate() is True
+
+
+def test_entity_validate_narrative_fail(mock_workspace_info_invalid):
+    ws_id = 5
+    mock_workspace_info_invalid(ws_id)
+    e = Entity(ws_id, "narrative")
+    assert e.validate() is False
+
+
+def test_entity_validate_job_ok():
+    pass
+
+
+def test_entity_validate_user_fail(mock_invalid_user):
+    user_id = "not_a_user"
+    mock_invalid_user(user_id)
+    e = Entity(user_id, "user")
+    assert e.validate() is False
 
 
 @pytest.mark.parametrize("e_id,e_type,name", [
@@ -167,5 +236,110 @@ def test_entity_repr():
     assert r == 'Entity("foo", "user")'
 
 
-def test_entity_fetch_name():
-    raise NotImplementedError()
+def test_entity_fetch_name_user(mock_valid_users):
+    user_name = "Fake User"
+    user_id = "fake"
+    mock_valid_users({user_id: user_name})
+    e = Entity(user_id, "user")
+    e._fetch_name()
+    assert e.name == user_name
+
+
+def test_entity_name_getter_user_ok(mock_valid_users):
+    user_name = "Some User"
+    user_id = "some_user"
+    mock_valid_users({user_id: user_name})
+    e = Entity(user_id, "user")
+    assert e.name == user_name
+
+
+def test_entity_name_getter_user_fail(mock_invalid_user):
+    user_id = "bad_user"
+    mock_invalid_user(user_id)
+    e = Entity(user_id, "user")
+    with pytest.raises(EntityNameError) as err:
+        x = e.name
+    assert "Unable to find name for user id: {}".format(user_id) in str(err)
+
+
+def test_entity_name_getter_auth_fail(mock_network_error):
+    e = Entity("a_user", "user")
+    with pytest.raises(EntityNameError) as error:
+        x = e.name
+    assert "Unable to find name for user id" in str(error)
+
+
+def test_entity_name_getter_group_fail():
+    pass
+
+
+def test_entity_name_getter_workspace_fail(mock_workspace_info_invalid):
+    ws_id = 8
+    mock_workspace_info_invalid(ws_id)
+    e = Entity(ws_id, "workspace")
+    with pytest.raises(EntityNameError) as err:
+        x = e.name
+    assert "Unable to find name for workspace id: {}".format(ws_id) in str(err)
+
+
+def test_entity_name_getter_workspace_error(mock_workspace_info_error):
+    ws_id = 8
+    mock_workspace_info_error(ws_id)
+    e = Entity(ws_id, "workspace")
+    with pytest.raises(EntityNameError) as err:
+        x = e.name
+    assert "Unable to find name for workspace id: {}".format(ws_id) in str(err)
+
+
+def test_entity_name_getter_narrative_fail(mock_workspace_info_invalid):
+    ws_id = 8
+    mock_workspace_info_invalid(ws_id)
+    e = Entity(ws_id, "narrative")
+    with pytest.raises(EntityNameError) as err:
+        x = e.name
+    assert "Unable to find name for narrative id: {}".format(ws_id) in str(err)
+
+
+def test_entity_name_getter_narrative_error(mock_workspace_info_error):
+    ws_id = 8
+    mock_workspace_info_error(ws_id)
+    e = Entity(ws_id, "narrative")
+    with pytest.raises(EntityNameError) as err:
+        x = e.name
+    assert "Unable to find name for narrative id: {}".format(ws_id) in str(err)
+
+
+def test_entity_name_getter_job_fail():
+    pass
+
+
+def test_entity_name_setter():
+    user_name = "A User"
+    user_id = "a_user"
+    e = Entity(user_id, "user")
+    e.name = user_name
+    assert e.name == user_name
+
+
+def test_entity_fetch_name_ws(mock_workspace_info):
+    ws_id = 6
+    info = [6, "A_Workspace", "owner", "Timestamp", 18, "a", "n", "unlocked", {"narrative": "1", "narrative_nice_name": "My Narrative"}]
+    mock_workspace_info(info)
+    e = Entity(ws_id, "workspace")
+    assert e.name == info[1]
+
+
+def test_entity_fetch_name_narr(mock_workspace_info):
+    ws_id = 7
+    info = [7, "A_Workspace", "owner", "Timestamp", 18, "a", "n", "unlocked", {"narrative": "1", "narrative_nice_name": "My Narrative"}]
+    mock_workspace_info(info)
+    e = Entity(ws_id, "narrative")
+    assert e.name == info[8]["narrative_nice_name"]
+
+
+def test_entity_fetch_name_group():
+    pass
+
+
+def test_entity_fetch_name_job():
+    pass

@@ -43,7 +43,7 @@ def validate_group_id(group_id: str) -> bool:
 
 def __groups_request(path: str, token: str=None) -> Response:
     headers = {"Authorization": token}
-    r = requests.get(path, headers=headers)
+    r = requests.get(GROUPS_URL + path, headers=headers)
     # the requests that fail based on the token (401, 403) get returned for the
     # calling function to turn into an informative error
     # others - 404, 500 - get raised
