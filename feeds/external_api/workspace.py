@@ -10,6 +10,7 @@ from typing import (
 
 config = get_config()
 
+
 def validate_narrative_id(ws_id: Union[int, str]) -> bool:
     """
     Returns True if the workspace id exists and has a narrative registered in it, False otherwise.
