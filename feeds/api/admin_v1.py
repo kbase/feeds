@@ -18,7 +18,7 @@ from .util import (
     parse_notification_params,
     parse_expire_notifications_params
 )
-from feeds.entity import Entity
+from feeds.entity.entity import Entity
 
 cfg = get_config()
 admin_v1 = flask.Blueprint('admin_v1', __name__)

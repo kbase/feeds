@@ -1,4 +1,4 @@
-from feeds.entity import Entity
+from feeds.entity.entity import Entity
 
 
 class BaseStorage(object):

@@ -10,7 +10,7 @@ from feeds.exceptions import (
 )
 import datetime
 from feeds.config import get_config
-from feeds.entity import Entity
+from feeds.entity.entity import Entity
 from typing import (
     List,
     TypeVar
@@ -270,3 +270,13 @@ class Notification(BaseActivity):
         deserial.expires = serial['expires']
         deserial.id = serial['id']
         return deserial
+
+    @staticmethod
+    def update_entity_names(notes: List[N]) -> None:
+        entities = list()
+        for n in notes:
+            entities.append(n.actor)
+            entities.append(n.object)
+            entities = entities + n.target
+            entities = entities + n.users
+        Entity.fetch_entity_names(entities)

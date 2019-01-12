@@ -100,7 +100,7 @@ def validate_user_ids(user_ids: List[str]) -> Dict[str, str]:
     key is a user that exists, each value is their user name.
     Raises an HTTPError if something bad happens.
     """
-    users = dict()
+    users = {config.global_feed: "KBase"}
     # fetch ones we know of from the cache
     for user_id in user_ids:
         try:

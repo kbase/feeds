@@ -72,7 +72,15 @@ def get_workspace_name(ws_id: int) -> str:
 
 
 def get_workspace_names(ws_ids: List[Union[int, str]]) -> Dict[str, str]:
-    pass
+    ws = __ws_client()
+    names = dict()
+    for ws_id in ws_ids:
+        try:
+            info = ws.get_workspace_info({"id": ws_id})
+            names[ws_id] = info[1]
+        except ServerError:
+            names[ws_id] = None
+    return names
 
 
 def get_narrative_name(ws_id: int) -> str:
@@ -96,8 +104,22 @@ def get_narrative_name(ws_id: int) -> str:
         )
 
 
-def get_narrative_names(ws_id: List[Union[int, str]]) -> Dict[str, str]:
-    pass
+def get_narrative_names(ws_ids: List[Union[int, str]]) -> Dict[str, str]:
+    ws = __ws_client()
+    names = dict()
+    for ws_id in ws_ids:
+        try:
+            info = ws.get_workspace_info({"id": ws_id})
+            meta = info[8]
+            if 'narrative_nice_name' in meta:
+                names[ws_id] = meta['narrative_nice_name']
+            elif 'narrative' in meta:
+                names[ws_id] = 'Untitled'
+            else:
+                names[ws_id] = None
+        except ServerError:
+            names[ws_id] = None
+    return names
 
 
 def __ws_client() -> Workspace:

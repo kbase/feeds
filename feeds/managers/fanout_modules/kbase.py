@@ -1,6 +1,6 @@
 from .base import FanoutModule
 from feeds.config import get_config
-from feeds.entity import Entity
+from feeds.entity.entity import Entity
 
 
 class KBaseFanout(FanoutModule):

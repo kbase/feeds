@@ -13,7 +13,7 @@ from feeds.exceptions import (
     InvalidExpirationError,
     InvalidNotificationError
 )
-from feeds.entity import Entity
+from feeds.entity.entity import Entity
 
 cfg = test_config()
 

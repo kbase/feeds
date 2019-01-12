@@ -23,7 +23,11 @@ def get_group_names(group_ids: List[str]) -> Dict[str, str]:
     """
     Returns a mapping from group id to group names given a list of group ids.
     """
-    raise NotImplementedError()
+    # TODO
+    ret = dict()
+    for g_id in group_ids:
+        ret[g_id] = "A Group"
+    return ret
 
 
 def validate_group_id(group_id: str) -> bool:

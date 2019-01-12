@@ -17,7 +17,7 @@ from .fanout_modules.groups import GroupsFanout
 from .fanout_modules.workspace import WorkspaceFanout
 from .fanout_modules.jobs import JobsFanout
 from .fanout_modules.kbase import KBaseFanout
-from feeds.entity import Entity
+from feeds.entity.entity import Entity
 
 
 class NotificationManager(BaseManager):

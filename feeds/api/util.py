@@ -2,7 +2,7 @@ from feeds.exceptions import (
     IllegalParameterError,
     MissingParameterError
 )
-from feeds.entity import Entity
+from feeds.entity.entity import Entity
 
 
 def parse_notification_params(params: dict, is_global: bool=False) -> dict:

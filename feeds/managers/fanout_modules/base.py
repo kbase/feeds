@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from feeds.activity.notification import Notification
-from feeds.entity import Entity
+from feeds.entity.entity import Entity
 from typing import List
 
 

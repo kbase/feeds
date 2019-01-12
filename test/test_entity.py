@@ -1,5 +1,5 @@
 import pytest
-from feeds.entity import (
+from feeds.entity.entity import (
     Entity,
     STR_SEPARATOR
 )
@@ -51,7 +51,10 @@ def test_entity_init_autovalidate_fail(mock_invalid_user):
 
 
 def test_entity_validate_user_ok(mock_valid_users):
-    mock_valid_users({"fake": "Fake User"})
+    mock_valid_users({
+        "fake": "Fake User",
+        "some_admin": "admin"
+    })
     e = Entity("fake", "user")
     assert e.validate() is True
 
@@ -343,3 +346,12 @@ def test_entity_fetch_name_group():
 
 def test_entity_fetch_name_job():
     pass
+
+
+def test_entity_fetch_name_list():
+    pass
+
+
+def test_entity_fetch_name_list_fail():
+    pass
+

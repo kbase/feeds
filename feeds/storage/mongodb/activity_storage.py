@@ -9,7 +9,7 @@ from feeds.exceptions import (
 )
 from pymongo.errors import PyMongoError
 from feeds.util import epoch_ms
-from feeds.entity import Entity
+from feeds.entity.entity import Entity
 
 
 class MongoActivityStorage(ActivityStorage):

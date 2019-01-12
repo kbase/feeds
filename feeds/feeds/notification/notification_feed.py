@@ -5,8 +5,8 @@ from feeds.storage.mongodb.timeline_storage import MongoTimelineStorage
 from cachetools import TTLCache
 import logging
 from feeds.exceptions import NotificationNotFoundError
-# from feeds.actor import actor_ids_to_names
-from feeds.entity import Entity
+from feeds.entity.entity import Entity
+from typing import List
 
 
 class NotificationFeed(BaseFeed):
@@ -58,6 +58,7 @@ class NotificationFeed(BaseFeed):
         }
         if user_view:
             ret_struct["feed"] = list()
+            Notification.update_entity_names(activities)
             for act in activities:
                 ret_struct["feed"].append(act.user_view())
         else:
@@ -77,7 +78,7 @@ class NotificationFeed(BaseFeed):
             return Notification.from_dict(note)
 
     def get_activities(self, count=10, include_seen=False, level=None, verb=None,
-                       reverse=False, user_view=False):
+                       reverse=False, user_view=False) -> List[Notification]:
         """
         Returns a selection of activities.
         :param count: Maximum number of Notifications to return (default 10)
@@ -95,13 +96,7 @@ class NotificationFeed(BaseFeed):
             level=level, verb=verb, reverse=reverse
         )
         note_list = list()
-        # actor_ids = set()
         for note in serial_notes:
-            # actor_ids.add(note["actor"].id)
-            # if self.user_id not in note["unseen"]:
-            #     note["seen"] = True
-            # else:
-            #     note["seen"] = False
             note_list.append(Notification.from_dict(note))
         # actor_names = actor_ids_to_names(list(actor_ids))
         # for note in note_list:
