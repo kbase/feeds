@@ -10,7 +10,7 @@ from flask import (
 import logging
 from http.client import responses
 from flask.logging import default_handler
-from .auth import (
+from .external_api.auth import (
     get_auth_token,
     validate_service_token,
     validate_user_token,
@@ -33,7 +33,7 @@ from feeds.logger import (
     log_error
 )
 
-VERSION = "0.0.2"
+VERSION = "0.1.0"
 
 try:
     from feeds import gitcommit

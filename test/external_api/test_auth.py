@@ -3,13 +3,13 @@ import requests
 import json
 import os
 import uuid
-from feeds.auth import (
+from feeds.external_api.auth import (
     validate_user_token,
     validate_service_token,
     get_auth_token,
     is_feeds_admin
 )
-from .util import test_config
+from ..util import test_config
 from feeds.exceptions import InvalidTokenError
 
 cfg = test_config()

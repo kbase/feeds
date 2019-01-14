@@ -6,7 +6,7 @@ import json
 from feeds.activity.notification import Notification
 from feeds.managers.notification_manager import NotificationManager
 from feeds.feeds.notification.notification_feed import NotificationFeed
-from feeds.auth import (
+from feeds.external_api.auth import (
     get_auth_token,
     is_feeds_admin
 )
@@ -18,6 +18,7 @@ from .util import (
     parse_notification_params,
     parse_expire_notifications_params
 )
+from feeds.entity.entity import Entity
 
 cfg = get_config()
 admin_v1 = flask.Blueprint('admin_v1', __name__)
@@ -45,15 +46,15 @@ def add_global_notification():
 
     params = parse_notification_params(json.loads(request.get_data()), is_global=True)
     new_note = Notification(
-        'kbase',
+        Entity('kbase', 'admin'),
         params.get('verb'),
-        params.get('object'),
+        Entity('kbase', 'admin'),
         'kbase',
         level=params.get('level'),
         context=params.get('context'),
         expires=params.get('expires')
     )
-    global_feed = NotificationFeed(cfg.global_feed)
+    global_feed = NotificationFeed(cfg.global_feed, cfg.global_feed_type)
     global_feed.add_notification(new_note)
     return (flask.jsonify({'id': new_note.id}), 200)
 

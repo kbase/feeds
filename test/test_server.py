@@ -178,7 +178,7 @@ def test_server_missing_params(client, mock_valid_service_token):
     _validate_error(data, {
         'http_code': 422,
         'http_status': 'Unprocessable Entity',
-        'message': 'Missing parameters - verb, object, level, target, source'
+        'message': 'Missing parameters - verb, level, source, object'
     })
 
 

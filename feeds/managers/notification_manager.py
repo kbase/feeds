@@ -17,6 +17,7 @@ from .fanout_modules.groups import GroupsFanout
 from .fanout_modules.workspace import WorkspaceFanout
 from .fanout_modules.jobs import JobsFanout
 from .fanout_modules.kbase import KBaseFanout
+from feeds.entity.entity import Entity
 
 
 class NotificationManager(BaseManager):
@@ -35,7 +36,7 @@ class NotificationManager(BaseManager):
         activity_storage = MongoActivityStorage()
         activity_storage.add_to_storage(note, target_users)
 
-    def get_target_users(self, note: Notification) -> List[str]:
+    def get_target_users(self, note: Notification) -> List[Entity]:
         """
         This is gonna get complex.
         The target users are a combination of:
@@ -62,7 +63,7 @@ class NotificationManager(BaseManager):
         return user_list
 
     def expire_notifications(self, note_ids: list, external_keys: list, source: str=None,
-                             is_admin: bool=False):
+                             is_admin: bool=False) -> Dict[str, list]:
         """
         Expires notifications.
         All notifications identified by either their id, or external key, must come from the same
@@ -104,7 +105,8 @@ class NotificationManager(BaseManager):
             "expired": expired
         }
 
-    def get_notifications_by_ext_keys(self, external_keys: List[str], source: str) -> Dict:
+    def get_notifications_by_ext_keys(self, external_keys: List[str],
+                                      source: str) -> Dict[str, Notification]:
         """
         Fetches notifications by their external key and source.
         These are returned as a dictionary where the keys are the

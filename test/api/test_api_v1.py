@@ -21,10 +21,20 @@ def test_api_root(client):
 ###
 
 
-def test_get_notifications(client, mock_valid_user_token, mongo_notes):
+def test_get_notifications(client, mock_valid_user_token, mock_valid_users, mock_workspace_info, mongo_notes):
     user_id="test_user"
     user_name="Test User"
     mock_valid_user_token(user_id, user_name)
+    mock_valid_users({
+        "kbasetest": "KBase Test",
+        "test_user": "Test User",
+        "test_user2": "Test User2",
+        "test_user3": "Test User3",
+        "test_see": "Test See",
+        "test_unsee": "Test Unsee",
+        "_kbase_": "KBase Admin"
+    })
+    mock_workspace_info(["123", "A_Workspace"])
     response = client.get('/api/V1/notifications', headers={"Authorization": "token-"+str(uuid4())})
     # Got the fake db in _data/mongo/notifications.json
     data = json.loads(response.data)
@@ -45,10 +55,20 @@ def test_get_notifications(client, mock_valid_user_token, mongo_notes):
     ("l=alert", ['3', '2', '1']),
     ("l=1", ['3', '2', '1'])
 ])
-def test_get_notifications_filtered(client, mock_valid_user_token, filters, expected, mongo_notes):
+def test_get_notifications_filtered(client, mock_valid_user_token, mock_valid_users, mock_workspace_info, filters, expected, mongo_notes):
     user_id="test_user"
     user_name="Test User"
     mock_valid_user_token(user_id, user_name)
+    mock_valid_users({
+        "kbasetest": "KBase Test",
+        "test_user": "Test User",
+        "test_user2": "Test User2",
+        "test_user3": "Test User3",
+        "test_see": "Test See",
+        "test_unsee": "Test Unsee",
+        "_kbase_": "KBase Admin"
+    })
+    mock_workspace_info(["123", "A_Workspace"])
     route = '/api/V1/notifications?' + filters
     response = client.get(route, headers={"Authorization": "token-"+str(uuid4())})
     data = json.loads(response.data)
@@ -77,19 +97,19 @@ def test_get_notifications_invalid_auth(client, mock_invalid_user_token):
 # POST /notification
 ###
 
-def test_post_notification_ok(client, mock_valid_service_token, mock_valid_user_token, mock_valid_user, mongo_notes):
+def test_post_notification_ok(client, mock_valid_service_token, mock_valid_user_token, mock_valid_users, mock_workspace_info, mongo_notes):
     service = "a_service"
     test_user = "test_note"
     test_actor = "test_actor"
-    mock_valid_user(test_actor, "Test Actor")
-    mock_valid_user(test_user, "Test User")
+    mock_valid_users({test_actor: "Test Actor", test_user: "Test User"})
+    mock_workspace_info(["stuff", "Some Workspace"])
     mock_valid_service_token("user", "pw", service)
     note = {
-        "actor": test_actor,
-        "target": [test_user],
+        "actor": {"id": test_actor, "type": "user"},
+        "target": [{"id": test_user, "type": "user"}],
         "verb": 1,
         "level": 1,
-        "object": "stuff",
+        "object": {"id": "stuff", "type": "workspace"},
         "source": service
     }
     response = client.post(
@@ -114,6 +134,7 @@ def test_post_notification_no_auth(client):
     assert data['error']['http_code'] == 401
     assert data['error']['message'] == 'Authentication token required'
 
+
 def test_post_notification_user_auth(client, mock_valid_user_token):
     mock_valid_user_token("test_user", "Test User")
     response = client.post('/api/V1/notification', headers={"Authorization": "token-"+str(uuid4())})
@@ -121,6 +142,7 @@ def test_post_notification_user_auth(client, mock_valid_user_token):
     assert 'error' in data
     assert data['error']['http_code'] == 403
     assert data['error']['message'] == 'Authentication token must be a Service token.'
+
 
 def test_post_notification_invalid_auth(client, mock_invalid_user_token):
     mock_invalid_user_token("test_user")
@@ -135,7 +157,9 @@ def test_post_notification_invalid_auth(client, mock_invalid_user_token):
 # GET /notifications/global
 ###
 
-def test_get_global_notifications(client):
+def test_get_global_notifications(client, mock_valid_users, mock_workspace_info):
+    mock_valid_users({"kbasetest": "KBase Test", "_kbase_": "KBase Admin"})
+    mock_workspace_info(["123", "Some_Workspace"])
     response = client.get('/api/V1/notifications/global')
     data = json.loads(response.data)
     assert len(data["feed"]) >= 1 and data["feed"][-1]["id"] == "global-1"
@@ -144,8 +168,15 @@ def test_get_global_notifications(client):
 # GET /notification/<note_id>
 ###
 
-def test_get_single_notification(client, mock_valid_user_token):
+def test_get_single_notification(client, mock_valid_user_token, mock_valid_users, mock_workspace_info):
     test_ids = ['1', '8']
+    mock_valid_users({
+        "kbasetest": "KBase Test",
+        "test_user": "Test User",
+        "test_user2": "Test User2",
+        "test_user3": "Test User3"
+    })
+    mock_workspace_info(["123", "Some_workspace"])
     mock_valid_user_token("test_user", "Test User")
     auth = {"Authorization": "token-"+str(uuid4())}
     for id_ in test_ids:
@@ -389,10 +420,10 @@ def test_expire_notifications_service(client, mongo_notes, mock_valid_service_to
     ext_key = "an_external_key"
     # make a notification
     note = {
-        "actor": "kbasetest",
+        "actor": {"id": "kbasetest", "type": "user"},
         "verb": 1,
         "level": 1,
-        "object": "stuff",
+        "object": {"id": "stuff", "type": "workspace"},
         "source": service,
         "target": []
     }
@@ -408,10 +439,10 @@ def test_expire_notifications_service(client, mongo_notes, mock_valid_service_to
 
     # make a notification with an external key
     note2 = {
-        "actor": "kbasetest",
+        "actor": {"id": "kbasetest", "type": "user"},
         "verb": 1,
         "level": 1,
-        "object": "stuff",
+        "object": {"id": "stuff", "type": "workspace"},
         "source": service,
         "external_key": ext_key,
         "target": []
@@ -496,6 +527,6 @@ def _validate_notification(note):
     Expects a dict.
     """
     pprint(note)
-    required_keys = ["id", "actor", "verb", "object", "target", "created", "expires", "source", "actor_name"]
+    required_keys = ["id", "actor", "verb", "object", "target", "created", "expires", "source"]
     for k in required_keys:
         assert k in note
