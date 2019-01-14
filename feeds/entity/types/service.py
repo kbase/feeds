@@ -4,6 +4,18 @@ from typing import (
     Dict
 )
 
+SERVICE_MAP = {
+    "groups": "Groups",
+    "groupsservice": "Groups",
+    "jobs": "Jobs",
+    "narrative": "Narrative",
+    "workspace": "Workspace",
+    "workspaceservice": "Workspace",
+    "kbase": "KBase"
+}
+
+DEFAULT_SERVICE = "KBase"
+
 
 class ServiceType(BaseType):
     @staticmethod
@@ -12,7 +24,12 @@ class ServiceType(BaseType):
         Should return the name as a str.
         If a fail happens, raise an EntityNameError
         """
-        raise NotImplementedError()
+        # I don't care for making this hard coded, but if it should be
+        # done, then this is the place.
+        if i in SERVICE_MAP:
+            return SERVICE_MAP[i]
+        else:
+            return DEFAULT_SERVICE
 
     @staticmethod
     def get_names_from_ids(ids: List[str]) -> Dict[str, str]:
@@ -20,11 +37,12 @@ class ServiceType(BaseType):
         Should return a dict with keys -> values = ids -> names.
         If any of them fail, set id -> None
         """
-        raise NotImplementedError()
+        names = dict()
+        for i in ids:
+            names[i] = get_name_from_id(i)
+        return names
 
     @staticmethod
     def validate_id(i: str) -> bool:
-        """
-        Shouldn't raise an Exception - just return False if it fails.
-        """
-        raise NotImplementedError()
+        return i in SERVICE_MAP
+
