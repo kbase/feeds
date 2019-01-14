@@ -13,7 +13,7 @@ class BaseType(abc.ABC):
         Should return the name as a str.
         If a fail happens, raise an EntityNameError
         """
-        pass
+        raise NotImplementedError()
 
     @staticmethod
     @abc.abstractmethod
@@ -22,7 +22,7 @@ class BaseType(abc.ABC):
         Should return a dict with keys -> values = ids -> names.
         If any of them fail, set id -> None
         """
-        pass
+        raise NotImplementedError()
 
     @staticmethod
     @abc.abstractmethod
@@ -30,4 +30,4 @@ class BaseType(abc.ABC):
         """
         Shouldn't raise an Exception - just return False if it fails.
         """
-        pass
+        raise NotImplementedError()
