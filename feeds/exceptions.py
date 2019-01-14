@@ -140,3 +140,10 @@ class JobError(Exception):
     Generic wrapper around exceptions from Job Service calls.
     """
     pass
+
+
+class CatalogError(Exception):
+    """
+    Generic wrapper around exceptions from either Catalog or Narrative Method Store calls.
+    """
+    pass

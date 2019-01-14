@@ -39,10 +39,9 @@ class ServiceType(BaseType):
         """
         names = dict()
         for i in ids:
-            names[i] = get_name_from_id(i)
+            names[i] = ServiceType.get_name_from_id(i)
         return names
 
     @staticmethod
     def validate_id(i: str) -> bool:
         return i in SERVICE_MAP
-

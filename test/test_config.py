@@ -19,6 +19,7 @@ GOOD_CONFIG = [
     'njs-url=njs',
     'workspace-url=ws',
     'groups-url=groups',
+    'nms-url=nms',
     'global-feed=global',
     'lifespan=30'
 ]
@@ -60,7 +61,7 @@ def test_config_bad_port(dummy_config, dummy_auth_token):
 
 def test_config_bad_lifespan(dummy_config, dummy_auth_token):
     cfg_text = GOOD_CONFIG.copy()
-    cfg_text[9] = "lifespan=wrong"
+    cfg_text[10] = "lifespan=wrong"
     cfg_path = dummy_config(cfg_text)
     feeds_config_backup = os.environ.get('FEEDS_CONFIG')
     os.environ['FEEDS_CONFIG'] = cfg_path
