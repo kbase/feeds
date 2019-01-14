@@ -15,9 +15,11 @@ from ..exceptions import (
 )
 from .types import (
     AdminType,
+    AppType,
     GroupType,
     JobType,
     NarrativeType,
+    ServiceType,
     UserType,
     WorkspaceType
 )
@@ -31,9 +33,11 @@ STR_SEPARATOR = "::"
 E = TypeVar('E', bound='Entity')
 TYPE_MAP = {
     "admin": AdminType,
+    "app": AppType,
     "group": GroupType,
     "job": JobType,
     "narrative": NarrativeType,
+    "service": ServiceType,
     "user": UserType,
     "workspace": WorkspaceType
 }
