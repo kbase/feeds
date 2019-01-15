@@ -32,6 +32,9 @@ global-feed=_global_
 # (when given).
 lifespan=30
 
+# Default maximum number of notifications (for each feed) to return on request.
+default-note-count = 100
+
 # In debug mode, auth is effectively ignored.
 # Useful for testing, etc.
 # SET TO FALSE IN PRODUCTION!

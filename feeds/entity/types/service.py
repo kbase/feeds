@@ -11,6 +11,7 @@ SERVICE_MAP = {
     "narrative": "Narrative",
     "workspace": "Workspace",
     "workspaceservice": "Workspace",
+    "ws": "Workspace",
     "kbase": "KBase"
 }
 

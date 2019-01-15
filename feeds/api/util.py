@@ -3,6 +3,8 @@ from feeds.exceptions import (
     MissingParameterError
 )
 from feeds.entity.entity import Entity
+from feeds.feeds.notification.notification_feed import NotificationFeed
+from feeds.config import get_config
 
 
 def parse_notification_params(params: dict, is_global: bool=False) -> dict:
@@ -103,3 +105,15 @@ def parse_expire_notifications_params(params: dict, is_admin: bool=False) -> dic
             )
 
     return params
+
+
+def fetch_global_notifications(count=0) -> dict:
+    """
+    Always returns notifications in user view.
+    """
+    cfg = get_config()
+    if count == 0:
+        count = cfg.default_max_notes
+    global_feed = NotificationFeed(cfg.global_feed, cfg.global_feed_type)
+    global_notes = global_feed.get_notifications(count=count, user_view=True)
+    return global_notes

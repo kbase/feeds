@@ -11,6 +11,10 @@ import shutil
 import time
 import re
 from requests_mock import ANY as r_mock_ANY
+from typing import (
+    List,
+    Dict
+)
 
 
 def pytest_sessionstart(session):
@@ -114,7 +118,7 @@ def mock_invalid_user(requests_mock):
     return auth_invalid_user
 
 @pytest.fixture
-def mock_valid_user_token(requests_mock):
+def mock_valid_user_token(requests_mock, mock_user_groups):
     """
     Use this to mock a valid authenticated request coming from a user (not an admin or service).
     Use the fixture as follows:
@@ -122,7 +126,19 @@ def mock_valid_user_token(requests_mock):
         mock_valid_user_token('someuser', 'Some User')
         ... continue test ...
     """
-    def auth_valid_user_token(user_id, user_name):
+    def auth_valid_user_token(user_id: str, user_name: str, group_membership: List[Dict[str, str]]=[]):
+        """
+        group_membership, if present should be a list of dicts, where each dict has the id and name of
+        a group the "user" is in.
+        E.g.:
+        [{
+            "id": "group1",
+            "name": "User Group 1"
+        }, {
+            "id": "group2",
+            "name": "User Group 2"
+        }]
+        """
         cfg = test_config()
         auth_url = cfg.get('feeds', 'auth-url')
         requests_mock.get('{}/api/V2/token'.format(auth_url), json={
@@ -135,6 +151,7 @@ def mock_valid_user_token(requests_mock):
             'display': user_name,
             'user': user_id
         })
+        mock_user_groups(group_membership)
     return auth_valid_user_token
 
 @pytest.fixture
@@ -358,7 +375,6 @@ def mock_app_lookup(requests_mock):
                 app_list.append(None)
             else:
                 app_list.append({"id": app, "name": app_mapping[app]})
-        print("MOCK RESULTS: {}".format(app_list))
         cfg = test_config()
         nms_url = cfg.get('feeds', 'nms-url')
         requests_mock.register_uri("POST", nms_url,

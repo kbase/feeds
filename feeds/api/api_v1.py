@@ -12,6 +12,9 @@ from feeds.external_api.auth import (
     get_auth_token,
     is_feeds_admin
 )
+from feeds.external_api.groups import (
+    get_user_groups
+)
 from feeds.exceptions import (
     InvalidTokenError,
     IllegalParameterError,
@@ -24,7 +27,8 @@ from feeds.notification_level import translate_level
 from feeds.verbs import translate_verb
 from .util import (
     parse_notification_params,
-    parse_expire_notifications_params
+    parse_expire_notifications_params,
+    fetch_global_notifications
 )
 
 cfg = get_config()
@@ -55,9 +59,8 @@ def get_notifications():
     1. validate/authenticate user
     2. make user feed object
     3. query user feed for most recent, based on params
-    #TODO: support group "feeds"
     """
-    max_notes = request.args.get('n', default=10, type=int)
+    max_notes = request.args.get('n', default=cfg.default_max_notes, type=int)
 
     rev_sort = request.args.get('rev', default=0, type=int)
     rev_sort = False if rev_sort == 0 else True
@@ -74,21 +77,29 @@ def get_notifications():
 
     include_seen = request.args.get('seen', default=0, type=int)
     include_seen = False if include_seen == 0 else True
-    user_id = validate_user_token(get_auth_token(request))
+    user_token = get_auth_token(request)
+    user_id = validate_user_token(user_token)
     log(__name__, 'Getting feed for {}'.format(user_id))
+
     feed = NotificationFeed(user_id, "user")
     user_notes = feed.get_notifications(
         count=max_notes, include_seen=include_seen, level=level_filter,
         verb=verb_filter, reverse=rev_sort, user_view=True
     )
 
-    # fetch the globals
-    global_feed = NotificationFeed(cfg.global_feed, cfg.global_feed_type)
-    global_notes = global_feed.get_notifications(count=max_notes, user_view=True)
     return_vals = {
         "user": user_notes,
-        "global": global_notes
+        "global": fetch_global_notifications(count=max_notes)
     }
+
+    user_groups = get_user_groups(user_token)
+    for g in user_groups:
+        feed = NotificationFeed(g["id"], "group")
+        return_vals[g["id"]] = feed.get_notifications(
+            count=max_notes, include_seen=include_seen, level=level_filter,
+            verb=verb_filter, reverse=rev_sort, user_view=True
+        )
+
     return (flask.jsonify(return_vals), 200)
 
 
@@ -150,9 +161,7 @@ def add_notification():
 @api_v1.route('/notifications/global', methods=['GET'])
 @cross_origin()
 def get_global_notifications():
-    global_feed = NotificationFeed(cfg.global_feed, cfg.global_feed_type)
-    global_notes = global_feed.get_notifications(user_view=True)
-    return flask.jsonify(global_notes)
+    return flask.jsonify(fetch_global_notifications())
 
 
 @api_v1.route('/notification/external_key/<ext_key>/source/<source>', methods=['GET'])

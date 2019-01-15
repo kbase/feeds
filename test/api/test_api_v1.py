@@ -38,7 +38,6 @@ def test_get_notifications(client, mock_valid_user_token, mock_valid_users, mock
     response = client.get('/api/V1/notifications', headers={"Authorization": "token-"+str(uuid4())})
     # Got the fake db in _data/mongo/notifications.json
     data = json.loads(response.data)
-    pprint(data)
     assert len(data['user']['feed']) == data['user']['unseen'] == 7
     for note in data['global']['feed'] + data['user']['feed']:
         _validate_notification(note)
@@ -92,6 +91,32 @@ def test_get_notifications_invalid_auth(client, mock_invalid_user_token):
     assert data['error']['http_code'] == 403
     assert data['error']['message'] == 'Invalid token'
 
+def test_get_notifications_groups(client, mock_valid_user_token, mock_valid_users, mock_workspace_info):
+    user_id="test_user"
+    user_name="Test User"
+    user_groups=[{"id": "group1", "name": "Group 1"}]
+    mock_valid_user_token(user_id, user_name, user_groups)
+    mock_valid_users({
+        "kbasetest": "KBase Test",
+        user_id: user_name,
+        "test_user": "Test User",
+        "test_user2": "Test User2",
+        "test_user3": "Test User3",
+        "test_see": "Test See",
+        "test_unsee": "Test Unsee",
+        "_kbase_": "KBase"
+    })
+    mock_workspace_info(["123", "A_Workspace"])
+    response = client.get("/api/V1/notifications", headers={"Authorization": "token-"+str(uuid4())})
+    data = json.loads(response.data)
+    print("FEED RESULT")
+    pprint(data)
+    assert "user" in data
+    assert "name" in data["user"] and data["user"]["name"] == user_name
+    assert "global" in data
+    assert "name" in data["global"] and data["global"]["name"] == "KBase Admin"
+    assert "group1" in data
+    assert "name" in data["group1"] and data["group1"]["name"] == "A Group"
 
 ###
 # POST /notification
@@ -308,7 +333,6 @@ def test_mark_notifications_seen(client, mongo_notes, mock_valid_user_token):
     assert note_id in data['seen_notes']
     response = client.get('/api/V1/notification/' + note_id, headers=auth)
     data = json.loads(response.data)
-    print(data)
     assert data['notification']['id'] == note_id
     assert data['notification']['seen'] == True
 
@@ -526,7 +550,6 @@ def _validate_notification(note):
     Validates the structure of a user's notification.
     Expects a dict.
     """
-    pprint(note)
     required_keys = ["id", "actor", "verb", "object", "target", "created", "expires", "source"]
     for k in required_keys:
         assert k in note

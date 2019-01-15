@@ -31,7 +31,10 @@ class AppType(BaseType):
         Should return a dict with keys -> values = ids -> names.
         If any of them fail, set id -> None
         """
-        return get_app_names(ids)
+        try:
+            return get_app_names(ids)
+        except CatalogError as e:
+            raise EntityNameError("Unable to find app names: {}".format(str(e)))
 
     @staticmethod
     def validate_id(i: str) -> bool:

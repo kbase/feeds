@@ -190,8 +190,6 @@ class Entity(object):
             if len(id_list):
                 ids_to_names = TYPE_MAP[t].get_names_from_ids(id_list)
                 for e in bins[t]:
-                    print(e.type)
-                    print(e.id)
                     if e.id in ids_to_names:
                         e.name = ids_to_names[e.id]
 
