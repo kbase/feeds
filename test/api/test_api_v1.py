@@ -91,6 +91,26 @@ def test_get_notifications_invalid_auth(client, mock_invalid_user_token):
     assert data['error']['http_code'] == 403
     assert data['error']['message'] == 'Invalid token'
 
+def test_get_notifications_groups(client, mock_valid_user_token, mock_valid_users, mock_workspace_info):
+    user_id="test_user"
+    user_name="Test User"
+    user_groups=[{"id": "group1", "name": "Group 1"}]
+    mock_valid_user_token(user_id, user_name, user_groups)
+    mock_valid_users({
+        "kbasetest": "KBase Test",
+        user_id: user_name,
+        "test_user": "Test User",
+        "test_user2": "Test User2",
+        "test_user3": "Test User3",
+        "test_see": "Test See",
+        "test_unsee": "Test Unsee",
+        "_kbase_": "KBase Admin"
+    })
+    mock_workspace_info(["123", "A_Workspace"])
+    response = client.get("/api/V1/notifications", headers={"Authorization": "token-"+str(uuid4())})
+    data = json.loads(response.data)
+    print("FEED RESULT")
+    pprint(data)
 
 ###
 # POST /notification

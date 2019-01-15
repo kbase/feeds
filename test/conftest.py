@@ -11,6 +11,10 @@ import shutil
 import time
 import re
 from requests_mock import ANY as r_mock_ANY
+from typing import (
+    List,
+    Dict
+)
 
 
 def pytest_sessionstart(session):
@@ -122,7 +126,19 @@ def mock_valid_user_token(requests_mock, mock_user_groups):
         mock_valid_user_token('someuser', 'Some User')
         ... continue test ...
     """
-    def auth_valid_user_token(user_id, user_name, group_membership=[]):
+    def auth_valid_user_token(user_id: str, user_name: str, group_membership: List[Dict[str, str]]=[]):
+        """
+        group_membership, if present should be a list of dicts, where each dict has the id and name of
+        a group the "user" is in.
+        E.g.:
+        [{
+            "id": "group1",
+            "name": "User Group 1"
+        }, {
+            "id": "group2",
+            "name": "User Group 2"
+        }]
+        """
         cfg = test_config()
         auth_url = cfg.get('feeds', 'auth-url')
         requests_mock.get('{}/api/V2/token'.format(auth_url), json={
