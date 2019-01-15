@@ -91,7 +91,7 @@ class Entity(object):
         being validated probably shouldn't be put in the notification DB, so we just let
         those percolate up.
         """
-        return self.type_obj.validate_id(self.id)
+        return self.type_obj.validate_id(self.id, self.token)
 
     def to_dict(self, with_name: bool=False) -> Dict[str, str]:
         d = {
