@@ -46,21 +46,23 @@ class FeedsConfig(object):
             )
         self.db_engine = self._get_line(cfg, KEY_DB_ENGINE)
         self.db_host = self._get_line(cfg, KEY_DB_HOST)
-        self.db_port = self._get_line(cfg, KEY_DB_PORT)
         try:
+            self.db_port = self._get_line(cfg, KEY_DB_PORT)
             self.db_port = int(self.db_port)
-        except ValueError:
-            raise ConfigError("{} must be an int! Got {}".format(KEY_DB_PORT, self.db_port))
+            assert self.db_port > 0
+        except (ValueError, AssertionError):
+            raise ConfigError("{} must be an int > 0! Got {}".format(KEY_DB_PORT, self.db_port))
         self.db_user = self._get_line(cfg, KEY_DB_USER, required=False)
         self.db_pw = self._get_line(cfg, KEY_DB_PW, required=False)
         self.db_name = self._get_line(cfg, KEY_DB_NAME, required=False)
         self.global_feed = self._get_line(cfg, KEY_GLOBAL_FEED)
         self.global_feed_type = "user"  # doesn't matter, need a valid Entity type...
-        self.lifespan = self._get_line(cfg, KEY_LIFESPAN)
         try:
-            self.lifespan = int(self._get_line(cfg, KEY_LIFESPAN))
-        except ValueError:
-            raise ConfigError("{} must be an int! Got {}".format(KEY_LIFESPAN, self.lifespan))
+            self.lifespan = self._get_line(cfg, KEY_LIFESPAN)
+            self.lifespan = int(self.lifespan)
+            assert self.lifespan > 0
+        except (ValueError, AssertionError):
+            raise ConfigError("{} must be an int > 0! Got {}".format(KEY_LIFESPAN, self.lifespan))
         self.debug = self._get_line(cfg, KEY_DEBUG, required=False)
         if not self.debug or self.debug.lower() != "true":
             self.debug = False
@@ -73,6 +75,7 @@ class FeedsConfig(object):
         self.nms_url = self._get_line(cfg, KEY_NMS_URL)
         self.default_max_notes = self._get_line(cfg, KEY_DEFAULT_COUNT)
         try:
+            self.default_max_notes = self._get_line(cfg, KEY_DEFAULT_COUNT)
             self.default_max_notes = int(self.default_max_notes)
             assert self.default_max_notes > 0
         except (ValueError, AssertionError):

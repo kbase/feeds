@@ -56,7 +56,6 @@ def get_notifications():
     1. validate/authenticate user
     2. make user feed object
     3. query user feed for most recent, based on params
-    #TODO: support group "feeds"
     """
     max_notes = request.args.get('n', default=cfg.default_max_notes, type=int)
 

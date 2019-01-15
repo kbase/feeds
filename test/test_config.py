@@ -46,7 +46,8 @@ def dummy_config():
     yield _write_test_cfg
     os.remove(fname)
 
-def test_config_bad_port(dummy_config, dummy_auth_token):
+@pytest.mark.parametrize("bad_val", [("foo"), (-100), (0), (0.5)])
+def test_config_bad_port(dummy_config, dummy_auth_token, bad_val):
     cfg_text = GOOD_CONFIG.copy()
     cfg_text[3] = "db-port=wrong"
     cfg_path = dummy_config(cfg_text)
@@ -54,13 +55,14 @@ def test_config_bad_port(dummy_config, dummy_auth_token):
     os.environ['FEEDS_CONFIG'] = cfg_path
     with pytest.raises(ConfigError) as e:
         config.FeedsConfig()
-    assert "db-port must be an int! Got wrong" == str(e.value)
+    assert "db-port must be an int > 0! Got wrong" == str(e.value)
     del os.environ['FEEDS_CONFIG']
     if feeds_config_backup is not None:
         os.environ['FEEDS_CONFIG'] = feeds_config_backup
 
 
-def test_config_bad_lifespan(dummy_config, dummy_auth_token):
+@pytest.mark.parametrize("bad_val", [("foo"), (-100), (0), (0.5)])
+def test_config_bad_lifespan(dummy_config, dummy_auth_token, bad_val):
     cfg_text = GOOD_CONFIG.copy()
     cfg_text[10] = "lifespan=wrong"
     cfg_path = dummy_config(cfg_text)
@@ -68,8 +70,23 @@ def test_config_bad_lifespan(dummy_config, dummy_auth_token):
     os.environ['FEEDS_CONFIG'] = cfg_path
     with pytest.raises(ConfigError) as e:
         config.FeedsConfig()
-    assert "lifespan must be an int! Got wrong" == str(e.value)
+    assert "lifespan must be an int > 0! Got wrong" == str(e.value)
     del os.environ['FEEDS_CONFIG']
+    if feeds_config_backup is not None:
+        os.environ['FEEDS_CONFIG'] = feeds_config_backup
+
+
+@pytest.mark.parametrize("bad_val", [("foo"), (-100), (0), (0.5)])
+def test_config_bad_note_count(dummy_config, dummy_auth_token, bad_val):
+    cfg_text = GOOD_CONFIG.copy()
+    cfg_text[11] = "default-note-count={}".format(bad_val)
+    cfg_path = dummy_config(cfg_text)
+    feeds_config_backup = os.environ.get('FEEDS_CONFIG')
+    os.environ['FEEDS_CONFIG'] = cfg_path
+    with pytest.raises(ConfigError) as e:
+        config.FeedsConfig()
+    assert "default-note-count must be an int > 0! Got {}".format(bad_val) == str(e.value)
+    del os.environ["FEEDS_CONFIG"]
     if feeds_config_backup is not None:
         os.environ['FEEDS_CONFIG'] = feeds_config_backup
 
