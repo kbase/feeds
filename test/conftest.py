@@ -358,7 +358,6 @@ def mock_app_lookup(requests_mock):
                 app_list.append(None)
             else:
                 app_list.append({"id": app, "name": app_mapping[app]})
-        print("MOCK RESULTS: {}".format(app_list))
         cfg = test_config()
         nms_url = cfg.get('feeds', 'nms-url')
         requests_mock.register_uri("POST", nms_url,

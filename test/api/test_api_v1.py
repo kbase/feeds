@@ -38,7 +38,6 @@ def test_get_notifications(client, mock_valid_user_token, mock_valid_users, mock
     response = client.get('/api/V1/notifications', headers={"Authorization": "token-"+str(uuid4())})
     # Got the fake db in _data/mongo/notifications.json
     data = json.loads(response.data)
-    pprint(data)
     assert len(data['user']['feed']) == data['user']['unseen'] == 7
     for note in data['global']['feed'] + data['user']['feed']:
         _validate_notification(note)
@@ -308,7 +307,6 @@ def test_mark_notifications_seen(client, mongo_notes, mock_valid_user_token):
     assert note_id in data['seen_notes']
     response = client.get('/api/V1/notification/' + note_id, headers=auth)
     data = json.loads(response.data)
-    print(data)
     assert data['notification']['id'] == note_id
     assert data['notification']['seen'] == True
 
@@ -526,7 +524,6 @@ def _validate_notification(note):
     Validates the structure of a user's notification.
     Expects a dict.
     """
-    pprint(note)
     required_keys = ["id", "actor", "verb", "object", "target", "created", "expires", "source"]
     for k in required_keys:
         assert k in note

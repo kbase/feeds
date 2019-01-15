@@ -253,7 +253,6 @@ class Notification(BaseActivity):
         missing_keys = required_keys.difference(set(serial.keys()))
         if missing_keys:
             raise InvalidNotificationError('Missing keys: {}'.format(missing_keys))
-        print(serial)
         deserial = cls(
             Entity.from_dict(serial['actor']),
             str(serial['verb']),
