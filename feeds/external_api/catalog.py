@@ -13,7 +13,7 @@ def get_app_name(app_id: str) -> str:
     Returns a single string - the Name of the given app id.
     Lookup errors raise a CatalogError
     """
-    return get_app_names(app_id)[app_id]
+    return get_app_names([app_id]).get(app_id)
 
 
 def get_app_names(app_ids: List[str]) -> Dict[str, str]:
@@ -35,12 +35,14 @@ def get_app_names(app_ids: List[str]) -> Dict[str, str]:
     nms = NarrativeMethodStore(url=cfg.nms_url)
     try:
         names = dict()
-        infos = nms.get_method_brief_info({"ids": list(slash_app_ids.values())})
+        print("LOOKING UP: {}".format(list(set(slash_app_ids.values()))))
+        infos = nms.get_method_brief_info({"ids": list(set(slash_app_ids.values()))})
         for info in infos:
-            names[info['id']] = info['name']
+            if info is not None:
+                names[info['id']] = info['name']
         ret_names = dict()
         for app_id in app_ids:
-            ret_names[app_id] = names[slash_app_ids[app_id]]
+            ret_names[app_id] = names.get(slash_app_ids[app_id])
         return ret_names
     except ServerError as e:
-        raise CatalogError("An error occurred while retrieving method names: {}".format(e.message))
+        raise CatalogError("An error occurred while retrieving app names: {}".format(e.message))

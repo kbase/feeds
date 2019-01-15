@@ -276,7 +276,6 @@ def mock_invalid_group(requests_mock):
 
 def workspace_info_matcher(req):
     body = json.loads(req.text)
-    print("MATCHING AGAINST: {}".format(body))
     return body.get("method") == "Workspace.get_workspace_info"
 
 @pytest.fixture
@@ -327,3 +326,51 @@ def mock_workspace_info_invalid(requests_mock):
             }
         })
     return invalid_workspace_info
+
+
+#######################################
+### CATALOG/NMS SERVICE API MOCKING ###
+#######################################
+
+def nms_brief_info_matcher(req):
+    body = json.loads(req.text)
+    return body.get("method") == "NarrativeMethodStore.get_method_brief_info"
+
+@pytest.fixture
+def mock_app_lookup(requests_mock):
+    def app_lookup(app_mapping):
+        app_list = list()
+        for app in app_mapping:
+            if app_mapping[app] is None:
+                app_list.append(None)
+            else:
+                app_list.append({"id": app, "name": app_mapping[app]})
+        print("MOCK RESULTS: {}".format(app_list))
+        cfg = test_config()
+        nms_url = cfg.get('feeds', 'nms-url')
+        requests_mock.register_uri("POST", nms_url,
+            additional_matcher=nms_brief_info_matcher,
+            json={
+                "version": "1.1",
+                "result": [app_list]
+            }
+        )
+    return app_lookup
+
+@pytest.fixture
+def mock_app_lookup_fail(requests_mock):
+    cfg = test_config()
+    nms_url = cfg.get('feeds', 'nms-url')
+    requests_mock.register_uri("POST", nms_url,
+        additional_matcher=nms_brief_info_matcher,
+        status_code=500,
+        json={
+            "version": "1.1",
+            "error": {
+                "name": "JSONRPCError",
+                "code": "-32500",
+                "message": "Something silly happened.",
+                "error": "Long winded explanation..."
+            }
+        }
+    )
