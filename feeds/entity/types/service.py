@@ -40,7 +40,7 @@ class ServiceType(BaseType):
         """
         names = dict()
         for i in ids:
-            names[i] = ServiceType.get_name_from_id(i)
+            names[i] = ServiceType.get_name_from_id(i, token)
         return names
 
     @staticmethod

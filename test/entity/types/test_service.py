@@ -13,7 +13,7 @@ from feeds.exceptions import EntityNameError
     ("ws", "Workspace")
 ])
 def test_get_name_from_id(name, expected):
-    assert ServiceType.get_name_from_id(name) == expected
+    assert ServiceType.get_name_from_id(name, None) == expected
 
 
 def test_get_names_from_ids():
@@ -24,7 +24,7 @@ def test_get_names_from_ids():
         "Nope": DEFAULT_SERVICE,
         "ws": "Workspace"
     }
-    names = ServiceType.get_names_from_ids(list(std.keys()))
+    names = ServiceType.get_names_from_ids(list(std.keys()), None)
     for n in std:
         assert n in names
         assert names[n] == std[n]
@@ -39,4 +39,4 @@ def test_get_names_from_ids():
     ("ws", True)
 ])
 def test_validate_id(service_id, expected):
-    assert ServiceType.validate_id(service_id) is expected
+    assert ServiceType.validate_id(service_id, None) is expected
