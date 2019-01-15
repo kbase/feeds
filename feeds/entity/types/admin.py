@@ -12,15 +12,15 @@ from feeds.exceptions import EntityNameError
 
 class AdminType(BaseType):
     @staticmethod
-    def get_name_from_id(i: str) -> str:
+    def get_name_from_id(i: str, token: str) -> str:
         if AdminType.validate_id(i):
             return "KBase"
         raise EntityNameError("Invalid admin account: {}".format(i))
 
     @staticmethod
-    def get_names_from_ids(ids: List[str]) -> Dict[str, str]:
+    def get_names_from_ids(ids: List[str], token: str) -> Dict[str, str]:
         return validate_user_ids(ids)
 
     @staticmethod
-    def validate_id(i: str) -> bool:
+    def validate_id(i: str, token: str) -> bool:
         return validate_user_id(i)  # TODO

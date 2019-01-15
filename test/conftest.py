@@ -295,6 +295,17 @@ def mock_user_groups(requests_mock):
         requests_mock.get("{}/member/".format(groups_url), json=groups)
     return user_groups
 
+
+@pytest.fixture
+def mock_group_names(requests_mock):
+    def group_names(groups):
+        cfg = test_config()
+        groups_url = cfg.get('feeds', 'groups-url')
+        matcher = re.compile("/names/")
+        requests_mock.register_uri("GET", matcher, json=groups)
+    return group_names
+
+
 ###################################
 ### WORKSPACE SERVICE API MOCKING
 ###################################

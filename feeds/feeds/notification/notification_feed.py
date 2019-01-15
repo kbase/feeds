@@ -10,8 +10,8 @@ from typing import List
 
 
 class NotificationFeed(BaseFeed):
-    def __init__(self, user_id: str, user_type: str):
-        self.user = Entity(user_id, user_type)
+    def __init__(self, user_id: str, user_type: str, token: str=None):
+        self.user = Entity(user_id, user_type, token=token)
         self.timeline_storage = MongoTimelineStorage(user_id, user_type)
         self.activity_storage = MongoActivityStorage()
         self.timeline = None

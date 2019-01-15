@@ -16,9 +16,9 @@ from feeds.exceptions import (
 
 class WorkspaceType(BaseType):
     @staticmethod
-    def get_name_from_id(i: str) -> str:
+    def get_name_from_id(i: str, token: str) -> str:
         try:
-            name = get_workspace_name(i)
+            name = get_workspace_name(i, token)
             if name is None:
                 raise EntityNameError(
                     "Unable to find name for workspace id: {}".format(i)
@@ -28,9 +28,9 @@ class WorkspaceType(BaseType):
             raise EntityNameError(e)
 
     @staticmethod
-    def get_names_from_ids(ids: List[str]) -> Dict[str, str]:
-        return get_workspace_names(ids)
+    def get_names_from_ids(ids: List[str], token: str) -> Dict[str, str]:
+        return get_workspace_names(ids, token)
 
     @staticmethod
-    def validate_id(i: str) -> bool:
-        return validate_workspace_id(i)
+    def validate_id(i: str, token: str) -> bool:
+        return validate_workspace_id(i, token)

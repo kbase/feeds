@@ -44,7 +44,8 @@ TYPE_MAP = {
 
 
 class Entity(object):
-    def __init__(self, e_id: str, e_type: str, name: str=None, auto_validate: str=False):
+    def __init__(self, e_id: str, e_type: str, name: str=None, token: str=None,
+                 auto_validate: str=False):
         """
         Instantiate a new Entity.
         If the type is bad, raises en EntityValidationError.
@@ -58,6 +59,7 @@ class Entity(object):
         self.type = e_type
         self.id = e_id
         self._name = name
+        self.token = token
         if auto_validate:
             v = self.validate()
             if not v:
@@ -124,7 +126,7 @@ class Entity(object):
         Sets the name of this object based on its type.
         If anything fails, raises an EntityNameError.
         """
-        self._name = self.type_obj.get_name_from_id(self.id)
+        self._name = self.type_obj.get_name_from_id(self.id, self.token)
 
     def __repr__(self):
         return "Entity(\"{}\", \"{}\")".format(self.id, self.type)
@@ -153,7 +155,7 @@ class Entity(object):
         return cls(i, t)
 
     @staticmethod
-    def fetch_entity_names(entities: List[E]) -> None:
+    def fetch_entity_names(entities: List[E], token: str) -> None:
         """
         Uses various services to the names of all Entities in the given list.
         The goal here is to minimize the number of service calls. So if you have 100 Entities,
@@ -188,7 +190,7 @@ class Entity(object):
             id_list = list(set([e.id for e in bins[t]]))
             # run ids_to_names from whatever appropriate type
             if len(id_list):
-                ids_to_names = TYPE_MAP[t].get_names_from_ids(id_list)
+                ids_to_names = TYPE_MAP[t].get_names_from_ids(id_list, token)
                 for e in bins[t]:
                     if e.id in ids_to_names:
                         e.name = ids_to_names[e.id]

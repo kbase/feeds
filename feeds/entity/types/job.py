@@ -15,7 +15,7 @@ from feeds.exceptions import (
 
 class JobType(BaseType):
     @staticmethod
-    def get_name_from_id(i: str) -> str:
+    def get_name_from_id(i: str, token: str) -> str:
         try:
             name = get_job_name(i)
             if name is None:
@@ -25,7 +25,7 @@ class JobType(BaseType):
             raise EntityNameError(e)
 
     @staticmethod
-    def get_names_from_ids(ids: List[str]) -> Dict[str, str]:
+    def get_names_from_ids(ids: List[str], token: str) -> Dict[str, str]:
         # TODO
         ret = dict()
         for j_id in ids:
@@ -33,5 +33,5 @@ class JobType(BaseType):
         return ret
 
     @staticmethod
-    def validate_id(i: str) -> bool:
+    def validate_id(i: str, token: str) -> bool:
         return validate_job_id(i)

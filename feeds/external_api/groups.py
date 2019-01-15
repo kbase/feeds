@@ -23,15 +23,21 @@ def get_user_groups(user_token: str) -> list:
     return r.json()
 
 
-def get_group_names(group_ids: List[str]) -> Dict[str, str]:
+def get_group_names(group_ids: List[str], auth_token: str) -> Dict[str, str]:
     """
     Returns a mapping from group id to group names given a list of group ids.
     """
     # TODO
-    ret = dict()
+    group_id_params = ",".join(group_ids)
+    r = __groups_request("/names/" + group_id_params, auth_token)
+    data = r.json()
+    names = dict()
+    for n in data:
+        names[n["id"]] = n["name"]
     for g_id in group_ids:
-        ret[g_id] = "A Group"
-    return ret
+        if g_id not in names:
+            names[g_id] = None
+    return names
 
 
 def validate_group_id(group_id: str) -> bool:
