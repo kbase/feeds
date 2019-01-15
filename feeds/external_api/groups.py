@@ -5,6 +5,7 @@ from typing import (
     Dict
 )
 from feeds.exceptions import GroupsError
+from requests import HTTPError
 
 config = get_config()
 GROUPS_URL = config.groups_url
@@ -12,11 +13,14 @@ GROUPS_URL = config.groups_url
 Response = requests.models.Response
 
 
-def get_groups(user: str) -> list:
+def get_user_groups(user_token: str) -> list:
     """
     Returns the list of groups that a user belongs to.
+    These are returned as a list of dicts, each of which has an "id" and "name"
+    key, representing the group id and name respectively. What else would they be?
     """
-    raise NotImplementedError()
+    r = __groups_request("/member/", user_token)
+    return r.json()
 
 
 def get_group_names(group_ids: List[str]) -> Dict[str, str]:
@@ -47,9 +51,9 @@ def validate_group_id(group_id: str) -> bool:
 
 def __groups_request(path: str, token: str=None) -> Response:
     headers = {"Authorization": token}
-    r = requests.get(GROUPS_URL + path, headers=headers)
-    # the requests that fail based on the token (401, 403) get returned for the
-    # calling function to turn into an informative error
-    # others - 404, 500 - get raised
-    r.raise_for_status()
-    return r
+    try:
+        r = requests.get(GROUPS_URL + path, headers=headers)
+        r.raise_for_status()
+        return r
+    except HTTPError as e:
+        raise GroupsError("Unable to fetch group information: {}".format(str(e)))

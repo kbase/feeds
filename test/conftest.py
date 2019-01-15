@@ -270,6 +270,14 @@ def mock_invalid_group(requests_mock):
     return invalid_group_id
 
 
+@pytest.fixture
+def mock_user_groups(requests_mock):
+    def user_groups(groups):
+        cfg = test_config()
+        groups_url = cfg.get('feeds', 'groups-url')
+        requests_mock.get("{}/member/".format(groups_url), json=groups)
+    return user_groups
+
 ###################################
 ### WORKSPACE SERVICE API MOCKING
 ###################################
