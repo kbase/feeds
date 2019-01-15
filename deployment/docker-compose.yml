@@ -12,6 +12,7 @@ services:
       - groups-url=https://ci.kbase.us/services/groups
       - nms-url=https://ci.kbase.us/services/narrative_method_store/rpc
       - AUTH_TOKEN=fake_token
+      - default-note-count=100
     command:
       - "-wait"
       - "tcp://ci-mongo:27017"

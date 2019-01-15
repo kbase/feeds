@@ -21,7 +21,8 @@ GOOD_CONFIG = [
     'groups-url=groups',
     'nms-url=nms',
     'global-feed=global',
-    'lifespan=30'
+    'lifespan=30',
+    'default-note-count=100'
 ]
 
 @pytest.fixture(scope="function")

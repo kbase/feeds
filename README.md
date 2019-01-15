@@ -73,6 +73,7 @@ The types currently supported are:
     "external_key": string - (optional) a external key that has meaning for the service that created the notification. Meant for use by other services.
     "context": structure - (optional) a (mostly) freely open structure with meaning for the service that created it. The special keys `text` and `link` are intended to be used by the front end viewers. A `link` becomes a hyperlink that would link to some relevant place. `text` gets interpreted as the intended text of the notification, instead of automatically generating it.
     "users": list(Entity) - the user(s) who should see the notification. If that user is a group, then all members of the group will see it.
+            Note that when returned from the server for user consumption, this will not be found, for some attempt at privacy.
 }
 ```
 

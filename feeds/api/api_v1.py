@@ -24,7 +24,8 @@ from feeds.notification_level import translate_level
 from feeds.verbs import translate_verb
 from .util import (
     parse_notification_params,
-    parse_expire_notifications_params
+    parse_expire_notifications_params,
+    fetch_global_notifications
 )
 
 cfg = get_config()
@@ -57,7 +58,7 @@ def get_notifications():
     3. query user feed for most recent, based on params
     #TODO: support group "feeds"
     """
-    max_notes = request.args.get('n', default=10, type=int)
+    max_notes = request.args.get('n', default=cfg.default_max_notes, type=int)
 
     rev_sort = request.args.get('rev', default=0, type=int)
     rev_sort = False if rev_sort == 0 else True
@@ -83,11 +84,9 @@ def get_notifications():
     )
 
     # fetch the globals
-    global_feed = NotificationFeed(cfg.global_feed, cfg.global_feed_type)
-    global_notes = global_feed.get_notifications(count=max_notes, user_view=True)
     return_vals = {
         "user": user_notes,
-        "global": global_notes
+        "global": fetch_global_notifications(count=max_notes)
     }
     return (flask.jsonify(return_vals), 200)
 
@@ -150,9 +149,7 @@ def add_notification():
 @api_v1.route('/notifications/global', methods=['GET'])
 @cross_origin()
 def get_global_notifications():
-    global_feed = NotificationFeed(cfg.global_feed, cfg.global_feed_type)
-    global_notes = global_feed.get_notifications(user_view=True)
-    return flask.jsonify(global_notes)
+    return flask.jsonify(fetch_global_notifications())
 
 
 @api_v1.route('/notification/external_key/<ext_key>/source/<source>', methods=['GET'])

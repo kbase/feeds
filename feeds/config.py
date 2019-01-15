@@ -23,6 +23,7 @@ KEY_NJS_URL = "njs-url"
 KEY_GROUPS_URL = "groups-url"
 KEY_WS_URL = "workspace-url"
 KEY_NMS_URL = "nms-url"
+KEY_DEFAULT_COUNT = "default-note-count"
 
 
 class FeedsConfig(object):
@@ -70,6 +71,14 @@ class FeedsConfig(object):
         self.ws_url = self._get_line(cfg, KEY_WS_URL)
         self.groups_url = self._get_line(cfg, KEY_GROUPS_URL)
         self.nms_url = self._get_line(cfg, KEY_NMS_URL)
+        self.default_max_notes = self._get_line(cfg, KEY_DEFAULT_COUNT)
+        try:
+            self.default_max_notes = int(self.default_max_notes)
+            assert self.default_max_notes > 0
+        except (ValueError, AssertionError):
+            raise ConfigError(
+                "{} must be an int > 0! Got {}".format(KEY_DEFAULT_COUNT, self.default_max_notes)
+            )
 
     def _find_config_path(self):
         """
