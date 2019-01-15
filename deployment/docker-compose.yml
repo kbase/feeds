@@ -10,6 +10,7 @@ services:
       - auth-url=https://ci.kbase.us/services/auth
       - workspace-url=https://ci.kbase.us/services/ws
       - groups-url=https://ci.kbase.us/services/groups
+      - nms-url=https://ci.kbase.us/services/narrative_method_store/rpc
       - AUTH_TOKEN=fake_token
     command:
       - "-wait"

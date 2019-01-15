@@ -22,6 +22,7 @@ KEY_AUTH_URL = "auth-url"
 KEY_NJS_URL = "njs-url"
 KEY_GROUPS_URL = "groups-url"
 KEY_WS_URL = "workspace-url"
+KEY_NMS_URL = "nms-url"
 
 
 class FeedsConfig(object):
@@ -68,6 +69,7 @@ class FeedsConfig(object):
         self.njs_url = self._get_line(cfg, KEY_NJS_URL)
         self.ws_url = self._get_line(cfg, KEY_WS_URL)
         self.groups_url = self._get_line(cfg, KEY_GROUPS_URL)
+        self.nms_url = self._get_line(cfg, KEY_NMS_URL)
 
     def _find_config_path(self):
         """

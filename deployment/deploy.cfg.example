@@ -17,6 +17,7 @@ auth-url=https://ci.kbase.us/services/auth
 workspace-url=https://ci.kbase.us/services/ws
 groups-url=https://ci.kbase.us/services/groups
 njs-url=https://ci.kbase.us/services/njs_wrapper
+nms-url=https://ci.kbase.us/service/narrative_method_store/rpc
 
 # admins are allowed to use their auth tokens to create global notifications.
 # examples would be notices about KBase downtime or events.
