@@ -20,7 +20,7 @@ N = TypeVar('N', bound='Notification')
 
 class Notification(BaseActivity):
     def __init__(self, actor: Entity, verb: str, note_object: Entity, source: str,
-                 level='alert', target: List[Entity]=[], context: dict=None,
+                 level='alert', target: List[Entity]=[], context: dict={},
                  expires: int=None, external_key: str=None, seen: bool=False,
                  users: List[Entity]=[]):
         """
@@ -175,6 +175,8 @@ class Notification(BaseActivity):
             "expires": self.expires,
             "seen": self.seen
         }
+        if self.external_key is not None:
+            view["external_key"] = self.external_key
         target_dict = []
         if self.target is not None:
             target_dict = [t.to_dict(with_name=True) for t in self.target]

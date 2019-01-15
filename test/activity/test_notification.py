@@ -222,7 +222,7 @@ def test_to_dict():
     assert isinstance(d["expires"], int) and d["expires"] == note.expires
     assert isinstance(d["created"], int) and d["created"] == note.created
     assert d["target"] == []
-    assert d["context"] is None
+    assert d["context"] == {}
     assert d["level"] == level_id
     assert d["external_key"] is None
     assert d["users"] == []
@@ -238,9 +238,26 @@ def test_user_view():
     assert isinstance(v["expires"], int) and v["expires"] == note.expires
     assert isinstance(v["created"], int) and v["created"] == note.created
     assert v["target"] == []
-    assert v["context"] is None
+    assert v["context"] == {}
     assert v["level"] == level_name
     assert "external_key" not in v
+    assert "users" not in v
+
+
+def test_user_view_context_ext_key():
+    note = Notification(actor, verb_inf, note_object, source, level=level_id,
+                        external_key=external_key, context=context)
+    v = note.user_view()
+    assert v["actor"] == actor_d
+    assert v["verb"] == verb_past
+    assert v["object"] == object_d
+    assert v["source"] == source
+    assert isinstance(v["expires"], int) and v["expires"] == note.expires
+    assert isinstance(v["created"], int) and v["created"] == note.created
+    assert v["target"] == []
+    assert v["level"] == level_name
+    assert v["external_key"] == external_key
+    assert v["context"] == context
     assert "users" not in v
 
 
@@ -309,7 +326,7 @@ def test_serialization():
     assert "l" in json_serial and json_serial['l'] == level_id
     assert "c" in json_serial and json_serial['c'] == note.created
     assert "e" in json_serial and json_serial['e'] == note.expires
-    assert "n" in json_serial and json_serial['n'] == None
+    assert "n" in json_serial and json_serial['n'] == {}
     assert "x" in json_serial and json_serial['x'] == None
     assert "t" in json_serial and json_serial['t'] == []
     assert "u" in json_serial and json_serial['u'] == []

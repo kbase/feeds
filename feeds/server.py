@@ -33,7 +33,7 @@ from feeds.logger import (
     log_error
 )
 
-VERSION = "0.1.2"
+VERSION = "0.1.3"
 
 try:
     from feeds import gitcommit
