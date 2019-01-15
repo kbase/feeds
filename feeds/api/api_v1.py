@@ -12,6 +12,9 @@ from feeds.external_api.auth import (
     get_auth_token,
     is_feeds_admin
 )
+from feeds.external_api.groups import (
+    get_user_groups
+)
 from feeds.exceptions import (
     InvalidTokenError,
     IllegalParameterError,
@@ -74,19 +77,29 @@ def get_notifications():
 
     include_seen = request.args.get('seen', default=0, type=int)
     include_seen = False if include_seen == 0 else True
-    user_id = validate_user_token(get_auth_token(request))
+    user_token = get_auth_token(request)
+    user_id = validate_user_token(user_token)
     log(__name__, 'Getting feed for {}'.format(user_id))
+
     feed = NotificationFeed(user_id, "user")
     user_notes = feed.get_notifications(
         count=max_notes, include_seen=include_seen, level=level_filter,
         verb=verb_filter, reverse=rev_sort, user_view=True
     )
 
-    # fetch the globals
     return_vals = {
         "user": user_notes,
         "global": fetch_global_notifications(count=max_notes)
     }
+
+    user_groups = get_user_groups(user_token)
+    for g in user_groups:
+        feed = NotificationFeed(g["id"], "group")
+        return_vals[g["id"]] = feed.get_notifications(
+            count=max_notes, include_seen=include_seen, level=level_filter,
+            verb=verb_filter, reverse=rev_sort, user_view=True
+        )
+
     return (flask.jsonify(return_vals), 200)
 
 

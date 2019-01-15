@@ -114,7 +114,7 @@ def mock_invalid_user(requests_mock):
     return auth_invalid_user
 
 @pytest.fixture
-def mock_valid_user_token(requests_mock):
+def mock_valid_user_token(requests_mock, mock_user_groups):
     """
     Use this to mock a valid authenticated request coming from a user (not an admin or service).
     Use the fixture as follows:
@@ -122,7 +122,7 @@ def mock_valid_user_token(requests_mock):
         mock_valid_user_token('someuser', 'Some User')
         ... continue test ...
     """
-    def auth_valid_user_token(user_id, user_name):
+    def auth_valid_user_token(user_id, user_name, group_membership=[]):
         cfg = test_config()
         auth_url = cfg.get('feeds', 'auth-url')
         requests_mock.get('{}/api/V2/token'.format(auth_url), json={
@@ -135,6 +135,7 @@ def mock_valid_user_token(requests_mock):
             'display': user_name,
             'user': user_id
         })
+        mock_user_groups(group_membership)
     return auth_valid_user_token
 
 @pytest.fixture
