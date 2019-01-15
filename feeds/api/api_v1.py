@@ -81,7 +81,7 @@ def get_notifications():
     user_id = validate_user_token(user_token)
     log(__name__, 'Getting feed for {}'.format(user_id))
 
-    feed = NotificationFeed(user_id, "user")
+    feed = NotificationFeed(user_id, "user", token=user_token)
     user_notes = feed.get_notifications(
         count=max_notes, include_seen=include_seen, level=level_filter,
         verb=verb_filter, reverse=rev_sort, user_view=True

@@ -13,9 +13,9 @@ from feeds.exceptions import EntityNameError
 
 class GroupType(BaseType):
     @staticmethod
-    def get_name_from_id(i: str) -> str:
+    def get_name_from_id(i: str, token: str) -> str:
         try:
-            groups = get_group_names([i])
+            groups = get_group_names([i], token)
             if i not in groups:
                 raise EntityNameError(
                     "Unable to find name for group id: {}".format(i)
@@ -26,9 +26,9 @@ class GroupType(BaseType):
             raise EntityNameError("Unable to find name for group id: {}".format(i))
 
     @staticmethod
-    def get_names_from_ids(ids: List[str]) -> Dict[str, str]:
-        return get_group_names(ids)
+    def get_names_from_ids(ids: List[str], token: str) -> Dict[str, str]:
+        return get_group_names(ids, token)
 
     @staticmethod
-    def validate_id(i: str) -> bool:
+    def validate_id(i: str, token: str) -> bool:
         return validate_group_id(i)

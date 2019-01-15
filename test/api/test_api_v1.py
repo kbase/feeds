@@ -91,7 +91,7 @@ def test_get_notifications_invalid_auth(client, mock_invalid_user_token):
     assert data['error']['http_code'] == 403
     assert data['error']['message'] == 'Invalid token'
 
-def test_get_notifications_groups(client, mock_valid_user_token, mock_valid_users, mock_workspace_info):
+def test_get_notifications_groups(client, mock_valid_user_token, mock_valid_users, mock_workspace_info, mock_group_names):
     user_id="test_user"
     user_name="Test User"
     user_groups=[{"id": "group1", "name": "Group 1"}]
@@ -109,14 +109,12 @@ def test_get_notifications_groups(client, mock_valid_user_token, mock_valid_user
     mock_workspace_info(["123", "A_Workspace"])
     response = client.get("/api/V1/notifications", headers={"Authorization": "token-"+str(uuid4())})
     data = json.loads(response.data)
-    print("FEED RESULT")
-    pprint(data)
     assert "user" in data
     assert "name" in data["user"] and data["user"]["name"] == user_name
     assert "global" in data
     assert "name" in data["global"] and data["global"]["name"] == "KBase Admin"
     assert "group1" in data
-    assert "name" in data["group1"] and data["group1"]["name"] == "A Group"
+    assert "name" in data["group1"] and data["group1"]["name"] == "Group 1"
 
 ###
 # POST /notification

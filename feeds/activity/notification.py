@@ -204,7 +204,7 @@ class Notification(BaseActivity):
         return json.dumps(serial, separators=(',', ':'))
 
     @classmethod
-    def deserialize(cls, serial: str) -> N:
+    def deserialize(cls, serial: str, token: str=None) -> N:
         """
         Deserializes and returns a new Notification instance.
         """
@@ -220,12 +220,12 @@ class Notification(BaseActivity):
         missing_keys = required_keys.difference(struct.keys())
         if missing_keys:
             raise InvalidNotificationError('Missing keys: {}'.format(missing_keys))
-        users = [Entity.from_str(u) for u in struct.get('u', [])]
-        target = [Entity.from_str(t) for t in struct.get('t', [])]
+        users = [Entity.from_str(u, token=token) for u in struct.get('u', [])]
+        target = [Entity.from_str(t, token=token) for t in struct.get('t', [])]
         deserial = cls(
-            Entity.from_str(struct['a']),
+            Entity.from_str(struct['a'], token=token),
             str(struct['v']),
-            Entity.from_str(struct['o']),
+            Entity.from_str(struct['o'], token=token),
             struct['s'],
             level=str(struct['l']),
             target=target,
@@ -239,7 +239,7 @@ class Notification(BaseActivity):
         return deserial
 
     @classmethod
-    def from_dict(cls, serial: dict) -> N:
+    def from_dict(cls, serial: dict, token: str=None) -> N:
         """
         Returns a new Notification from a serialized dictionary (e.g. used in Mongo)
         """
@@ -254,16 +254,16 @@ class Notification(BaseActivity):
         if missing_keys:
             raise InvalidNotificationError('Missing keys: {}'.format(missing_keys))
         deserial = cls(
-            Entity.from_dict(serial['actor']),
+            Entity.from_dict(serial['actor'], token=token),
             str(serial['verb']),
-            Entity.from_dict(serial['object']),
+            Entity.from_dict(serial['object'], token=token),
             serial['source'],
             level=str(serial['level']),
-            target=[Entity.from_dict(t) for t in serial.get('target', [])],
+            target=[Entity.from_dict(t, token=token) for t in serial.get('target', [])],
             context=serial.get('context'),
             external_key=serial.get('external_key'),
             seen=serial.get('seen', False),
-            users=[Entity.from_dict(u) for u in serial.get('users', [])]
+            users=[Entity.from_dict(u, token=token) for u in serial.get('users', [])]
         )
         deserial.created = serial['created']
         deserial.expires = serial['expires']
@@ -271,11 +271,11 @@ class Notification(BaseActivity):
         return deserial
 
     @staticmethod
-    def update_entity_names(notes: List[N]) -> None:
+    def update_entity_names(notes: List[N], token: str=None) -> None:
         entities = list()
         for n in notes:
             entities.append(n.actor)
             entities.append(n.object)
             entities = entities + n.target
             entities = entities + n.users
-        Entity.fetch_entity_names(entities)
+        Entity.fetch_entity_names(entities, token)

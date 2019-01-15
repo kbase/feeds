@@ -44,7 +44,8 @@ TYPE_MAP = {
 
 
 class Entity(object):
-    def __init__(self, e_id: str, e_type: str, name: str=None, auto_validate: str=False):
+    def __init__(self, e_id: str, e_type: str, name: str=None, token: str=None,
+                 auto_validate: str=False):
         """
         Instantiate a new Entity.
         If the type is bad, raises en EntityValidationError.
@@ -58,6 +59,7 @@ class Entity(object):
         self.type = e_type
         self.id = e_id
         self._name = name
+        self.token = token
         if auto_validate:
             v = self.validate()
             if not v:
@@ -89,7 +91,7 @@ class Entity(object):
         being validated probably shouldn't be put in the notification DB, so we just let
         those percolate up.
         """
-        return self.type_obj.validate_id(self.id)
+        return self.type_obj.validate_id(self.id, self.token)
 
     def to_dict(self, with_name: bool=False) -> Dict[str, str]:
         d = {
@@ -101,13 +103,13 @@ class Entity(object):
         return d
 
     @classmethod
-    def from_dict(cls, d: dict) -> E:
+    def from_dict(cls, d: dict, token: str=None) -> E:
         assert isinstance(d, dict), "from_dict requires a dictionary input!"
         if "id" not in d:
             raise EntityValidationError("An Entity requires an id!")
         if "type" not in d:
             raise EntityValidationError("An Entity requires a type!")
-        return cls(d["id"], d["type"], name=d.get("name"))
+        return cls(d["id"], d["type"], name=d.get("name"), token=token)
 
     @property
     def name(self) -> str:
@@ -124,7 +126,7 @@ class Entity(object):
         Sets the name of this object based on its type.
         If anything fails, raises an EntityNameError.
         """
-        self._name = self.type_obj.get_name_from_id(self.id)
+        self._name = self.type_obj.get_name_from_id(self.id, self.token)
 
     def __repr__(self):
         return "Entity(\"{}\", \"{}\")".format(self.id, self.type)
@@ -139,7 +141,7 @@ class Entity(object):
         return hash((self.id, self.type))
 
     @classmethod
-    def from_str(cls, s: str) -> E:
+    def from_str(cls, s: str, token: str=None) -> E:
         """
         Given a string built with self.__str__(), this builds it back into an Entity.
         Doesn't do the validation, as it's expected to come from the database.
@@ -150,10 +152,10 @@ class Entity(object):
             (t, i) = s.split(STR_SEPARATOR)
         except ValueError:
             raise EntityValidationError("'{}' could not be resolved into an Entity".format(s))
-        return cls(i, t)
+        return cls(i, t, token=token)
 
     @staticmethod
-    def fetch_entity_names(entities: List[E]) -> None:
+    def fetch_entity_names(entities: List[E], token: str) -> None:
         """
         Uses various services to the names of all Entities in the given list.
         The goal here is to minimize the number of service calls. So if you have 100 Entities,
@@ -188,7 +190,7 @@ class Entity(object):
             id_list = list(set([e.id for e in bins[t]]))
             # run ids_to_names from whatever appropriate type
             if len(id_list):
-                ids_to_names = TYPE_MAP[t].get_names_from_ids(id_list)
+                ids_to_names = TYPE_MAP[t].get_names_from_ids(id_list, token)
                 for e in bins[t]:
                     if e.id in ids_to_names:
                         e.name = ids_to_names[e.id]

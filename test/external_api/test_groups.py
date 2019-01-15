@@ -31,3 +31,15 @@ def test_get_user_groups_fail(mock_network_error):
     with pytest.raises(GroupsError) as e:
         get_user_groups("some_token")
     assert "Unable to fetch group information" in str(e)
+
+def test_get_group_names(mock_group_names):
+    dummy_ret = [
+        {"id": "g1", "name": "Group 1"},
+        {"id": "g2", "name": "Group 2"}
+    ]
+    std = {"g1": "Group 1", "g2": "Group 2"}
+    mock_group_names(dummy_ret)
+    names = get_group_names(["g1", "g2"], "some_token")
+    for n in ["g1", "g2"]:
+        assert n in names
+        assert names[n] == std[n]

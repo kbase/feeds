@@ -20,7 +20,7 @@ DEFAULT_SERVICE = "KBase"
 
 class ServiceType(BaseType):
     @staticmethod
-    def get_name_from_id(i: str) -> str:
+    def get_name_from_id(i: str, token: str) -> str:
         """
         Should return the name as a str.
         If a fail happens, raise an EntityNameError
@@ -33,16 +33,16 @@ class ServiceType(BaseType):
             return DEFAULT_SERVICE
 
     @staticmethod
-    def get_names_from_ids(ids: List[str]) -> Dict[str, str]:
+    def get_names_from_ids(ids: List[str], token: str) -> Dict[str, str]:
         """
         Should return a dict with keys -> values = ids -> names.
         If any of them fail, set id -> None
         """
         names = dict()
         for i in ids:
-            names[i] = ServiceType.get_name_from_id(i)
+            names[i] = ServiceType.get_name_from_id(i, token)
         return names
 
     @staticmethod
-    def validate_id(i: str) -> bool:
+    def validate_id(i: str, token: str) -> bool:
         return i in SERVICE_MAP

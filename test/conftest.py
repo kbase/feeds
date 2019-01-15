@@ -118,7 +118,7 @@ def mock_invalid_user(requests_mock):
     return auth_invalid_user
 
 @pytest.fixture
-def mock_valid_user_token(requests_mock, mock_user_groups):
+def mock_valid_user_token(requests_mock, mock_user_groups, mock_group_names):
     """
     Use this to mock a valid authenticated request coming from a user (not an admin or service).
     Use the fixture as follows:
@@ -152,6 +152,7 @@ def mock_valid_user_token(requests_mock, mock_user_groups):
             'user': user_id
         })
         mock_user_groups(group_membership)
+        mock_group_names(group_membership)
     return auth_valid_user_token
 
 @pytest.fixture
@@ -294,6 +295,17 @@ def mock_user_groups(requests_mock):
         groups_url = cfg.get('feeds', 'groups-url')
         requests_mock.get("{}/member/".format(groups_url), json=groups)
     return user_groups
+
+
+@pytest.fixture
+def mock_group_names(requests_mock):
+    def group_names(groups):
+        cfg = test_config()
+        groups_url = cfg.get('feeds', 'groups-url')
+        matcher = re.compile("/names/")
+        requests_mock.register_uri("GET", matcher, json=groups)
+    return group_names
+
 
 ###################################
 ### WORKSPACE SERVICE API MOCKING

@@ -13,7 +13,7 @@ from feeds.exceptions import EntityNameError
 
 class UserType(BaseType):
     @staticmethod
-    def get_name_from_id(i: str) -> str:
+    def get_name_from_id(i: str, token: str) -> str:
         try:
             users = validate_user_ids([i])
             if i not in users:
@@ -28,7 +28,7 @@ class UserType(BaseType):
             )
 
     @staticmethod
-    def get_names_from_ids(ids: List[str]) -> Dict[str, str]:
+    def get_names_from_ids(ids: List[str], token: str) -> Dict[str, str]:
         try:
             return validate_user_ids(ids)
         except HTTPError:
@@ -37,5 +37,5 @@ class UserType(BaseType):
             )
 
     @staticmethod
-    def validate_id(i: str) -> bool:
+    def validate_id(i: str, token: str) -> bool:
         return validate_user_id(i)
