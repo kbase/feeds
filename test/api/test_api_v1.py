@@ -104,13 +104,19 @@ def test_get_notifications_groups(client, mock_valid_user_token, mock_valid_user
         "test_user3": "Test User3",
         "test_see": "Test See",
         "test_unsee": "Test Unsee",
-        "_kbase_": "KBase Admin"
+        "_kbase_": "KBase"
     })
     mock_workspace_info(["123", "A_Workspace"])
     response = client.get("/api/V1/notifications", headers={"Authorization": "token-"+str(uuid4())})
     data = json.loads(response.data)
     print("FEED RESULT")
     pprint(data)
+    assert "user" in data
+    assert "name" in data["user"] and data["user"]["name"] == user_name
+    assert "global" in data
+    assert "name" in data["global"] and data["global"]["name"] == "KBase Admin"
+    assert "group1" in data
+    assert "name" in data["group1"] and data["group1"]["name"] == "A Group"
 
 ###
 # POST /notification

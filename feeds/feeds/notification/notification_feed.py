@@ -54,7 +54,8 @@ class NotificationFeed(BaseFeed):
             level=level, reverse=reverse, user_view=user_view
         )
         ret_struct = {
-            "unseen": self.get_unseen_count()
+            "unseen": self.get_unseen_count(),
+            "name": self.user.name
         }
         if user_view:
             ret_struct["feed"] = list()
