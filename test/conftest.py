@@ -283,10 +283,13 @@ def mock_workspace_info(requests_mock):
     def valid_workspace_info(info):
         cfg = test_config()
         ws_url = cfg.get('feeds', 'workspace-url')
-        requests_mock.register_uri("POST", ws_url, additional_matcher=workspace_info_matcher, json={
-            "version": "1.1",
-            "result": [info]
-        })
+        requests_mock.register_uri("POST", ws_url,
+            additional_matcher=workspace_info_matcher,
+            json={
+                "version": "1.1",
+                "result": [info]
+            }
+        )
     return valid_workspace_info
 
 @pytest.fixture
@@ -304,8 +307,9 @@ def mock_workspace_info_error(requests_mock):
                     "code": "-32500",
                     "message": "Workspace {} is deleted".format(ws_id),
                     "error": "Long winded exception..."
+                }
             }
-        })
+        )
     return error_workspace_info
 
 @pytest.fixture
@@ -323,8 +327,9 @@ def mock_workspace_info_invalid(requests_mock):
                     "code": "-32500",
                     "message": "No workspace with id {} exists".format(ws_id),
                     "error": "Long winded exception..."
+                }
             }
-        })
+        )
     return invalid_workspace_info
 
 

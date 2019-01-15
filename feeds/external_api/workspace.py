@@ -49,8 +49,8 @@ def validate_workspace_ids(ws_ids: List[Union[int, str]]) -> Dict[str, bool]:
     ids = {}
     for ws_id in ws_ids:
         try:
-            ws.get_workspace_info({"id": ws_id})
-            ids[ws_id] = True
+            info = ws.get_workspace_info({"id": ws_id})
+            ids[ws_id] = str(info[0]) == str(ws_id)   # dumb, but helps with testing
         except ServerError as e:
             if "No workspace with id" in e.message:
                 ids[ws_id] = False
