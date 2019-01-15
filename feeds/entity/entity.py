@@ -103,13 +103,13 @@ class Entity(object):
         return d
 
     @classmethod
-    def from_dict(cls, d: dict) -> E:
+    def from_dict(cls, d: dict, token: str=None) -> E:
         assert isinstance(d, dict), "from_dict requires a dictionary input!"
         if "id" not in d:
             raise EntityValidationError("An Entity requires an id!")
         if "type" not in d:
             raise EntityValidationError("An Entity requires a type!")
-        return cls(d["id"], d["type"], name=d.get("name"))
+        return cls(d["id"], d["type"], name=d.get("name"), token=token)
 
     @property
     def name(self) -> str:
@@ -141,7 +141,7 @@ class Entity(object):
         return hash((self.id, self.type))
 
     @classmethod
-    def from_str(cls, s: str) -> E:
+    def from_str(cls, s: str, token: str=None) -> E:
         """
         Given a string built with self.__str__(), this builds it back into an Entity.
         Doesn't do the validation, as it's expected to come from the database.
@@ -152,7 +152,7 @@ class Entity(object):
             (t, i) = s.split(STR_SEPARATOR)
         except ValueError:
             raise EntityValidationError("'{}' could not be resolved into an Entity".format(s))
-        return cls(i, t)
+        return cls(i, t, token=token)
 
     @staticmethod
     def fetch_entity_names(entities: List[E], token: str) -> None:

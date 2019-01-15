@@ -12,6 +12,7 @@ from typing import List
 class NotificationFeed(BaseFeed):
     def __init__(self, user_id: str, user_type: str, token: str=None):
         self.user = Entity(user_id, user_type, token=token)
+        self.token = token
         self.timeline_storage = MongoTimelineStorage(user_id, user_type)
         self.activity_storage = MongoActivityStorage()
         self.timeline = None
@@ -59,7 +60,7 @@ class NotificationFeed(BaseFeed):
         }
         if user_view:
             ret_struct["feed"] = list()
-            Notification.update_entity_names(activities)
+            Notification.update_entity_names(activities, token=self.token)
             for act in activities:
                 ret_struct["feed"].append(act.user_view())
         else:
@@ -76,7 +77,7 @@ class NotificationFeed(BaseFeed):
         if note is None:
             raise NotificationNotFoundError("Cannot find notification with id {}.".format(note_id))
         else:
-            return Notification.from_dict(note)
+            return Notification.from_dict(note, self.token)
 
     def get_activities(self, count=10, include_seen=False, level=None, verb=None,
                        reverse=False, user_view=False) -> List[Notification]:
@@ -98,7 +99,7 @@ class NotificationFeed(BaseFeed):
         )
         note_list = list()
         for note in serial_notes:
-            note_list.append(Notification.from_dict(note))
+            note_list.append(Notification.from_dict(note, self.token))
         # actor_names = actor_ids_to_names(list(actor_ids))
         # for note in note_list:
         #     note.actor_name = actor_names.get(note.actor, {}).get("name")
