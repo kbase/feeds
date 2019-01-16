@@ -323,7 +323,7 @@ def test_get_note_ext_key_user_auth(client, mock_valid_user_token):
 # POST /notifications/see
 ###
 
-def test_mark_notifications_seen(client, mongo_notes, mock_valid_user_token):
+def test_mark_notifications_seen(client, mongo_notes, mock_valid_user_token, mock_workspace_info):
     note_id = 'see-test'
     mock_valid_user_token("test_see", "Test Seer")
     auth = {"Authorization": "token-"+str(uuid4())}
@@ -336,10 +336,20 @@ def test_mark_notifications_seen(client, mongo_notes, mock_valid_user_token):
     assert 'seen_notes' in data
     assert 'unauthorized_notes' in data
     assert note_id in data['seen_notes']
+    # validate with single note endpoint
     response = client.get('/api/V1/notification/' + note_id, headers=auth)
     data = json.loads(response.data)
     assert data['notification']['id'] == note_id
     assert data['notification']['seen'] == True
+    # validate with bulk notes endpoint
+    mock_workspace_info(["123", "Some_workspace"])
+    response = client.get('/api/V1/notifications/?seen=1', headers=auth)
+    data = json.loads(response.data)
+    assert 'user' in data
+    assert 'feed' in data['user']
+    note = data['user']['feed'][0]
+    assert note['id'] == note_id
+    assert note['seen'] == True
 
 def test_mark_notes_seen_not_allowed(client, mongo_notes, mock_valid_user_token):
     note_id = "not-a-real-note"
@@ -391,7 +401,7 @@ def test_mark_notifications_seen_errors(client, mock_valid_user_token, params, e
 # POST /notifications/unsee
 ###
 
-def test_mark_notifications_unseen(client, mongo_notes, mock_valid_user_token):
+def test_mark_notifications_unseen(client, mongo_notes, mock_valid_user_token, mock_workspace_info):
     note_id = 'unsee-test'
     mock_valid_user_token("test_unsee", "Test Unseer")
     auth = {"Authorization": "token-"+str(uuid4())}
@@ -404,10 +414,20 @@ def test_mark_notifications_unseen(client, mongo_notes, mock_valid_user_token):
     assert 'unseen_notes' in data
     assert 'unauthorized_notes' in data
     assert note_id in data['unseen_notes']
+    # validate with single note endpoint
     response = client.get('/api/V1/notification/' + note_id, headers=auth)
     data = json.loads(response.data)
     assert data['notification']['id'] == note_id
     assert data['notification']['seen'] == False
+    # validate with bulk notes endpoint
+    mock_workspace_info(["123", "Some_workspace"])
+    response = client.get('/api/V1/notifications/', headers=auth)
+    data = json.loads(response.data)
+    assert 'user' in data
+    assert 'feed' in data['user']
+    note = data['user']['feed'][0]
+    assert note['id'] == note_id
+    assert note['seen'] == False
 
 def test_mark_notes_unseen_not_allowed(client, mongo_notes, mock_valid_user_token):
     note_id = "not-a-real-note"
