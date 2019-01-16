@@ -110,7 +110,6 @@ def test_get_notifications_groups(client, mock_valid_user_token, mock_valid_user
     mock_workspace_info(["123", "A_Workspace"])
     response = client.get("/api/V1/notifications", headers={"Authorization": "token-"+str(uuid4())})
     data = json.loads(response.data)
-    pprint(data)
     assert "user" in data
     assert "name" in data["user"] and data["user"]["name"] == user_name
     assert "global" in data
