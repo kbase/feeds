@@ -260,16 +260,18 @@ def test_entity_name_getter_user_fail(mock_invalid_user):
     user_id = "bad_user"
     mock_invalid_user(user_id)
     e = Entity(user_id, "user")
-    with pytest.raises(EntityNameError) as err:
-        x = e.name
-    assert "Unable to find name for user id: {}".format(user_id) in str(err)
+    assert e.name is None
+    # with pytest.raises(EntityNameError) as err:
+    #     x = e.name
+    # assert "Unable to find name for user id: {}".format(user_id) in str(err)
 
 
 def test_entity_name_getter_auth_fail(mock_network_error):
     e = Entity("a_user", "user")
-    with pytest.raises(EntityNameError) as error:
-        x = e.name
-    assert "Unable to find name for user id" in str(error)
+    assert e.name is None
+    # with pytest.raises(EntityNameError) as error:
+    #     x = e.name
+    # assert "Unable to find name for user id" in str(error)
 
 
 def test_entity_name_getter_group_fail():
@@ -280,36 +282,40 @@ def test_entity_name_getter_workspace_fail(mock_workspace_info_invalid):
     ws_id = 8
     mock_workspace_info_invalid(ws_id)
     e = Entity(ws_id, "workspace")
-    with pytest.raises(EntityNameError) as err:
-        x = e.name
-    assert "Unable to find name for workspace id: {}".format(ws_id) in str(err)
+    assert e.name is None
+    # with pytest.raises(EntityNameError) as err:
+    #     x = e.name
+    # assert "Unable to find name for workspace id: {}".format(ws_id) in str(err)
 
 
 def test_entity_name_getter_workspace_error(mock_workspace_info_error):
     ws_id = 8
     mock_workspace_info_error(ws_id)
     e = Entity(ws_id, "workspace")
-    with pytest.raises(EntityNameError) as err:
-        x = e.name
-    assert "Unable to find name for workspace id: {}".format(ws_id) in str(err)
+    assert e.name is None
+    # with pytest.raises(EntityNameError) as err:
+    #     x = e.name
+    # assert "Unable to find name for workspace id: {}".format(ws_id) in str(err)
 
 
 def test_entity_name_getter_narrative_fail(mock_workspace_info_invalid):
     ws_id = 8
     mock_workspace_info_invalid(ws_id)
     e = Entity(ws_id, "narrative")
-    with pytest.raises(EntityNameError) as err:
-        x = e.name
-    assert "Unable to find name for narrative id: {}".format(ws_id) in str(err)
+    assert e.name is None
+    # with pytest.raises(EntityNameError) as err:
+    #     x = e.name
+    # assert "Unable to find name for narrative id: {}".format(ws_id) in str(err)
 
 
 def test_entity_name_getter_narrative_error(mock_workspace_info_error):
     ws_id = 8
     mock_workspace_info_error(ws_id)
     e = Entity(ws_id, "narrative")
-    with pytest.raises(EntityNameError) as err:
-        x = e.name
-    assert "Unable to find name for narrative id: {}".format(ws_id) in str(err)
+    assert e.name is None
+    # with pytest.raises(EntityNameError) as err:
+    #     x = e.name
+    # assert "Unable to find name for narrative id: {}".format(ws_id) in str(err)
 
 
 def test_entity_name_getter_job_fail():
