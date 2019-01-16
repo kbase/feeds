@@ -132,11 +132,13 @@ class NotificationFeed(BaseFeed):
             level=level, verb=verb, reverse=reverse
         )
         note_list = list()
+        user_dict = self.user.to_dict()
         for note in serial_notes:
+            if user_dict in note["unseen"]:
+                note["seen"] = False
+            else:
+                note["seen"] = True
             note_list.append(Notification.from_dict(note, self.token))
-        # actor_names = actor_ids_to_names(list(actor_ids))
-        # for note in note_list:
-        #     note.actor_name = actor_names.get(note.actor, {}).get("name")
         return note_list
 
     def mark_activities(self, activity_ids, seen=False):
