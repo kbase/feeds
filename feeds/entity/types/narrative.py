@@ -29,8 +29,14 @@ class NarrativeType(BaseType):
 
     @staticmethod
     def get_names_from_ids(ids: List[str], token: str) -> Dict[str, str]:
-        return get_narrative_names(ids, token)
+        try:
+            return get_narrative_names(ids, token)
+        except WorkspaceError as e:
+            raise EntityNameError(e)
 
     @staticmethod
     def validate_id(i: str, token: str) -> bool:
-        return validate_narrative_id(i, token)
+        try:
+            return validate_narrative_id(i, token)
+        except WorkspaceError:
+            return False

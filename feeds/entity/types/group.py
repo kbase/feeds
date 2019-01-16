@@ -7,8 +7,10 @@ from feeds.external_api.groups import (
     validate_group_id,
     get_group_names
 )
-from requests import HTTPError
-from feeds.exceptions import EntityNameError
+from feeds.exceptions import (
+    EntityNameError,
+    GroupsError
+)
 
 
 class GroupType(BaseType):
@@ -22,13 +24,19 @@ class GroupType(BaseType):
                 )
             else:
                 return groups[i]
-        except HTTPError:
+        except GroupsError:
             raise EntityNameError("Unable to find name for group id: {}".format(i))
 
     @staticmethod
     def get_names_from_ids(ids: List[str], token: str) -> Dict[str, str]:
-        return get_group_names(ids, token)
+        try:
+            return get_group_names(ids, token)
+        except GroupsError:
+            raise EntityNameError("Unable to find names for a list of group ids")
 
     @staticmethod
     def validate_id(i: str, token: str) -> bool:
-        return validate_group_id(i)
+        try:
+            return validate_group_id(i)
+        except GroupsError as e:
+            return False
