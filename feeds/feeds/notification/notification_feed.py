@@ -6,7 +6,10 @@ from cachetools import TTLCache
 import logging
 from feeds.exceptions import NotificationNotFoundError
 from feeds.entity.entity import Entity
-from typing import List
+from typing import (
+    List,
+    Dict
+)
 
 
 class NotificationFeed(BaseFeed):
@@ -30,6 +33,33 @@ class NotificationFeed(BaseFeed):
             'Fetching timeline for '.format(self.user)
         )
         self.timeline = self.timeline_storage.get_timeline()
+
+    def get_group_notifications(self, group: Dict[str, str], count: int=10,
+                                include_seen: bool=False, level=None,
+                                verb=None, reverse: bool=False) -> dict:
+        """
+        Returns all notifications (using the get_notifications fn.) for a user, filtered down to
+        those that reference an Entity of type group with the given id.
+        """
+        notes = self.get_notifications(count=count, include_seen=include_seen, level=level,
+                                       verb=verb, reverse=reverse)
+        # group has id and name keys
+        group_notes = {
+            "unseen": 0,
+            "name": group.get("name"),
+            "feed": list()
+        }
+        gid = group["id"]
+
+        def is_group(e: Entity) -> bool:
+            return e.id == gid and e.type == "group"
+
+        for n in notes["feed"]:
+            if is_group(n.actor) or is_group(n.object) or any([is_group(t) for t in n.target]):
+                group_notes["feed"].append(n)
+                if not n.seen:
+                    group_notes["unseen"] += 1
+        return group_notes
 
     def get_notifications(self, count: int=10, include_seen: bool=False, level=None, verb=None,
                           reverse: bool=False, user_view: bool=False) -> dict:
