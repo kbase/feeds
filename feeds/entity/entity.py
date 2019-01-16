@@ -116,7 +116,10 @@ class Entity(object):
     @property
     def name(self) -> str:
         if self._name is None:
-            self._fetch_name()
+            try:
+                self._fetch_name()
+            except EntityNameError as e:
+                log_error(__name__, e)
         return self._name
 
     @name.setter
