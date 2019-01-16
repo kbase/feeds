@@ -54,11 +54,15 @@ class NotificationFeed(BaseFeed):
         def is_group(e: Entity) -> bool:
             return e.id == gid and e.type == "group"
 
+        notes_list = list()
         for n in notes["feed"]:
             if is_group(n.actor) or is_group(n.object) or any([is_group(t) for t in n.target]):
-                group_notes["feed"].append(n)
+                notes_list.append(n)
                 if not n.seen:
                     group_notes["unseen"] += 1
+        Notification.update_entity_names(notes_list, token=self.token)
+        for n in notes_list:
+            group_notes["feed"].append(n.user_view())
         return group_notes
 
     def get_notifications(self, count: int=10, include_seen: bool=False, level=None, verb=None,

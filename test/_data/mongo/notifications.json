@@ -453,5 +453,35 @@
         }],
         "unseen" : [
         ]
+    },
+    {
+        "id": "group-feed-test",
+        "actor": {
+            "id": "kbasetest",
+            "type": "user"
+        },
+        "verb": 4,
+        "object": {
+            "id": "some_group",
+            "type": "group"
+        },
+        "source": "groups",
+        "context": {},
+        "target": [{
+            "id": "test_user",
+            "type": "user"
+        }],
+        "level": 1,
+        "created" : 1540877033814,
+        "expires" : 15434690258140,
+        "external_key": "foo",
+        "users": [{
+            "id": "test_group_user",
+            "type": "user"
+        }],
+        "unseen": [{
+            "id": "test_group_user",
+            "type": "user"
+        }]
     }
 ]
