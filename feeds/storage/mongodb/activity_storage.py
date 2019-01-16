@@ -35,27 +35,13 @@ class MongoActivityStorage(ActivityStorage):
         """
         u = user.to_dict()
         coll = get_feeds_collection()
-        coll.update(
-            {
-                "id": {"$in": act_ids},
-                "users": u,
-                "unseen": {"$nin": [u]}
-            },
-            {
-                "$addToSet": {"unseen": u}
-            },
-            multi=True
-        )
-
-        # not sure how this ever worked... it's only in MongoDB 3.0+
-        # But leaving it here in case we ever upgrade.
-        # coll.update_many({
-        #     'id': {'$in': act_ids},
-        #     'users': u,
-        #     'unseen': {'$nin': [u]}
-        # }, {
-        #     '$addToSet': {'unseen': u}
-        # })
+        coll.update_many({
+            'id': {'$in': act_ids},
+            'users': u,
+            'unseen': {'$nin': [u]}
+        }, {
+            '$addToSet': {'unseen': u}
+        })
 
     def set_seen(self, act_ids: List[str], user: Entity) -> None:
         """
@@ -66,26 +52,13 @@ class MongoActivityStorage(ActivityStorage):
         """
         u = user.to_dict()
         coll = get_feeds_collection()
-        coll.update(
-            {
-                "id": {"$in": act_ids},
-                "users": u,
-                "unseen": u
-            }, {
-                "$pull": {"unseen": u}
-            },
-            multi=True
-        )
-
-        # not sure how this ever worked... it's only in MongoDB 3.0+
-        # But leaving it here in case we ever upgrade.
-        # coll.update_many({
-        #     'id': {'$in': act_ids},
-        #     'users': u,
-        #     'unseen': u
-        # }, {
-        #     '$pull': {'unseen': u}
-        # })
+        coll.update_many({
+            'id': {'$in': act_ids},
+            'users': u,
+            'unseen': u
+        }, {
+            '$pull': {'unseen': u}
+        })
 
     def get_by_id(self, act_ids: List[str], source: str=None) -> Dict[str, dict]:
         """
