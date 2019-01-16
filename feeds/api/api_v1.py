@@ -94,11 +94,18 @@ def get_notifications():
 
     user_groups = get_user_groups(user_token)
     for g in user_groups:
-        feed = NotificationFeed(g["id"], "group")
-        return_vals[g["id"]] = feed.get_notifications(
-            count=max_notes, include_seen=include_seen, level=level_filter,
-            verb=verb_filter, reverse=rev_sort, user_view=True
+        # temporary until sometime after the GSP meeting when we work out
+        # how to properly support following various channels and posting to
+        # them and such.
+        return_vals[g["id"]] = feed.get_group_notifications(
+            g, count=max_notes, include_seen=include_seen, level=level_filter,
+            verb=verb_filter, reverse=rev_sort
         )
+        # feed = NotificationFeed(g["id"], "group")
+        # return_vals[g["id"]] = feed.get_notifications(
+        #     count=max_notes, include_seen=include_seen, level=level_filter,
+        #     verb=verb_filter, reverse=rev_sort, user_view=True
+        # )
 
     return (flask.jsonify(return_vals), 200)
 

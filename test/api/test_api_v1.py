@@ -92,9 +92,9 @@ def test_get_notifications_invalid_auth(client, mock_invalid_user_token):
     assert data['error']['message'] == 'Invalid token'
 
 def test_get_notifications_groups(client, mock_valid_user_token, mock_valid_users, mock_workspace_info, mock_group_names):
-    user_id="test_user"
-    user_name="Test User"
-    user_groups=[{"id": "group1", "name": "Group 1"}]
+    user_id="test_group_user"
+    user_name="Test Group User"
+    user_groups=[{"id": "group1", "name": "Group 1"}, {"id": "some_group", "name": "Some Group"}]
     mock_valid_user_token(user_id, user_name, user_groups)
     mock_valid_users({
         "kbasetest": "KBase Test",
@@ -104,7 +104,8 @@ def test_get_notifications_groups(client, mock_valid_user_token, mock_valid_user
         "test_user3": "Test User3",
         "test_see": "Test See",
         "test_unsee": "Test Unsee",
-        "_kbase_": "KBase"
+        "_kbase_": "KBase",
+        "test_group_user": "Test Group User"
     })
     mock_workspace_info(["123", "A_Workspace"])
     response = client.get("/api/V1/notifications", headers={"Authorization": "token-"+str(uuid4())})
@@ -112,9 +113,15 @@ def test_get_notifications_groups(client, mock_valid_user_token, mock_valid_user
     assert "user" in data
     assert "name" in data["user"] and data["user"]["name"] == user_name
     assert "global" in data
-    assert "name" in data["global"] and data["global"]["name"] == "KBase Admin"
+    assert "name" in data["global"] and data["global"]["name"] == "KBase"
     assert "group1" in data
     assert "name" in data["group1"] and data["group1"]["name"] == "Group 1"
+    assert "some_group" in data
+    assert "name" in data["some_group"] and data["some_group"]["name"] == "Some Group"
+    assert "feed" in data["some_group"]
+    g_feed = data["some_group"]["feed"]
+    assert len(g_feed) == 1
+    assert g_feed[0]["id"] == "group-feed-test"
 
 ###
 # POST /notification

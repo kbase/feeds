@@ -35,7 +35,6 @@ def get_app_names(app_ids: List[str]) -> Dict[str, str]:
     nms = NarrativeMethodStore(url=cfg.nms_url)
     try:
         names = dict()
-        print("LOOKING UP: {}".format(list(set(slash_app_ids.values()))))
         infos = nms.get_method_brief_info({"ids": list(set(slash_app_ids.values()))})
         for info in infos:
             if info is not None:
