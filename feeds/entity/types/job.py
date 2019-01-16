@@ -26,12 +26,17 @@ class JobType(BaseType):
 
     @staticmethod
     def get_names_from_ids(ids: List[str], token: str) -> Dict[str, str]:
-        # TODO
         ret = dict()
-        for j_id in ids:
-            ret[j_id] = get_job_name(j_id)
-        return ret
+        try:
+            for j_id in ids:
+                ret[j_id] = get_job_name(j_id)
+            return ret
+        except JobError as e:
+            raise EntityNameError(str(e))
 
     @staticmethod
     def validate_id(i: str, token: str) -> bool:
-        return validate_job_id(i)
+        try:
+            validate_job_id(i)
+        except JobError as e:
+            return False

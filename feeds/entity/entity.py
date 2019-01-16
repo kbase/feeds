@@ -11,7 +11,8 @@ Examples are
 """
 
 from ..exceptions import (
-    EntityValidationError
+    EntityValidationError,
+    EntityNameError
 )
 from .types import (
     AdminType,
@@ -28,6 +29,7 @@ from typing import (
     Dict,
     TypeVar
 )
+from feeds.logger import log_error
 
 STR_SEPARATOR = "::"
 E = TypeVar('E', bound='Entity')
@@ -190,9 +192,12 @@ class Entity(object):
             id_list = list(set([e.id for e in bins[t]]))
             # run ids_to_names from whatever appropriate type
             if len(id_list):
-                ids_to_names = TYPE_MAP[t].get_names_from_ids(id_list, token)
-                for e in bins[t]:
-                    if e.id in ids_to_names:
-                        e.name = ids_to_names[e.id]
+                try:
+                    ids_to_names = TYPE_MAP[t].get_names_from_ids(id_list, token)
+                    for e in bins[t]:
+                        if e.id in ids_to_names:
+                            e.name = ids_to_names[e.id]
+                except EntityNameError as e:
+                    log_error(__name__, e)
 
         # 3. done?

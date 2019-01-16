@@ -3,7 +3,7 @@ import traceback
 
 
 def get_log(name):
-    return logging.getLogger(__name__)
+    return logging.getLogger(name)
 
 
 def log(name, msg, *args, level=logging.INFO):

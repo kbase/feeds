@@ -29,7 +29,10 @@ class WorkspaceType(BaseType):
 
     @staticmethod
     def get_names_from_ids(ids: List[str], token: str) -> Dict[str, str]:
-        return get_workspace_names(ids, token)
+        try:
+            return get_workspace_names(ids, token)
+        except WorkspaceError as e:
+            raise EntityNameError(e)
 
     @staticmethod
     def validate_id(i: str, token: str) -> bool:
