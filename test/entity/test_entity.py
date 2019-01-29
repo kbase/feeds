@@ -335,8 +335,9 @@ def test_entity_fetch_name_ws(mock_workspace_info):
     info = [6, "A_Workspace", "owner", "Timestamp", 18, "a", "n", "unlocked", {"narrative": "1", "narrative_nice_name": "My Narrative"}]
     mock_workspace_info(info)
     e = Entity(ws_id, "workspace")
-    assert e.name == info[1]
-
+    # assert e.name == info[1]
+    # workspace == narrative now. so test that name.
+    assert e.name == info[8]['narrative_nice_name']
 
 def test_entity_fetch_name_narr(mock_workspace_info):
     ws_id = 7

@@ -143,10 +143,12 @@ Options are included to filter by level, source, whether a notification has been
 ```
 {
     "global": {
+        "name": <full name of feed>,
         "unseen": <number unseen>,
         "feed": [ array of global notifications ]
     },
     "user": {
+        "name": <full name of user>,
         "unseen": <number unseen>,
         "feed": [ array of user's notifications ]
     }
@@ -162,8 +164,12 @@ curl -X GET
 returns
 ```
 {
-    "global": [{note 1}, {note 2}, ...],
-    "user": [{note 1}, {note 2}, ... {note 10}]
+    "global": {
+        "name": <name>,
+        "unseen": <number unseen>,
+        "feed": [{note 1}, {note 2}, ...]
+    },
+    "user": { structure as above }
 }
 ```
 (they all return a structure like that, so the return is omitted for the remaining examples)
