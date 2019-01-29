@@ -182,7 +182,7 @@ def test_admin_expire_service_auth(client, mock_valid_service_token):
 def test_expire_notifications_admin(client, mongo_notes, mock_valid_admin_token, mock_valid_users, mock_workspace_info):
     mock_valid_admin_token("kbase_admin", "KBase Admin")
     mock_valid_users({"kbasetest": "KBase Test Account", "kbase": "KBase"})
-    mock_workspace_info(["123", "A_Workspace"])
+    mock_workspace_info(["123", "A_Workspace", "owner", "Timestamp", 18, "a", "n", "unlocked", {"narrative": "1", "narrative_nice_name": "Some Narrative"}])
     # make a notification
     admin_cred = {"Authorization": "token-"+str(uuid4())}
     note = {

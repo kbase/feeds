@@ -34,7 +34,7 @@ def test_get_notifications(client, mock_valid_user_token, mock_valid_users, mock
         "test_unsee": "Test Unsee",
         "_kbase_": "KBase Admin"
     })
-    mock_workspace_info(["123", "A_Workspace"])
+    mock_workspace_info(["123", "A_Workspace", "owner", "Timestamp", 18, "a", "n", "unlocked", {"narrative": "1", "narrative_nice_name": "Some Narrative"}])
     response = client.get('/api/V1/notifications', headers={"Authorization": "token-"+str(uuid4())})
     # Got the fake db in _data/mongo/notifications.json
     data = json.loads(response.data)
@@ -67,7 +67,7 @@ def test_get_notifications_filtered(client, mock_valid_user_token, mock_valid_us
         "test_unsee": "Test Unsee",
         "_kbase_": "KBase Admin"
     })
-    mock_workspace_info(["123", "A_Workspace"])
+    mock_workspace_info(["123", "A_Workspace", "owner", "Timestamp", 18, "a", "n", "unlocked", {"narrative": "1", "narrative_nice_name": "Some Narrative"}])
     route = '/api/V1/notifications?' + filters
     response = client.get(route, headers={"Authorization": "token-"+str(uuid4())})
     data = json.loads(response.data)
@@ -107,7 +107,7 @@ def test_get_notifications_groups(client, mock_valid_user_token, mock_valid_user
         "_kbase_": "KBase",
         "test_group_user": "Test Group User"
     })
-    mock_workspace_info(["123", "A_Workspace"])
+    mock_workspace_info(["123", "A_Workspace", "owner", "Timestamp", 18, "a", "n", "unlocked", {"narrative": "1", "narrative_nice_name": "Some Narrative"}])
     response = client.get("/api/V1/notifications", headers={"Authorization": "token-"+str(uuid4())})
     data = json.loads(response.data)
     assert "user" in data
@@ -132,7 +132,7 @@ def test_post_notification_ok(client, mock_valid_service_token, mock_valid_user_
     test_user = "test_note"
     test_actor = "test_actor"
     mock_valid_users({test_actor: "Test Actor", test_user: "Test User"})
-    mock_workspace_info(["stuff", "Some Workspace"])
+    mock_workspace_info(["stuff", "A_Workspace", "owner", "Timestamp", 18, "a", "n", "unlocked", {"narrative": "1", "narrative_nice_name": "Some Narrative"}])
     mock_valid_service_token("user", "pw", service)
     note = {
         "actor": {"id": test_actor, "type": "user"},
@@ -189,7 +189,7 @@ def test_post_notification_invalid_auth(client, mock_invalid_user_token):
 
 def test_get_global_notifications(client, mock_valid_users, mock_workspace_info):
     mock_valid_users({"kbasetest": "KBase Test", "_kbase_": "KBase Admin"})
-    mock_workspace_info(["123", "Some_Workspace"])
+    mock_workspace_info(["123", "A_Workspace", "owner", "Timestamp", 18, "a", "n", "unlocked", {"narrative": "1", "narrative_nice_name": "Some Narrative"}])
     response = client.get('/api/V1/notifications/global')
     data = json.loads(response.data)
     assert len(data["feed"]) >= 1 and data["feed"][-1]["id"] == "global-1"
@@ -206,7 +206,7 @@ def test_get_single_notification(client, mock_valid_user_token, mock_valid_users
         "test_user2": "Test User2",
         "test_user3": "Test User3"
     })
-    mock_workspace_info(["123", "Some_workspace"])
+    mock_workspace_info(["123", "A_Workspace", "owner", "Timestamp", 18, "a", "n", "unlocked", {"narrative": "1", "narrative_nice_name": "Some Narrative"}])
     mock_valid_user_token("test_user", "Test User")
     auth = {"Authorization": "token-"+str(uuid4())}
     for id_ in test_ids:
@@ -342,7 +342,7 @@ def test_mark_notifications_seen(client, mongo_notes, mock_valid_user_token, moc
     assert data['notification']['id'] == note_id
     assert data['notification']['seen'] == True
     # validate with bulk notes endpoint
-    mock_workspace_info(["123", "Some_workspace"])
+    mock_workspace_info(["123", "A_Workspace", "owner", "Timestamp", 18, "a", "n", "unlocked", {"narrative": "1", "narrative_nice_name": "Some Narrative"}])
     response = client.get('/api/V1/notifications/?seen=1', headers=auth)
     data = json.loads(response.data)
     assert 'user' in data
@@ -420,7 +420,7 @@ def test_mark_notifications_unseen(client, mongo_notes, mock_valid_user_token, m
     assert data['notification']['id'] == note_id
     assert data['notification']['seen'] == False
     # validate with bulk notes endpoint
-    mock_workspace_info(["123", "Some_workspace"])
+    mock_workspace_info(["123", "A_Workspace", "owner", "Timestamp", 18, "a", "n", "unlocked", {"narrative": "1", "narrative_nice_name": "Some Narrative"}])
     response = client.get('/api/V1/notifications/', headers=auth)
     data = json.loads(response.data)
     assert 'user' in data
