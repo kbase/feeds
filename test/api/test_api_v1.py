@@ -570,6 +570,32 @@ def test_expire_notifications_user_auth(client, mock_valid_user_token):
     assert data['error']['message'] == 'Authentication token must be a Service token.'
 
 
+###
+# GET /unseen_count
+###
+
+def test_get_unseen_count(client, mock_valid_user_token):
+    mock_valid_user_token('test_user', 'Test User')
+    response = client.get('/api/V1/notifications/unseen_count', headers={"Authorization": "token-"+str(uuid4())})
+    data = json.loads(response.data)
+    assert 'unseen' in data
+    assert data['unseen'] == 7
+
+def test_get_unseen_count_no_auth(client):
+    response = client.get('/api/V1/notifications/unseen_count')
+    data = json.loads(response.data)
+    assert 'error' in data
+    assert data['error']['http_code'] == 401
+    assert data['error']['message'] == 'Authentication token required'
+
+def test_get_unseen_count_invalid_auth(client, mock_invalid_user_token):
+    mock_invalid_user_token('fake_user')
+    response = client.get('/api/V1/notifications/unseen_count', headers={"Authorization": "bad_token-"+str(uuid4())})
+    data = json.loads(response.data)
+    assert 'error' in data
+    assert data['error']['http_code'] == 403
+
+
 def _validate_notification(note):
     """
     Validates the structure of a user's notification.

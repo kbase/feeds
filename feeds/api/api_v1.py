@@ -168,7 +168,16 @@ def add_notification():
 @api_v1.route('/notifications/global', methods=['GET'])
 @cross_origin()
 def get_global_notifications():
-    return flask.jsonify(fetch_global_notifications())
+    return (flask.jsonify(fetch_global_notifications()), 200)
+
+
+@api_v1.route('/notifications/unseen_count', methods=['GET'])
+@cross_origin()
+def get_unseen_notification_count():
+    user_token = get_auth_token(request)
+    user_id = validate_user_token(user_token)
+    feed = NotificationFeed(user_id, "user", token=user_token)
+    return (flask.jsonify({'unseen': feed.get_unseen_count()}), 200)
 
 
 @api_v1.route('/notification/external_key/<ext_key>/source/<source>', methods=['GET'])

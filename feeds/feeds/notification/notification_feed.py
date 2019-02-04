@@ -141,7 +141,7 @@ class NotificationFeed(BaseFeed):
             note_list.append(Notification.from_dict(note, self.token))
         return note_list
 
-    def mark_activities(self, activity_ids, seen=False):
+    def mark_activities(self, activity_ids: List[str], seen=False) -> None:
         """
         Marks the given list of activities as either seen (True) or unseen (False).
         If the owner of this feed is not on the users list for an activity, nothing is
@@ -152,16 +152,16 @@ class NotificationFeed(BaseFeed):
         else:
             self.activity_storage.set_unseen(activity_ids, self.user)
 
-    def add_notification(self, note):
+    def add_notification(self, note) -> None:
         return self.add_activity(note)
 
-    def add_activity(self, note):
+    def add_activity(self, note) -> None:
         """
         Adds an activity to this user's feed
         """
         self.activity_storage.add_to_storage(note, [self.user])
 
-    def get_unseen_count(self):
+    def get_unseen_count(self) -> int:
         """
         Returns the number of unread / unexpired notifications in this feed.
         """
