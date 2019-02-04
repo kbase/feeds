@@ -188,6 +188,16 @@ curl -X GET
      https://<service_url>/api/V1/notifications?seen=0&n=50&v=share&l=warning
 ```
 
+### Get count of unseen notifications
+Doesn't return the notifications at all, just how many unseen ones there are for the given user. Should be pretty performant, and certainly light on data transfer.
+* Path: `/api/V1/notifications/unseen_count`
+* Method: `GET`
+* Required header: `Authorization`
+* Returns: a JSON object with an "unseen" key. This key is a small structure with "user" and "global" keys, where the values of those are the number of unseen notifications in each. For the user feed, this is summed across all feeds the user is subscribed to.
+* Possible errors:
+    * 401 Not Authenticated - If an auth token is not provided.
+    * 403 Forbidden -If an invalid auth token is provided.
+
 ### Get a single notification
 If you have the id of a notification and want to get its structure, just add it to the path. This will search the user's feed for that notification. If present on the user's feed, it will be returned. If not present, or if this notification cannot be seen by the user, this will raise a "404 Not Found" error.
 * Path: `/api/V1/notification/<note_id>`

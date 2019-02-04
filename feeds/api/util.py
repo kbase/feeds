@@ -114,6 +114,11 @@ def fetch_global_notifications(count=0) -> dict:
     cfg = get_config()
     if count == 0:
         count = cfg.default_max_notes
-    global_feed = NotificationFeed(cfg.global_feed, cfg.global_feed_type)
+    global_feed = get_global_feed()
     global_notes = global_feed.get_notifications(count=count, user_view=True)
     return global_notes
+
+
+def get_global_feed() -> NotificationFeed:
+    cfg = get_config()
+    return NotificationFeed(cfg.global_feed, cfg.global_feed_type)

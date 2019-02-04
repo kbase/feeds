@@ -28,7 +28,8 @@ from feeds.verbs import translate_verb
 from .util import (
     parse_notification_params,
     parse_expire_notifications_params,
-    fetch_global_notifications
+    fetch_global_notifications,
+    get_global_feed
 )
 
 cfg = get_config()
@@ -168,7 +169,25 @@ def add_notification():
 @api_v1.route('/notifications/global', methods=['GET'])
 @cross_origin()
 def get_global_notifications():
-    return flask.jsonify(fetch_global_notifications())
+    return (flask.jsonify(fetch_global_notifications()), 200)
+
+
+@api_v1.route('/notifications/unseen_count', methods=['GET'])
+@cross_origin()
+def get_unseen_notification_count():
+    user_token = get_auth_token(request)
+    user_id = validate_user_token(user_token)
+    feed = NotificationFeed(user_id, "user", token=user_token)
+    user_count = feed.get_unseen_count()
+    global_feed = get_global_feed()
+    global_count = global_feed.get_unseen_count()
+    ret_value = {
+        "unseen": {
+            "user": user_count,
+            "global": global_count
+        }
+    }
+    return (flask.jsonify(ret_value), 200)
 
 
 @api_v1.route('/notification/external_key/<ext_key>/source/<source>', methods=['GET'])
