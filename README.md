@@ -193,7 +193,7 @@ Doesn't return the notifications at all, just how many unseen ones there are for
 * Path: `/api/V1/notifications/unseen_count`
 * Method: `GET`
 * Required header: `Authorization`
-* Returns: a JSON object with an "unseen" key where the value is the number of unseen notifications.
+* Returns: a JSON object with an "unseen" key. This key is a small structure with "user" and "global" keys, where the values of those are the number of unseen notifications in each. For the user feed, this is summed across all feeds the user is subscribed to.
 * Possible errors:
     * 401 Not Authenticated - If an auth token is not provided.
     * 403 Forbidden -If an invalid auth token is provided.

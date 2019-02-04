@@ -579,7 +579,10 @@ def test_get_unseen_count(client, mock_valid_user_token):
     response = client.get('/api/V1/notifications/unseen_count', headers={"Authorization": "token-"+str(uuid4())})
     data = json.loads(response.data)
     assert 'unseen' in data
-    assert data['unseen'] == 7
+    assert 'user' in data['unseen']
+    assert data['unseen']['user'] == 7
+    assert 'global' in data['unseen']
+    assert data['unseen']['global'] == 1
 
 def test_get_unseen_count_no_auth(client):
     response = client.get('/api/V1/notifications/unseen_count')
