@@ -20,22 +20,59 @@ _COL_NOTIFICATIONS = "notifications"
 # 7. Aggregations... later. Maybe part of the Timeline class.
 
 _INDEXES = [
-    [("act_id", ASCENDING)],
+    # MongoActivityStorage.get_by_id
+    # MongoActivityStorage.expire_notifications
+    [("id", ASCENDING)],
 
-    # sort by creation date
-    [("created", DESCENDING)],
+    # MongoActivityStorage.get_by_id
+    [("id", ASCENDING), ("source", ASCENDING)],
 
-    # sort by target users
+    # MongoTimelineStorage.get_single_activity_from_timeline
+    [("id", ASCENDING), ("users", ASCENDING)],
+
+    # MongoTimelineStorage.get_timeline
     [("users", ASCENDING)],
 
-    # sort by unseen users
-    [("unseen", ASCENDING)],
+    # MongoTimelineStorage.get_timeline
+    [("users", ASCENDING), ("expires", ASCENDING)],
 
-    # sort by source, then creation date
+    # MongoTimelineStorage.get_timeline
     [("users", ASCENDING), ("source", ASCENDING), ("created", DESCENDING)],
 
-    # sort by level, then creation date
-    [("users", ASCENDING), ("level", ASCENDING), ("created", DESCENDING)]
+    # MongoTimelineStorage.get_timeline
+    [("users", ASCENDING), ("source", ASCENDING), ("expires", ASCENDING), ("created", DESCENDING)],
+
+    # MongoTimelineStorage.get_timeline
+    [("users", ASCENDING), ("expires", ASCENDING), ("level", ASCENDING), ("created", DESCENDING)],
+
+    # MongoTimelineStorage.get_timeline
+    [("users", ASCENDING), ("level", ASCENDING), ("created", DESCENDING)],
+
+    # MongoTimelineStorage.get_unseen_count
+    # MongoTimelineStorage.get_timeline
+    [("users", ASCENDING), ("expires", ASCENDING)],
+
+    # MongoTimelineStorage.get_timeline
+    [
+        ("users", ASCENDING),
+        ("expires", ASCENDING),
+        ("level", ASCENDING),
+        ("created", DESCENDING)
+    ],
+
+    # MongoTimelineStorage.get_timeline
+    [
+        ("users", ASCENDING),
+        ("expires", ASCENDING),
+        ("level", ASCENDING),
+        ("verb", ASCENDING),
+        ("created", DESCENDING)
+    ],
+]
+
+_SPARSE_INDEXES = [
+    # MongoActivityStorage.get_by_external_key
+    [("external_key", ASCENDING), ("source", ASCENDING)]
 ]
 
 
@@ -75,6 +112,8 @@ class FeedsMongoConnection(object):
         coll = self.get_collection(_COL_NOTIFICATIONS)
         for index in _INDEXES:
             coll.create_index(index)
+        for index in _SPARSE_INDEXES:
+            coll.create_index(index, sparse=True)
 
     def _setup_schema(self):
         pass
