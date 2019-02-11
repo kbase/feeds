@@ -24,6 +24,12 @@ KEY_GROUPS_URL = "groups-url"
 KEY_WS_URL = "workspace-url"
 KEY_NMS_URL = "nms-url"
 KEY_DEFAULT_COUNT = "default-note-count"
+KEY_USE_KAFKA = "use-kafka"
+
+KAFKA_SECTION = "kafka"
+KEY_KAFKA_HOST = "host"
+KEY_KAFKA_TOPICS = "topics"
+KEY_KAFKA_GROUP_ID = "group-id"
 
 
 class FeedsConfig(object):
@@ -82,6 +88,22 @@ class FeedsConfig(object):
             raise ConfigError(
                 "{} must be an int > 0! Got {}".format(KEY_DEFAULT_COUNT, self.default_max_notes)
             )
+        self.use_kafka = self._get_line(cfg, KEY_USE_KAFKA)
+        if not self.use_kafka or self.use_kafka.lower() != "true":
+            self.use_kafka = False
+        else:
+            self.use_kafka = True
+        if self.use_kafka:
+            self._kafka_config(cfg)
+
+    def _kafka_config(self, cfg: configparser.ConfigParser) -> None:
+        if not cfg.has_section(KAFKA_SECTION):
+            raise ConfigError(
+                "Error parsing config file: section {} not found!".format(KAFKA_SECTION)
+            )
+        self.kafka_host = self._get_line(cfg, KEY_KAFKA_HOST, section=KAFKA_SECTION)
+        self.kafka_group_id = self._get_line(cfg, KEY_KAFKA_GROUP_ID, section=KAFKA_SECTION)
+        self.kafka_topics = self._get_line(cfg, KEY_KAFKA_TOPICS, section=KAFKA_SECTION).split(",")
 
     def _find_config_path(self):
         """
@@ -115,13 +137,13 @@ class FeedsConfig(object):
                 raise ConfigError("Error parsing config file {}: {}".format(cfg_file, e))
         return config
 
-    def _get_line(self, config, key, required=True):
+    def _get_line(self, config, key, section=INI_SECTION, required=True):
         """
         A little wrapper that raises a ConfigError if a required key isn't present.
         """
         val = None
         try:
-            val = config.get(INI_SECTION, key)
+            val = config.get(section, key)
         except configparser.NoOptionError:
             if required:
                 raise ConfigError("Required option {} not found in config".format(key))
