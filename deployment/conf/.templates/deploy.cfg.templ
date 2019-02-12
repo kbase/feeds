@@ -38,3 +38,10 @@ workspace-url = {{ default .Env.workspace_url "https://ci.kbase.us/services/ws" 
 groups-url = {{ default .Env.groups_url "https://ci.kbase.us/services/groups" }}
 njs-url = {{ default .Env.njs_url "https://ci.kbase.us/services/njs_wrapper" }}
 nms-url = {{ default .Env.nms_url "https://ci.kbase.us/services/narrative_method_store/rpc" }}
+
+[kafka]
+host = {{ default .Env.kafka_host "localhost:9092" }}
+
+# Topics is a comma-separated list. Probably just one to start with, though.
+topics = {{ default .Env.kafka_topics "feeds" }}
+group-id == {{ default .Env.kafka_group_id "feeds_group" }}

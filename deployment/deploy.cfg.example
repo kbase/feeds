@@ -39,3 +39,8 @@ default-note-count = 100
 # Useful for testing, etc.
 # SET TO FALSE IN PRODUCTION!
 debug=False
+
+[kafka]
+host=localhost:9092
+topics=feeds
+group-id=feeds_group
