@@ -6,18 +6,17 @@ listen for notifications coming in from Kafka, and push them into
 the Mongo feeds db by the same mechanism as the main server.
 """
 
-from feeds.config import get_config
+from feeds.config import get_kafka_config
 from .consumer import KafkaNotificationConsumer
 import time
 
 
 class KafkaListener(object):
     def __init__(self):
-        self.cfg = get_config()
-        self.consumer = KafkaNotificationConsumer(self.cfg.kafka_host,
-                                                  self.cfg.kafka_topics,
-                                                  self.cfg.kafka_group_id)
-        print("Initialized listener")
+        kafka_cfg = get_kafka_config()
+        self.consumer = KafkaNotificationConsumer(kafka_cfg.kafka_host,
+                                                  kafka_cfg.kafka_topics,
+                                                  kafka_cfg.kafka_group_id)
 
     def start_listening(self):
         while True:

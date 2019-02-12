@@ -1,8 +1,9 @@
 from .kafka.listener import KafkaListener
-
+from logger import log
 
 if __name__ == "__main__":
-    print("Initializing Listener")
+    name = 'kafka_listener'
+    log(name, "Initializing Kafka listener.")
     listener = KafkaListener()
-    print("Starting to listen")
+    log(name, "Starting Kafka listener loop.")
     listener.start_listening()
