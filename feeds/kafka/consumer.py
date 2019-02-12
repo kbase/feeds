@@ -19,6 +19,4 @@ class KafkaNotificationConsumer(object):
         self.consumer.commit()
 
     def _process_message(self, message: ConsumerRecord) -> None:
-        print(message)
-
-
+        print(message.value)

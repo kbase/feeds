@@ -23,4 +23,3 @@ class KafkaListener(object):
         while True:
             self.consumer.poll()
             time.sleep(1)
-
