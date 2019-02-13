@@ -53,7 +53,8 @@ def get_delete_mongo_files() -> bool:
 
 def get_delete_kafka_files() -> bool:
     cfg = test_config()
-    return cfg.get('test', DELETE_KAFKA_FILES)
+    return cfg.get('test', DELETE_KAFKA_FILES).lower() == "true"
+
 
 def test_config():
     """

@@ -9,6 +9,7 @@ import test.util as test_util
 
 KAFKA_SCRIPT = "bin/kafka-server-start.sh"
 ZOOKEEPER_SCRIPT = "bin/zookeeper-server-start.sh"
+KAFKA_TOPIC_SCRIPT = "bin/kafka-topics.sh"
 KAFKA_CONFIG_OUT = "kafka.properties"
 ZOOKEEPER_CONFIG_OUT = "zookeeper.properties"
 ZOOKEEPER_DATA_DIR = "zookeeper"
@@ -20,6 +21,7 @@ ZOOKEEPER_STDOUT = "zookeeper_stdout"
 class KafkaController(object):
     def __init__(self, kafka_root: Path, kafka_config_template: Path,
                  zookeeper_config_template: Path, root_temp_dir: Path) -> None:
+        self.kafka_root = kafka_root
         kafka_cmd = os.path.join(kafka_root, KAFKA_SCRIPT)
         zookeeper_cmd = os.path.join(kafka_root, ZOOKEEPER_SCRIPT)
 
@@ -90,6 +92,19 @@ class KafkaController(object):
         self._kafka_out = open(os.path.join(self.temp_dir, KAFKA_STDOUT), "w")
         kafka_run_cmd = [kafka_cmd, self.kafka_config_path]
         self._kafka_proc = subprocess.Popen(kafka_run_cmd, stdout=self._kafka_out, stderr=subprocess.STDOUT)
+
+        time.sleep(1)
+
+        cfg = test_util.test_config()
+        topics = cfg.get("kafka", "topics").split(",")
+        for topic in topics:
+            create_topic_cmd = [os.path.join(self.kafka_root, KAFKA_TOPIC_SCRIPT), "--create", "--zookeeper",
+                                "localhost:{}".format(self.zookeeper_port), "--replication-factor", "1",
+                                "--partitions", "1", "--topic", topic]
+            print("Running create topic script for {}".format(topic))
+            print(" ".join(create_topic_cmd))
+            subprocess.run(create_topic_cmd)
+
 
     def destroy(self, delete_temp_files: bool) -> None:
         if self._kafka_out:

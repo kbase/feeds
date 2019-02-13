@@ -13,16 +13,22 @@ from feeds.managers.notification_manager import NotificationManager
 
 class KafkaNotificationConsumer(object):
     def __init__(self, server: str, topics: List[str], group_id: str) -> None:
-        self.consumer = KafkaConsumer(bootstrap_servers=server,
-                                      auto_offset_reset='latest',
+        self.server = server
+        self.topics = topics
+        self.group_id = group_id
+        print("MAKING CONSUMER WITH server - {}, topic - {}, group_id - {}".format(server, topics[0], group_id))
+        self.consumer = KafkaConsumer(topics[0],
+                                      client_id="feeds-kakfa-consumer",
+                                      bootstrap_servers=[server],
+                                      consumer_timeout_ms=1000,
                                       group_id=group_id,
-                                      enable_auto_commit=True)
-        self.consumer.subscribe(topics)
+                                      enable_auto_commit=True,
+                                      auto_commit_interval_ms=1000,
+                                      auto_offset_reset="earliest")
 
     def poll(self) -> None:
         for msg in self.consumer:
             self._process_message(msg)
-        self.consumer.commit()
 
     def _process_message(self, message: ConsumerRecord) -> None:
         try:
@@ -43,7 +49,10 @@ class KafkaNotificationConsumer(object):
             # pass it to the NotificationManager to dole out to its audience feeds.
             manager = NotificationManager()
             manager.add_notification(new_note)
-
             log(__name__, "Created notification from Kafka with id {}".format(new_note.id))
         except Exception as e:
             log_error(__name__, e)
+
+    def __str__(self):
+        return ("KafkaNotificationConsumer: host:{},group_id:{},"
+                "topics:{}".format(self.server, self.group_id, self.topics))
