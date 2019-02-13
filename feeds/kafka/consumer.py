@@ -16,7 +16,6 @@ class KafkaNotificationConsumer(object):
         self.server = server
         self.topics = topics
         self.group_id = group_id
-        print("MAKING CONSUMER WITH server - {}, topic - {}, group_id - {}".format(server, topics[0], group_id))
         self.consumer = KafkaConsumer(topics[0],
                                       client_id="feeds-kakfa-consumer",
                                       bootstrap_servers=[server],
@@ -28,6 +27,7 @@ class KafkaNotificationConsumer(object):
 
     def poll(self) -> None:
         for msg in self.consumer:
+            print(msg)
             self._process_message(msg)
 
     def _process_message(self, message: ConsumerRecord) -> None:
