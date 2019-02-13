@@ -108,7 +108,7 @@ def main():
     import conftest
     conftest.pytest_sessionstart(None)
     mongoexe = test_util.get_mongo_exe()
-    root_temp_dir = test_util.get_temp_dir()
+    root_temp_dir = test_util.get_mongo_temp_dir()
 
     mc = MongoController(mongoexe, root_temp_dir, False)
     print('port: ' + str(mc.port))

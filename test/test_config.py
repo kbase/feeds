@@ -22,7 +22,11 @@ GOOD_CONFIG = [
     'nms-url=nms',
     'global-feed=global',
     'lifespan=30',
-    'default-note-count=100'
+    'default-note-count=100',
+    '[kafka]',
+    'host=localhost:9092',
+    'topics=foo,bar',
+    'group-id=feeds_group'
 ]
 
 @pytest.fixture(scope="function")
@@ -93,7 +97,7 @@ def test_config_bad_note_count(dummy_config, dummy_auth_token, bad_val):
 
 def test_config_check_debug(dummy_config, dummy_auth_token):
     cfg_text = GOOD_CONFIG.copy()
-    cfg_text.append("debug=true")
+    cfg_text.insert(1, "debug=true")
     cfg_path = dummy_config(cfg_text)
     feeds_config_backup = os.environ.get('FEEDS_CONFIG')
     os.environ['FEEDS_CONFIG'] = cfg_path
@@ -218,20 +222,26 @@ def test_get_config(dummy_config, dummy_auth_token):
     assert cfg.db_port == 5
     assert cfg.auth_url == 'baz'
     assert cfg.auth_token == FAKE_AUTH_TOKEN
+
+    cfg = config.get_kafka_config()
+    assert cfg.kafka_group_id == 'feeds_group'
+    assert cfg.kafka_host == 'localhost:9092'
+    assert cfg.kafka_topics == ['foo', 'bar']
+
     del os.environ['FEEDS_CONFIG']
     if path_backup is not None:
         os.environ['FEEDS_CONFIG'] = path_backup
     config.__config = None
 
 
-def test_config_bad_parsing(dummy_config, dummy_auth_token):
-    cfg_path = dummy_config(["fleeble"])
+def test_config_missing_section(dummy_config, dummy_auth_token):
+    cfg_path = dummy_config(["[fleeble]"])
     path_backup = os.environ.get('FEEDS_CONFIG')
     os.environ['FEEDS_CONFIG'] = cfg_path
     config.__config = None
     with pytest.raises(ConfigError) as e:
         config.FeedsConfig()
-    assert "Error parsing config file" in str(e.value)
+    assert "Error parsing config file: section feeds not found" in str(e.value)
     if path_backup is not None:
         os.environ['FEEDS_CONFIG'] = path_backup
 
@@ -259,5 +269,29 @@ def test_config_missing_reqs(dummy_config, dummy_auth_token):
         config.FeedsConfig()
     assert "has no value!" in str(e.value)
 
+    if path_backup is not None:
+        os.environ['FEEDS_CONFIG'] = path_backup
+
+
+def test_kafka_config_missing_section(dummy_config):
+    cfg_path = dummy_config(["[fleeble]"])
+    path_backup = os.environ.get('FEEDS_CONFIG')
+    os.environ['FEEDS_CONFIG'] = cfg_path
+    config.__kafka_config = None
+    with pytest.raises(ConfigError) as e:
+        config.KafkaConfig()
+    assert "Error parsing config file: section kafka not found" in str(e.value)
+    if path_backup is not None:
+        os.environ['FEEDS_CONFIG'] = path_backup
+
+
+def test_config_bad_parsing(dummy_config, dummy_auth_token):
+    cfg_path = dummy_config(["nope"])
+    path_backup = os.environ.get('FEEDS_CONFIG')
+    os.environ['FEEDS_CONFIG'] = cfg_path
+    config.__config = None
+    with pytest.raises(ConfigError) as e:
+        config.FeedsConfig()
+    assert "Error parsing config file {}:".format(cfg_path) in str(e.value)
     if path_backup is not None:
         os.environ['FEEDS_CONFIG'] = path_backup

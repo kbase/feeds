@@ -7,6 +7,7 @@ import feeds
 import test.util as test_util
 from .util import test_config
 from .mongo_controller import MongoController
+from .kafka_controller import KafkaController
 import shutil
 import time
 import re
@@ -34,7 +35,7 @@ def mongo_notes(mongo):
 @pytest.fixture(scope="module")
 def mongo():
     mongoexe = test_util.get_mongo_exe()
-    tempdir = test_util.get_temp_dir()
+    tempdir = test_util.get_mongo_temp_dir()
     mongo = MongoController(mongoexe, tempdir)
     print("running MongoDB {} on port {} in dir {}".format(
         mongo.db_version, mongo.port, mongo.temp_dir
@@ -43,12 +44,34 @@ def mongo():
     feeds.storage.mongodb.connection._connection = None
 
     yield mongo
-    del_temp = test_util.get_delete_temp_files()
+    del_temp = test_util.get_delete_mongo_files()
     print("Shutting down MongoDB,{} deleting temp files".format(" not" if not del_temp else ""))
     mongo.destroy(del_temp)
     if del_temp:
-        shutil.rmtree(test_util.get_temp_dir())
+        shutil.rmtree(test_util.get_mongo_temp_dir())
     # time.sleep(5) # wait for Mongo to go away
+
+@pytest.fixture() #scope="module")
+def kafka():
+    tempdir = test_util.get_kafka_temp_dir()
+    kafka = KafkaController(
+        test_util.get_kafka_root(),
+        test_util.get_kafka_config(),
+        test_util.get_zookeeper_config(),
+        tempdir
+    )
+    print("running Kafka on port {} with zookeeper on port {} and data dir {}".format(
+        kafka.kafka_port, kafka.zookeeper_port, kafka.temp_dir
+    ))
+    # a little hack to make the kafka host work right
+    feeds.config.get_kafka_config()
+    feeds.config.__kafka_config.kafka_host = "localhost:{}".format(kafka.kafka_port)
+    yield kafka
+    del_temp = test_util.get_delete_kafka_files()
+    print("Shutting down Kafka,{} deleting temp files".format(" not" if not del_temp else ""))
+    kafka.destroy(del_temp)
+    if del_temp:
+        shutil.rmtree(test_util.get_kafka_temp_dir())
 
 @pytest.fixture(scope="module")
 def app():

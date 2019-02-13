@@ -19,6 +19,9 @@ test: all
 	# flake8 test
 	pytest --verbose test --cov=feeds --cov-report html feeds -s
 
+start_kafka_listener:
+	python -m feeds.kafka_listener
+
 start: all
 	gunicorn --worker-class gevent --timeout 300 --workers 5 --bind :5000 feeds.server:app
 
