@@ -34,6 +34,7 @@ def test_kafka_consumer(client, kafka, mongo, mock_valid_users, mock_valid_user_
     }
     producer.send(topic, bytes(json.dumps(note), "utf-8"))
     producer.flush()
+    time.sleep(3)
     consumer.poll()
 
     # fetch notifications and expect that our new one is in there
@@ -71,5 +72,6 @@ def test_bad_input(kafka):
     producer.send(topic, bytes(json.dumps(note), "utf-8"))
     producer.flush()
     print("COMMITTED: {}".format(consumer.consumer.committed(TopicPartition("feeds", 0))))
+    time.sleep(3)
     consumer.poll()
     # consumer.consumer.close()
