@@ -87,13 +87,13 @@ class KafkaController(object):
         zookeeper_run_cmd = [zookeeper_cmd, self.zookeeper_config_path]
         self._zookeeper_proc = subprocess.Popen(zookeeper_run_cmd, stdout=self._zookeeper_out, stderr=subprocess.STDOUT)
 
-        time.sleep(1)
+        time.sleep(5)
 
         self._kafka_out = open(os.path.join(self.temp_dir, KAFKA_STDOUT), "w")
         kafka_run_cmd = [kafka_cmd, self.kafka_config_path]
         self._kafka_proc = subprocess.Popen(kafka_run_cmd, stdout=self._kafka_out, stderr=subprocess.STDOUT)
 
-        time.sleep(1)
+        time.sleep(5)
 
         cfg = test_util.test_config()
         topics = cfg.get("kafka", "topics").split(",")
