@@ -53,20 +53,21 @@ def mongo():
 
 @pytest.fixture(scope="module")
 def kafka():
-    kafka_path = test_util.get_kafka_root()
-    tempdir = test_util.get_temp_dir()
+    tempdir = test_util.get_kafka_temp_dir()
     kafka = KafkaController(
         test_util.get_kafka_root(),
         test_util.get_kafka_config(),
         test_util.get_zookeeper_config(),
         tempdir
     )
-    print("running Kafka {} on port {} with zookeeper on port {} and data dir {}".format(
-        kafka.version, kafka.kafka_port, kafka.zookeeper_port, kafka.temp_dir
+    print("running Kafka on port {} with zookeeper on port {} and data dir {}".format(
+        kafka.kafka_port, kafka.zookeeper_port, kafka.temp_dir
     ))
+    # a little hack to make the kafka host work right
+    feeds.config.get_kafka_config()
     feeds.config.__kafka_config.kafka_host = "localhost:{}".format(kafka.kafka_port)
     yield kafka
-    del_temp = test_util.get_delete_temp_files()
+    del_temp = test_util.get_delete_kafka_files()
     print("Shutting down Kafka,{} deleting temp files".format(" not" if not del_temp else ""))
     kafka.destroy(del_temp)
     if del_temp:
