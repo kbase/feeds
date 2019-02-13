@@ -43,8 +43,7 @@ def test_kafka_consumer(client, kafka, mongo, mock_valid_users, mock_valid_user_
     note = data["user"]["feed"][0]
     assert note['actor'] == {"type": "user", "id": "kafkatest", "name": "KBase Test"}
     assert note['context'] == {"foo": "bar"}
-
-    consumer.consumer.close()
+    # consumer.consumer.close()
 
 
 def test_bad_input(kafka):
@@ -73,3 +72,4 @@ def test_bad_input(kafka):
     producer.flush()
     print("COMMITTED: {}".format(consumer.consumer.committed(TopicPartition("feeds", 0))))
     consumer.poll()
+    # consumer.consumer.close()

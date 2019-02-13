@@ -51,7 +51,7 @@ def mongo():
         shutil.rmtree(test_util.get_mongo_temp_dir())
     # time.sleep(5) # wait for Mongo to go away
 
-@pytest.fixture(scope="module")
+@pytest.fixture() #scope="module")
 def kafka():
     tempdir = test_util.get_kafka_temp_dir()
     kafka = KafkaController(
