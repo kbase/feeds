@@ -117,6 +117,7 @@ class KafkaController(object):
             self._zookeeper_proc.terminate()
         if delete_temp_files and self.temp_dir:
             shutil.rmtree(self.temp_dir)
+        time.sleep(5)
 
 def main():
     from . import conftest
