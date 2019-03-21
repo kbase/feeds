@@ -55,6 +55,15 @@ def validate_group_id(group_id: str) -> bool:
         )
 
 
+def get_resource_info(request_id: str) -> dict:
+    """
+    Returns a dict with resource info that stems from a request
+    """
+    r = __groups_request(f"/request/id/{request_id}/")
+    res = r.json()
+    return res
+
+
 def __groups_request(path: str, token: str=None) -> Response:
     headers = {"Authorization": token}
     try:

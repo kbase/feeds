@@ -24,6 +24,11 @@ KEY_GROUPS_URL = "groups-url"
 KEY_WS_URL = "workspace-url"
 KEY_NMS_URL = "nms-url"
 KEY_DEFAULT_COUNT = "default-note-count"
+KEY_SERVICE_GROUPS = "service-groups"
+KEY_SERVICE_WORKSPACE = "service-workspace"
+KEY_SERVICE_NARRATIVE = "service-narrative"
+KEY_SERVICE_JOBS = "service-jobs"
+KEY_SERVICE_KBASE = "service-kbase"
 
 
 class FeedsConfig(object):
@@ -68,11 +73,21 @@ class FeedsConfig(object):
             self.debug = False
         else:
             self.debug = True
+
+        # URLs
         self.auth_url = self._get_line(cfg, KEY_AUTH_URL)
         self.njs_url = self._get_line(cfg, KEY_NJS_URL)
         self.ws_url = self._get_line(cfg, KEY_WS_URL)
         self.groups_url = self._get_line(cfg, KEY_GROUPS_URL)
         self.nms_url = self._get_line(cfg, KEY_NMS_URL)
+
+        # Source service names
+        self.service_groups = self._get_line(cfg, KEY_SERVICE_GROUPS)
+        self.service_workspace = self._get_line(cfg, KEY_SERVICE_WORKSPACE)
+        self.service_narrative = self._get_line(cfg, KEY_SERVICE_NARRATIVE)
+        self.service_jobs = self._get_line(cfg, KEY_SERVICE_JOBS)
+        self.service_kbase = self._get_line(cfg, KEY_SERVICE_KBASE)
+
         self.default_max_notes = self._get_line(cfg, KEY_DEFAULT_COUNT)
         try:
             self.default_max_notes = self._get_line(cfg, KEY_DEFAULT_COUNT)
