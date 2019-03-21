@@ -22,7 +22,12 @@ GOOD_CONFIG = [
     'nms-url=nms',
     'global-feed=global',
     'lifespan=30',
-    'default-note-count=100'
+    'default-note-count=100',
+    'service-groups=groupsservice',
+    'service-workspace=workspaceservice',
+    'service-narrative=narrativeservice',
+    'service-jobs=jobsservice',
+    'service-kbase=kbase'
 ]
 
 @pytest.fixture(scope="function")
@@ -124,7 +129,7 @@ def test_config_from_env_ok(dummy_config, dummy_auth_token):
     assert cfg.debug == False
     del os.environ['KB_DEPLOYMENT_CONFIG']
     if kb_dep_config is not None:
-        os.environ['KB_DEPLOYMENT_CONFIG'] = path_backup
+        os.environ['KB_DEPLOYMENT_CONFIG'] = kb_dep_config
     if feeds_config_backup is not None:
         os.environ['FEEDS_CONFIG'] = feeds_config_backup
 
