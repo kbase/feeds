@@ -13,6 +13,11 @@ services:
       - nms-url=https://ci.kbase.us/services/narrative_method_store/rpc
       - AUTH_TOKEN=fake_token
       - default-note-count=100
+      - service-groups = groupsservice
+      - service-workspace = workspaceservice
+      - service-narrative = narrativeservice
+      - service-jobs = jobservice
+      - service-kbase = kbase
     command:
       - "-wait"
       - "tcp://ci-mongo:27017"

@@ -38,3 +38,12 @@ workspace-url = {{ default .Env.workspace_url "https://ci.kbase.us/services/ws" 
 groups-url = {{ default .Env.groups_url "https://ci.kbase.us/services/groups" }}
 njs-url = {{ default .Env.njs_url "https://ci.kbase.us/services/njs_wrapper" }}
 nms-url = {{ default .Env.nms_url "https://ci.kbase.us/services/narrative_method_store/rpc" }}
+
+# Service names for notification sources.
+# These are the expected mappings for source services to do special management (fanning out notifications, etc).
+# Any source not used here won't be recognized and will do some default things.
+service-groups = {{ default .Env.service_groups "groupsservice" }}
+service-workspace = {{ default .Env.service_ws "workspaceservice" }}
+service-narrative = {{ default .Env.service_narrative "narrativeservice" }}
+service-jobs = {{ default .Env.service_jobs "jobservice" }}
+service-kbase = {{ default .Env.servivce_kbase "kbase" }}

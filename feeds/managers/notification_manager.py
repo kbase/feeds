@@ -18,6 +18,7 @@ from .fanout_modules.workspace import WorkspaceFanout
 from .fanout_modules.jobs import JobsFanout
 from .fanout_modules.kbase import KBaseFanout
 from feeds.entity.entity import Entity
+from feeds.config import get_config
 
 
 class NotificationManager(BaseManager):
@@ -46,19 +47,20 @@ class NotificationManager(BaseManager):
         TODO: add adapters, maybe subclass notifications to handle each source?
         """
         fanout = None
-        if note.source == 'ws' or note.source == 'workspace':
+        cfg = get_config()
+        if note.source == cfg.service_workspace:
             fanout = WorkspaceFanout(note)
-        elif note.source == 'groups':
+        elif note.source == cfg.service_groups:
             fanout = GroupsFanout(note)
-        elif note.source == 'jobs':
+        elif note.source == cfg.service_jobs:
             fanout = JobsFanout(note)
-        elif note.source == 'kbase':
+        elif note.source == cfg.service_kbase:
             fanout = KBaseFanout(note)
 
         if fanout is not None:
             user_list = fanout.get_target_users()
         else:
-            user_list = list(set(note.users + note.target))
+            user_list = list(note.users)
 
         return user_list
 

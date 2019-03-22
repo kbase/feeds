@@ -128,6 +128,7 @@ def test_get_notifications_groups(client, mock_valid_user_token, mock_valid_user
 ###
 
 def test_post_notification_ok(client, mock_valid_service_token, mock_valid_user_token, mock_valid_users, mock_workspace_info, mongo_notes):
+    # Set up note info.
     service = "a_service"
     test_user = "test_note"
     test_actor = "test_actor"
@@ -136,25 +137,34 @@ def test_post_notification_ok(client, mock_valid_service_token, mock_valid_user_
     mock_valid_service_token("user", "pw", service)
     note = {
         "actor": {"id": test_actor, "type": "user"},
-        "target": [{"id": test_user, "type": "user"}],
+        "users": [{"id": test_user, "type": "user"}],
+        "target": [{"id": test_actor, "type": "user"}],
         "verb": 1,
         "level": 1,
         "object": {"id": "stuff", "type": "workspace"},
         "source": service
     }
+    # Post the test note.
     response = client.post(
         "/api/V1/notification",
         headers={"Authorization": "token-"+str(uuid4())},
         json=note
     )
     post_return = json.loads(response.data)
+    # Make sure we get an id back, keep it so we can validate the user's feed.
     assert 'id' in post_return
     note_id = post_return['id']
     mock_valid_user_token(test_user, "Some Name")
+    # Get the test user's feed
     response = client.get("/api/V1/notifications", headers={"Authorization": "token-"+str(uuid4())})
     data_return = json.loads(response.data)
     assert len(data_return['user']['feed']) == 1
     assert data_return['user']['feed'][0]['id'] == note_id
+    # Get the actor's feed (also the target) - make sure the note isn't there (that it's empty, really).
+    mock_valid_user_token(test_actor, "Some Actor")
+    response = client.get("/api/V1/notifications", headers={"Authorization": "token-"+str(uuid4())})
+    data_return = json.loads(response.data)
+    assert len(data_return['user']['feed']) == 0
 
 
 def test_post_notification_no_auth(client):

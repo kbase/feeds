@@ -39,3 +39,12 @@ default-note-count = 100
 # Useful for testing, etc.
 # SET TO FALSE IN PRODUCTION!
 debug=False
+
+# Service names for notification sources.
+# These are the expected mappings for source services to do special management (fanning out notifications, etc).
+# Any source not used here won't be recognized and will do some default things.
+service-groups = groupsservice
+service-workspace = workspaceservice
+service-narrative = narrativeservice
+service-jobs = jobservice
+service-kbase = kbase
