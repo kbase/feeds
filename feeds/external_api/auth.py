@@ -22,11 +22,15 @@ from typing import (
     List
 )
 from requests.models import Response
+from collections import (
+    OrderedDict
+)
 
 config = get_config()
 AUTH_URL = config.auth_url
 AUTH_API_PATH = '/api/V2/'
 CACHE_EXPIRE_TIME = 300  # seconds
+MAX_BAD_TOKENS = 10000
 
 
 class TokenCache(TTLCache):
@@ -37,7 +41,7 @@ class TokenCache(TTLCache):
     """
     def __getitem__(self, key: str, cache_getitem: Any=Cache.__getitem__):
         token = super(TokenCache, self).__getitem__(key, cache_getitem=cache_getitem)
-        if token.get('expires', 0) <= epoch_ms():
+        if token is not None and token.get('expires', 0) <= epoch_ms():
             return self.__missing__(key)
         else:
             return token
@@ -45,6 +49,7 @@ class TokenCache(TTLCache):
 
 __token_cache = TokenCache(1000, CACHE_EXPIRE_TIME)
 __user_cache = TTLCache(1000, CACHE_EXPIRE_TIME)
+__bad_token_cache = OrderedDict()
 
 
 def validate_service_token(token: str) -> str:
@@ -136,9 +141,11 @@ def __fetch_token(token: str) -> dict:
     If the token is invalid or there's any other auth problems, either
     an InvalidTokenError or TokenLookupError gets raised.
     """
+    if token in __bad_token_cache:
+        raise InvalidTokenError(msg="Invalid token")
     try:
         fetched = __token_cache.get(token)
-    except KeyError:  # this wants to throw a KeyError in some tests. Don't know why.
+    except KeyError:  # extending the TTLCache is annoying.
         fetched = None
     if fetched is not None:
         return fetched
@@ -153,7 +160,7 @@ def __fetch_token(token: str) -> dict:
             __token_cache[token] = token_info
             return token_info
         except requests.HTTPError as e:
-            _handle_errors(e)
+            _handle_errors(e, token)
 
 
 def __auth_request(path: str, token: str) -> Response:
@@ -170,7 +177,7 @@ def __auth_request(path: str, token: str) -> Response:
     return r
 
 
-def _handle_errors(err: Response) -> None:
+def _handle_errors(err: Response, token=None) -> None:
     """
     Wrapper to handle errors for Auth requests.
     Raises either an InvalidTokenError (on a 403) or TokenLookupError as needed.
@@ -179,6 +186,9 @@ def _handle_errors(err: Response) -> None:
     if err.response.status_code == 403:
         err_content = json.loads(err.response.content)
         err_msg = err_content.get('error', {}).get('apperror', 'Invalid token')
+        __bad_token_cache[token] = 1
+        if len(__bad_token_cache) > MAX_BAD_TOKENS:
+            __bad_token_cache.popitem(last=False)
         raise InvalidTokenError(msg=err_msg, http_error=err)
     else:
         raise TokenLookupError(http_error=err)
