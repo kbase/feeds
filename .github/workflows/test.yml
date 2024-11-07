@@ -51,7 +51,6 @@ jobs:
           cd -
 
           # set up test config
-          cp -n test/test.cfg.example test/test.cfg
           sed -i "s#^mongo-exe.*#mongo-exe=$MONGOD#" test/test.cfg
           cat test/test.cfg
 
