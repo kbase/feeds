@@ -69,7 +69,7 @@ class MongoTimelineStorage(TimelineStorage):
             "unseen": self._user_doc(),
             "expires": {"$gt": now}
         }
-        return coll.find(query).count()
+        return coll.count_documents(query)
 
     def _user_doc(self) -> Dict[str, str]:
         return {
