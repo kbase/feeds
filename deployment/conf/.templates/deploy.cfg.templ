@@ -11,6 +11,7 @@ db-host = {{ default .Env.db_host "ci-mongo" }}
 db-port = {{ default .Env.db_port "27017" }}
 db-user = {{ default .Env.db_user "feedsserv" }}
 db-pw = {{ default .Env.db_pw "fake_password" }}
+db-retrywrites={{ default .Env.db_retrywrites "false" }}
 
 # admins are allowed to use their auth tokens to create global notifications.
 # examples would be notices about KBase downtime or events.
