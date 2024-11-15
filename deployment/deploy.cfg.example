@@ -12,6 +12,10 @@ db-port=6379
 db-user=
 db-pw=
 
+# Whether to enable ('true') the MongoDB retryWrites parameter or not (anything other than 'true').
+# See https://www.mongodb.com/docs/manual/core/retryable-writes/
+db-retrywrites=false
+
 # Service urls
 auth-url=https://ci.kbase.us/services/auth
 workspace-url=https://ci.kbase.us/services/ws
