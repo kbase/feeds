@@ -50,8 +50,8 @@ def validate_group_id(group_id: str) -> bool:
         return res['exists']
     elif 'error' in res:
         raise GroupsError(
-            f"Error while looking up group id: "
-            f"{res['error'].get('message', 'no message available')}"
+            "Error while looking up group id: " +  # noqa: W504
+            res['error'].get('message', 'no message available')
         )
 
 
