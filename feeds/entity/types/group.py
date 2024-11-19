@@ -38,5 +38,5 @@ class GroupType(BaseType):
     def validate_id(i: str, token: str) -> bool:
         try:
             return validate_group_id(i)
-        except GroupsError as e:
+        except GroupsError as e:  # noqa: F841
             return False

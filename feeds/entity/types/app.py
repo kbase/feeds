@@ -22,7 +22,7 @@ class AppType(BaseType):
         """
         try:
             return get_app_name(i)
-        except CatalogError as e:
+        except CatalogError as e:  # noqa: F841
             raise EntityNameError("Unable to find name for app id: {}".format(i))
 
     @staticmethod
