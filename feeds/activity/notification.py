@@ -108,7 +108,7 @@ class Notification(BaseActivity):
         """
         # Just validate that the time looks like a real time in epoch millis.
         try:
-            datetime.datetime.fromtimestamp(expires/1000)
+            datetime.datetime.fromtimestamp(expires / 1000)
         except (TypeError, ValueError):
             raise InvalidExpirationError(
                 "Expiration time should be the number "

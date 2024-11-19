@@ -30,7 +30,7 @@ class NotificationFeed(BaseFeed):
         TODO: add metadata to timeline storage - type and verb, first.
         """
         logging.getLogger(__name__).info(
-            'Fetching timeline for '.format(self.user)
+            'Fetching timeline for {}'.format(self.user)
         )
         self.timeline = self.timeline_storage.get_timeline()
 

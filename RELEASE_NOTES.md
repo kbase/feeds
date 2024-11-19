@@ -4,7 +4,7 @@ KBase Feeds Service
 * The MongoDB clients have been updated to the most recent version.
 * Added the mongo-retrywrites configuration setting in deployment.cfg.templ, defaulting to false.
 * Migrated from Travis CI to GitHub Actions workflows.
-* Updated Python version to 3.7.13.
+* Updated Python version to 3.9.19.
 
 ### Version 1.0.2
 - Add a cache for bad tokens so they aren't looked up over and over. Maxes out at 10000, then throws out the oldest bad token.
