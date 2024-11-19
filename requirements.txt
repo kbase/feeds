@@ -1,6 +1,6 @@
 flask==2.0.3
 werkzeug==2.0.3
-requests==2.20.0
+requests==2.32.3
 gunicorn==22.0.0
 gevent==24.2.1
 cachetools==2.1.0
