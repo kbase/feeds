@@ -1,14 +1,28 @@
-FROM kbase/kb_python:python3
+FROM python:3.9.19
 
 ARG BUILD_DATE
 ARG VCS_REF
 ARG BRANCH=develop
 
+RUN apt-get update
+RUN apt-get install wget
+
+# install dockerize
+WORKDIR /opt
+RUN wget -q https://github.com/kbase/dockerize/raw/master/dockerize-linux-amd64-v0.6.1.tar.gz \
+    && tar xvzf dockerize-linux-amd64-v0.6.1.tar.gz \
+    && rm dockerize-linux-amd64-v0.6.1.tar.gz
+RUN mkdir -p /kb/deployment/bin/
+RUN ln -s /opt/dockerize /kb/deployment/bin/dockerize
+
+# install dependencies
+RUN pip install --upgrade pip
+COPY requirements.txt ./
+RUN pip install -r requirements.txt
+
+# set workdir
 COPY ./ /kb/module
 WORKDIR /kb/module
-
-RUN pip install --upgrade pip setuptools wheel
-RUN while read requirement; do conda install --yes $requirement || pip install $requirement; done < /kb/module/requirements.txt
 
 LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.vcs-url="https://github.com/kbase/feeds.git" \
@@ -21,5 +35,5 @@ ENV KB_DEPLOYMENT_CONFIG=/kb/module/deploy.cfg
 
 ENTRYPOINT [ "/kb/deployment/bin/dockerize" ]
 CMD [ "--template", \
-      "/kb/module/deployment/conf/.templates/deploy.cfg.templ:/kb/module/deploy.cfg" \
-      "make start" ]
+      "/kb/module/deployment/conf/.templates/deploy.cfg.templ:/kb/module/deploy.cfg", \
+      "make", "start" ]
