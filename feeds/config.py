@@ -15,6 +15,7 @@ KEY_DB_USER = "db-user"
 KEY_DB_PW = "db-pw"
 KEY_DB_NAME = "db-name"
 KEY_DB_ENGINE = "db-engine"
+KEY_DB_RETRYWRITES = "db-retrywrites"
 KEY_GLOBAL_FEED = "global-feed"
 KEY_DEBUG = "debug"
 KEY_LIFESPAN = "lifespan"
@@ -60,6 +61,7 @@ class FeedsConfig(object):
         self.db_user = self._get_line(cfg, KEY_DB_USER, required=False)
         self.db_pw = self._get_line(cfg, KEY_DB_PW, required=False)
         self.db_name = self._get_line(cfg, KEY_DB_NAME, required=False)
+        self.db_retrywrites = self._get_line(cfg, KEY_DB_RETRYWRITES, required=False) == "true"
         self.global_feed = self._get_line(cfg, KEY_GLOBAL_FEED)
         self.global_feed_type = "user"  # doesn't matter, need a valid Entity type...
         try:

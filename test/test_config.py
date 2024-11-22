@@ -15,6 +15,7 @@ GOOD_CONFIG = [
     'db-engine=redis',
     'db-host=foo',
     'db-port=5',
+    'db-retrywrites=false',
     'auth-url=baz',
     'njs-url=njs',
     'workspace-url=ws',
@@ -69,7 +70,7 @@ def test_config_bad_port(dummy_config, dummy_auth_token, bad_val):
 @pytest.mark.parametrize("bad_val", [("foo"), (-100), (0), (0.5)])
 def test_config_bad_lifespan(dummy_config, dummy_auth_token, bad_val):
     cfg_text = GOOD_CONFIG.copy()
-    cfg_text[10] = "lifespan=wrong"
+    cfg_text[11] = "lifespan=wrong"
     cfg_path = dummy_config(cfg_text)
     feeds_config_backup = os.environ.get('FEEDS_CONFIG')
     os.environ['FEEDS_CONFIG'] = cfg_path
@@ -84,7 +85,7 @@ def test_config_bad_lifespan(dummy_config, dummy_auth_token, bad_val):
 @pytest.mark.parametrize("bad_val", [("foo"), (-100), (0), (0.5)])
 def test_config_bad_note_count(dummy_config, dummy_auth_token, bad_val):
     cfg_text = GOOD_CONFIG.copy()
-    cfg_text[11] = "default-note-count={}".format(bad_val)
+    cfg_text[12] = "default-note-count={}".format(bad_val)
     cfg_path = dummy_config(cfg_text)
     feeds_config_backup = os.environ.get('FEEDS_CONFIG')
     os.environ['FEEDS_CONFIG'] = cfg_path
@@ -221,6 +222,29 @@ def test_get_config(dummy_config, dummy_auth_token):
     cfg = config.get_config()
     assert cfg.db_host == 'foo'
     assert cfg.db_port == 5
+    assert cfg.db_retrywrites == False
+    assert cfg.auth_url == 'baz'
+    assert cfg.auth_token == FAKE_AUTH_TOKEN
+    del os.environ['FEEDS_CONFIG']
+    if path_backup is not None:
+        os.environ['FEEDS_CONFIG'] = path_backup
+    config.__config = None
+
+
+def test_config_retryWrites_is_true(dummy_config, dummy_auth_token):
+    # set db-retrywrites=true
+    cfg_text = GOOD_CONFIG.copy()
+    cfg_text[4] = 'db-retrywrites=true'
+    cfg_path = dummy_config(cfg_text)
+
+    path_backup = os.environ.get('FEEDS_CONFIG')
+    os.environ['FEEDS_CONFIG'] = cfg_path
+    config.__config = None
+
+    cfg = config.get_config()
+    assert cfg.db_host == 'foo'
+    assert cfg.db_port == 5
+    assert cfg.db_retrywrites == True
     assert cfg.auth_url == 'baz'
     assert cfg.auth_token == FAKE_AUTH_TOKEN
     del os.environ['FEEDS_CONFIG']

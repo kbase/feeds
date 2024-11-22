@@ -16,5 +16,5 @@ def log_error(name, error):
             etype=type(error),
             value=error,
             tb=error.__traceback__)
-        )
+    )
     log(name, "Exception: " + formatted_error, level=logging.ERROR)

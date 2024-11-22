@@ -38,5 +38,5 @@ class JobType(BaseType):
     def validate_id(i: str, token: str) -> bool:
         try:
             validate_job_id(i)
-        except JobError as e:
+        except JobError as e:  # noqa: F841
             return False

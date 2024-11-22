@@ -1,0 +1,67 @@
+name: Feeds tests
+
+on:
+  pull_request:
+    types:
+    - opened
+    - reopened
+    - synchronize
+    - ready_for_review
+  push:
+    # run workflow when merging to main or develop
+    branches:
+      - main
+      - master
+      - develop
+
+jobs:
+
+  feeds_tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - python: '3.9.19'
+            mongo: 'mongodb-linux-x86_64-3.6.2'
+          - python: '3.9.19'
+            mongo: 'mongodb-linux-x86_64-ubuntu2204-7.0.4'
+
+    steps:
+      - name: Check out GitHub repo
+        uses: actions/checkout@v4
+  
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{matrix.python}}
+
+      - name: Install dependencies and set up test config
+        shell: bash
+        run: |
+
+          # install python libraries
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r dev-requirements.txt
+
+          # set up mongo
+          cd ..
+          wget -q http://fastdl.mongodb.org/linux/${{matrix.mongo}}.tgz
+          tar xfz ${{matrix.mongo}}.tgz
+          export MONGOD=`pwd`/${{matrix.mongo}}/bin/mongod
+          cd -
+
+          # set up test config
+          sed -i "s#^mongo-exe.*#mongo-exe=$MONGOD#" test/test.cfg
+          cat test/test.cfg
+
+      - name: Run tests
+        shell: bash
+        run: make test
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true

@@ -4,6 +4,7 @@ import pytest
 import tempfile
 import json
 import feeds
+from feeds.util import epoch_ms
 import test.util as test_util
 from .util import test_config
 from .mongo_controller import MongoController
@@ -126,7 +127,8 @@ def mock_valid_user_token(requests_mock, mock_user_groups, mock_group_names):
         mock_valid_user_token('someuser', 'Some User')
         ... continue test ...
     """
-    def auth_valid_user_token(user_id: str, user_name: str, group_membership: List[Dict[str, str]]=[]):
+    def auth_valid_user_token(user_id: str, user_name: str, group_membership: List[Dict[str, str]]=[],
+                              expires: int=10000):
         """
         group_membership, if present should be a list of dicts, where each dict has the id and name of
         a group the "user" is in.
@@ -144,7 +146,8 @@ def mock_valid_user_token(requests_mock, mock_user_groups, mock_group_names):
         requests_mock.get('{}/api/V2/token'.format(auth_url), json={
             'user': user_id,
             'type': 'Login',
-            'name': None
+            'name': None,
+            'expires': epoch_ms() + expires
         })
         requests_mock.get('{}/api/V2/me'.format(auth_url), json={
             'customroles': [],
@@ -170,7 +173,8 @@ def mock_valid_service_token(requests_mock):
         requests_mock.get('{}/api/V2/token'.format(auth_url), json={
             'user': user_id,
             'type': 'Service',
-            'name': service_name
+            'name': service_name,
+            'expires': epoch_ms() + 10000
         })
         requests_mock.get('{}/api/V2/me'.format(auth_url), json={
             'customroles': [],
@@ -194,7 +198,8 @@ def mock_valid_admin_token(requests_mock):
         requests_mock.get('{}/api/V2/token'.format(auth_url), json={
             'user': user_id,
             'type': 'Login',
-            'name': None
+            'name': None,
+            'expires': epoch_ms() + 10000
         })
         requests_mock.get('{}/api/V2/me'.format(auth_url), json={
             'customroles': ['FEEDS_ADMIN'],
