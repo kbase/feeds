@@ -1,5 +1,5 @@
 coverage==7.5.3
-pytest-cov==2.6.0
+pytest-cov==6.2.1
 flake8==7.1.0
 pytest==3.8.2
 coveralls==1.5.1
