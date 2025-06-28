@@ -1,9 +1,9 @@
-flask==2.0.3
-werkzeug==2.0.3
-requests==2.20.0
+flask==2.2.5
+werkzeug==3.0.6
+requests==2.32.2
 gunicorn==22.0.0
 gevent==24.2.1
 cachetools==2.1.0
 pymongo==4.7.2
 redis==2.10.6
-flask-cors==3.0.6
+flask-cors==4.0.2
