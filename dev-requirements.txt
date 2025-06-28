@@ -3,5 +3,5 @@ pytest-cov==2.6.0
 flake8==7.1.0
 pytest==3.8.2
 coveralls==1.5.1
-requests-mock==1.5.2
+requests-mock==1.12.1
 semver==2.8.1
